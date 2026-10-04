@@ -25,11 +25,12 @@ The integration communicates directly over the LAN and does not depend on the ve
 
 ## Supported hardware
 
-Verified Home Assistant target:
+Supported Home Assistant targets (BroadLink BL3372 module, devtype `0x520F`):
 
-- ATH/BWT Ypsilon G6
-- Runxin F79D valve/controller
-- BroadLink BL3372 module, BroadLink devtype `0x520F`
+| Product | Runxin controller model (field 1) | Evidence |
+|---|---|---|
+| ATH/BWT Ypsilon G6 | 9 (F79D) | Reads and writes verified on hardware |
+| Euro-Clear Midnight (ECOPRO+ head) | 12 | Full state read decodes consistently with the F79D map. Writes to fields 4, 6, 10 and 43 hardware-verified; fields 7 and 47 and forced regeneration use the same encodings with read-back reconciliation |
 
 Other rebranded devices using the same controller/module may work, but compatibility must be verified per model and firmware. Separating protocol and transport does **not** imply that every Runxin or non-BroadLink device is supported.
 
