@@ -47,6 +47,10 @@ Amb HACS, afegeix `https://github.com/Danirv/ypsilon-local` com a repositori per
 
 Per a consum acumulat utilitza **Consum diari**. **Cabal** és una mostra instantània i pot no veure consums molt curts entre dos polls. Per obtenir un total real de la setmana a Home Assistant, deriva'l del comptador diari/estadístiques; no utilitzis el camp 39 com si fos el total de la setmana actual.
 
+## Problemes de connexió
+
+Consulta la [guia de resolució de problemes](troubleshooting.ca.md) per distingir descoberta, autenticació rebutjada i lectures F79D. Inclou logs de depuració i un script que genera un informe sense identificadors ni claus, encara que no puguis completar la configuració a HA.
+
 ## Seguretat
 
 La integració pot canviar paràmetres i iniciar moviments de vàlvula. No és un controlador de seguretat certificat ni ha de ser l'única protecció contra fuites o inundacions. Conèixer el còdec no equival a verificar l'acció física. En la compatibilitat Alpha del model 12, els controls pendents es mantenen disponibles amb aquesta limitació documentada.

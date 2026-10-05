@@ -14,6 +14,7 @@ from types import SimpleNamespace
 from types import MappingProxyType
 from unittest.mock import AsyncMock, Mock, patch
 
+import broadlink.exceptions
 import pytest
 
 pytest.importorskip("homeassistant", reason="Requires requirements-test-ha.txt")
@@ -162,6 +163,7 @@ async def test_discovery_rejects_model_that_changes_before_confirmation(hass):
 @pytest.mark.parametrize("fails", [False, True])
 async def test_probe_always_closes_temporary_client(hass, monkeypatch, fails):
     client = Mock(mac=TEST_MAC)
+    client.connection_diagnostics = {}
     if fails:
         client.read_identity.side_effect = flow_mod.YpsilonConnectionError("test failure")
     else:
@@ -250,6 +252,9 @@ async def test_diagnostics_include_model_evidence_and_raw_resin_bytes(hass):
     coordinator.scan_interval = 60
     coordinator.client.transient_retries = 0
     coordinator.client.reauth_count = 0
+    coordinator.client.connection_diagnostics = {
+        "stage": "ready", "devtype": 0x520F, "advertised_lock": False, "last_error": None,
+    }
     coordinator.data.update({"host": TEST_HOST, "mac": TEST_MAC})
     entry.version = 2
     entry.options = {}
@@ -263,4 +268,66 @@ async def test_diagnostics_include_model_evidence_and_raw_resin_bytes(hass):
     assert diagnostics["state"]["_raw_resinVolumeBytes"] == (250, 0)
     assert TEST_HOST not in str(diagnostics)
     assert TEST_MAC not in str(diagnostics)
+    assert diagnostics["connection"]["transport"]["stage"] == "ready"
     assert diagnostics_mod._semantic_protocol_summary(None) is None
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("step", ["user", "dhcp", "discovery_confirm", "reconfigure"])
+@pytest.mark.parametrize("kind,expected", [
+    ("locked", "device_locked"), ("rejected", "invalid_auth"), ("timeout", "cannot_connect"),
+])
+async def test_setup_paths_distinguish_rejected_auth_from_timeout(hass, step, kind, expected):
+    flow = _flow(hass)
+    error = (
+        flow_mod.YpsilonConnectionError("timeout") if kind == "timeout"
+        else flow_mod.YpsilonAuthenticationError(-1, kind == "locked")
+    )
+    flow._async_probe = AsyncMock(side_effect=error)
+    if step == "dhcp":
+        result = await flow.async_step_dhcp(DhcpServiceInfo(ip=TEST_HOST, hostname="test", macaddress=TEST_MAC))
+        assert result["reason"] == expected
+    else:
+        if step == "discovery_confirm":
+            flow.discovered_host = TEST_HOST
+        elif step == "reconfigure":
+            flow._get_reconfigure_entry = Mock(return_value=SimpleNamespace(data={"host": TEST_HOST}))
+        result = await getattr(flow, f"async_step_{step}")({"host": TEST_HOST})
+        assert result["errors"] == {"base": expected}
+
+
+@pytest.mark.asyncio
+async def test_real_probe_logs_safe_authentication_context_before_entry_exists(hass, monkeypatch, caplog):
+    transport_mod = load("transport.broadlink_bl3372")
+    device = Mock(devtype=0x520F, is_locked=True)
+    device.auth.side_effect = broadlink.exceptions.AuthenticationError(-1, f"{TEST_HOST} {TEST_MAC} secret-key")
+    monkeypatch.setattr(transport_mod.broadlink, "hello", Mock(return_value=device))
+    with caplog.at_level(logging.DEBUG):
+        result = await _flow(hass).async_step_user({"host": TEST_HOST})
+    assert result["errors"] == {"base": "device_locked"}
+    assert "Local setup probe failed" in caplog.text
+    assert "transport_stage=authentication" in caplog.text
+    assert "error_code=-1" in caplog.text
+    assert "advertised_lock=True" in caplog.text
+    for private in (TEST_HOST, TEST_MAC, "secret-key"):
+        assert private not in caplog.text
+    device.auth.assert_called_once_with()
+    device.send_packet.assert_not_called()
+    device.set_lock.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_real_short_auth_response_is_connection_error_even_with_advertised_lock(hass, monkeypatch, caplog):
+    transport_mod = load("transport.broadlink_bl3372")
+    device = transport_mod.broadlink.Device((TEST_HOST, 80), bytes(6), 0x520F, is_locked=True)
+    device.send_packet = Mock(return_value=bytes(0x38) + bytes(16))
+    device.decrypt = Mock(return_value=bytes(16))
+    monkeypatch.setattr(transport_mod.broadlink, "hello", Mock(return_value=device))
+    with caplog.at_level(logging.WARNING):
+        result = await _flow(hass).async_step_user({"host": TEST_HOST})
+    assert result["errors"] == {"base": "cannot_connect"}
+    assert "transport_stage=authentication" in caplog.text
+    assert "error_type=ValueError" in caplog.text
+    assert "result=cannot_connect" in caplog.text
+    assert TEST_HOST not in caplog.text
+    assert [call.args[0] for call in device.send_packet.call_args_list] == [0x65]

@@ -161,6 +161,8 @@ Home Assistant -> Ypsilon policy -> F79D client/codec -> raw Runxin frame
 
 `custom_components/ypsilon_local/runxin/` contains no Home Assistant or BroadLink imports. `transport/broadlink_bl3372.py` owns the BroadLink-specific envelope/session logic.
 
+Connection setup fails? See the [connection troubleshooting guide](docs/troubleshooting.md), including rejected authentication and a standalone sanitized probe.
+
 Developer/research documentation:
 
 - [`docs/architecture.md`](docs/architecture.md)

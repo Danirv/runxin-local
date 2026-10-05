@@ -69,6 +69,7 @@ async def async_get_config_entry_diagnostics(
             "firmware": client.firmware,
             "transient_retries": client.transient_retries,
             "reauth_count": client.reauth_count,
+            "transport": client.connection_diagnostics,
         },
         "protocol": _semantic_protocol_summary(coordinator.data),
         "state": async_redact_data(coordinator.data, TO_REDACT)
