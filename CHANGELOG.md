@@ -2,6 +2,20 @@
 
 All notable changes to this project are documented here.
 
+## [2.7.1] - 2026-10-05
+
+### Added
+- Connection troubleshooting in English, Catalan and Spanish, plus `scripts/debug_connection.py`: one discovery/authentication attempt and an optional firmware read, with a sanitized JSON report and no configuration/mechanical writes.
+- Non-identifying connection debug logs and transport diagnostics for stage, discovered device type, advertised lock and latest error type/code. Failed setup emits a useful warning before a config entry exists.
+- Regression tests for rejected/false authentication, timeouts, successful authentication despite an advertised lock, all setup paths and report/log privacy.
+
+### Fixed
+- Distinguish a rejected local BroadLink handshake from generic connection failures in setup, DHCP confirmation and reconfiguration. Show a separate message when the rejected device also advertises a local-control lock.
+
+### Notes
+- Improves diagnosis of issue #17; it does not claim to fix the physical device's authentication rejection or prove that cloud pairing caused it.
+- Authentication keys/handshake, retry budgets, F79D encodings, commands and model-12 Alpha support remain unchanged. No automatic unlock, reset, provisioning or alternative key path is introduced.
+
 ## [2.7.0] - 2026-10-04
 
 ### Added

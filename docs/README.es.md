@@ -47,6 +47,10 @@ Con HACS, añade `https://github.com/Danirv/ypsilon-local` como repositorio pers
 
 Para consumo acumulado utiliza **Consumo diario**. **Caudal** es una muestra instantánea y puede no reflejar consumos muy cortos entre dos sondeos. Para obtener un total real de la semana en Home Assistant, derívalo del contador diario/estadísticas; no utilices el campo 39 como si fuera el total de la semana actual.
 
+## Problemas de conexión
+
+Consulta la [guía de resolución de problemas](troubleshooting.es.md) para distinguir descubrimiento, autenticación rechazada y lecturas F79D. Incluye registros de depuración y un script que genera un informe sin identificadores ni claves, aunque no puedas completar la configuración en HA.
+
 ## Seguridad
 
 La integración puede cambiar parámetros e iniciar movimientos de válvula. No es un controlador de seguridad certificado ni debe ser la única protección contra fugas o inundaciones. Conocer el códec no equivale a verificar la acción física. En la compatibilidad Alpha del modelo 12, los controles pendientes siguen disponibles con esta limitación documentada.

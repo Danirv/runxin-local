@@ -15,6 +15,7 @@ from .const import FIELD52_FAIL_BACKOFF, FIELD52_REFRESH, WRITE_SETTLE_DELAY
 from .runxin.client import F79DClient
 from .runxin.errors import RunxinError
 from .transport.broadlink_bl3372 import (
+    BroadlinkAuthenticationError,
     BroadlinkBL3372Transport,
     BroadlinkOuterError,
 )
@@ -25,6 +26,7 @@ from .transport.broadlink_bl3372 import (
 # Home Assistant/Ypsilon names.
 YpsilonConnectionError = RunxinError
 YpsilonOuterError = BroadlinkOuterError
+YpsilonAuthenticationError = BroadlinkAuthenticationError
 
 
 class YpsilonWriteNotConfirmed(YpsilonConnectionError):
@@ -58,6 +60,11 @@ class YpsilonLocalClient:
     @property
     def reauth_count(self) -> int:
         return self._transport.reauth_count
+
+    @property
+    def connection_diagnostics(self) -> dict[str, Any]:
+        """Non-identifying discovery/authentication/transaction metadata."""
+        return self._transport.diagnostics
 
     def close(self) -> None:
         with self._lock:

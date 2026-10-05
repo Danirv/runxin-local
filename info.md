@@ -1,6 +1,12 @@
-# Ypsilon 2.7.0
+# Ypsilon 2.7.1
 
 Local Home Assistant integration for compatible Runxin F79D / BroadLink BL3372 water softeners, tested with ATH/BWT Ypsilon G6 and Euro-Clear Midnight.
+
+## 2.7.1
+
+Distinguishes rejected local authentication from other setup failures and reports an advertised local-control lock without assuming it caused the rejection. Adds sanitized connection logs, transport diagnostics, a standalone report script and troubleshooting guides in English, Catalan and Spanish.
+
+This patch helps investigate authentication failures such as issue #17; it does not introduce a new authentication method or claim to fix an untested firmware restriction. The handshake, retries, valve commands and model-12 Alpha compatibility remain unchanged.
 
 ## 2.7.0
 

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 import broadlink.exceptions
@@ -13,7 +14,7 @@ from homeassistant.core import callback
 from homeassistant.helpers.device_registry import format_mac
 from homeassistant.helpers.service_info.dhcp import DhcpServiceInfo
 
-from .api import YpsilonConnectionError, YpsilonLocalClient
+from .api import YpsilonAuthenticationError, YpsilonConnectionError, YpsilonLocalClient
 from .const import (
     CONF_ACTIVE_SCAN_INTERVAL,
     CONF_ADAPTIVE_POLLING,
@@ -33,6 +34,19 @@ from .const import (
     MIN_SCAN_INTERVAL,
 )
 from .models import controller_model, is_supported_model
+
+_LOGGER = logging.getLogger(__name__)
+
+
+def _probe_error(err: Exception) -> str:
+    """Classify a rejected handshake, without inferring its underlying cause."""
+    if isinstance(
+        err, (YpsilonAuthenticationError, broadlink.exceptions.AuthenticationError)
+    ):
+        if getattr(err, "is_locked", None) is True:
+            return "device_locked"
+        return "invalid_auth"
+    return "cannot_connect"
 
 
 def _entry_title(identity: dict[str, Any]) -> str:
@@ -65,9 +79,25 @@ class YpsilonLocalConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Probe a temporary client and always release its BroadLink socket."""
         client = YpsilonLocalClient(host)
         try:
+            _LOGGER.debug("Starting local setup probe")
             identity = await self.hass.async_add_executor_job(client.read_identity)
             mac = identity.get("mac") or client.mac
             return identity, mac
+        except PROBE_ERRORS as err:
+            details = client.connection_diagnostics
+            last_error = details.get("last_error") or {}
+            devtype = details.get("devtype")
+            _LOGGER.warning(
+                "Local setup probe failed (result=%s, transport_stage=%s, "
+                "error_type=%s, error_code=%s, devtype=%s, advertised_lock=%s). "
+                "See the Ypsilon connection troubleshooting guide.",
+                _probe_error(err), details.get("stage"),
+                last_error.get("error_type", type(err).__name__),
+                last_error.get("error_code"),
+                f"0x{devtype:04x}" if isinstance(devtype, int) else None,
+                details.get("advertised_lock"),
+            )
+            raise
         finally:
             await self.hass.async_add_executor_job(client.close)
 
@@ -83,8 +113,8 @@ class YpsilonLocalConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         try:
             identity, _ = await self._async_probe(self.discovered_host)
-        except PROBE_ERRORS:
-            return self.async_abort(reason="cannot_connect")
+        except PROBE_ERRORS as err:
+            return self.async_abort(reason=_probe_error(err))
         if not is_supported_model(identity.get("deviceModel")):
             return self.async_abort(reason="unsupported_device")
 
@@ -99,8 +129,8 @@ class YpsilonLocalConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             assert self.discovered_host is not None
             try:
                 identity, _ = await self._async_probe(self.discovered_host)
-            except PROBE_ERRORS:
-                errors["base"] = "cannot_connect"
+            except PROBE_ERRORS as err:
+                errors["base"] = _probe_error(err)
             else:
                 if not is_supported_model(identity.get("deviceModel")):
                     return self.async_abort(reason="unsupported_device")
@@ -123,8 +153,8 @@ class YpsilonLocalConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             host = user_input[CONF_HOST].strip()
             try:
                 identity, mac = await self._async_probe(host)
-            except PROBE_ERRORS:
-                errors["base"] = "cannot_connect"
+            except PROBE_ERRORS as err:
+                errors["base"] = _probe_error(err)
             else:
                 if not is_supported_model(identity.get("deviceModel")):
                     errors["base"] = "unsupported_device"
@@ -156,8 +186,8 @@ class YpsilonLocalConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             host = user_input[CONF_HOST].strip()
             try:
                 _, mac = await self._async_probe(host)
-            except PROBE_ERRORS:
-                errors["base"] = "cannot_connect"
+            except PROBE_ERRORS as err:
+                errors["base"] = _probe_error(err)
             else:
                 if mac and entry.unique_id:
                     await self.async_set_unique_id(format_mac(mac))

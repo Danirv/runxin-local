@@ -14,6 +14,7 @@ an independent read-back instead.
 
 from __future__ import annotations
 
+import logging
 import random
 import threading
 import time
@@ -31,6 +32,8 @@ DEFAULT_TRANSIENT_ERROR_CODE = -5
 DEFAULT_AUTH_ERROR_CODES = frozenset({-1, -7})
 DEFAULT_TRANSIENT_DELAYS = (0.4, 0.8)
 
+_LOGGER = logging.getLogger(__name__)
+
 BROADLINK_EXCEPTIONS = (
     broadlink.exceptions.BroadlinkException,
     OSError,
@@ -44,6 +47,23 @@ class BroadlinkOuterError(RunxinTransportError):
     def __init__(self, code: int) -> None:
         self.code = code
         super().__init__(f"BroadLink outer error {code}")
+
+
+class BroadlinkAuthenticationError(RunxinTransportError):
+    """Local authentication was rejected, before any Runxin request was sent.
+
+    The advertised lock is evidence from discovery, not proof of the cause.
+    Preserve this distinction even when authentication succeeds on a device
+    that advertises a lock. Never include a device repr, keys or packet bytes.
+    """
+
+    def __init__(self, code: int | None, is_locked: bool | None) -> None:
+        self.code = code
+        self.is_locked = is_locked
+        super().__init__(
+            "BroadLink local authentication rejected "
+            f"(code={code}, advertised_lock={is_locked})"
+        )
 
 
 def pack_tfb(frame: bytes) -> bytes:
@@ -86,6 +106,10 @@ class BroadlinkBL3372Transport(RunxinTransport):
         self._lock = threading.Lock()
         self.transient_retries = 0
         self.reauth_count = 0
+        self._stage = "not_started"
+        self._devtype: int | None = None
+        self._is_locked: bool | None = None
+        self._last_error: dict[str, Any] | None = None
 
     @property
     def identifier(self) -> str | None:
@@ -107,11 +131,32 @@ class BroadlinkBL3372Transport(RunxinTransport):
         return self._firmware
 
     @property
-    def diagnostics(self) -> dict[str, int]:
+    def diagnostics(self) -> dict[str, Any]:
+        """Return allowlisted metadata, available even if authentication fails."""
         return {
             "transient_retries": self.transient_retries,
             "reauth_count": self.reauth_count,
+            "stage": self._stage,
+            "devtype": self._devtype,
+            "advertised_lock": self._is_locked,
+            "last_error": dict(self._last_error) if self._last_error else None,
         }
+
+    def _record_failure(self, err: Exception) -> None:
+        """Retain useful error metadata without untrusted exception text."""
+        source = err.__cause__ or err
+        code = getattr(err, "code", getattr(source, "errno", None))
+        self._last_error = {
+            "stage": self._stage,
+            "error_type": type(source).__name__,
+            "error_code": code if isinstance(code, int) else None,
+        }
+        _LOGGER.debug(
+            "BroadLink transaction failed (stage=%s, error_type=%s, "
+            "error_code=%s, devtype=%s, advertised_lock=%s)",
+            self._stage, self._last_error["error_type"],
+            self._last_error["error_code"], self._devtype, self._is_locked,
+        )
 
     def _drop_session(self) -> None:
         device = self._device
@@ -133,9 +178,21 @@ class BroadlinkBL3372Transport(RunxinTransport):
             self._drop_session()
 
     def _connect(self) -> Any:
+        self._stage = "discovery"
+        self._devtype = None
+        self._is_locked = None
+        _LOGGER.debug("Starting BroadLink discovery (timeout=%ss)", self.timeout)
         device = broadlink.hello(self.host, timeout=self.timeout)
         if device is None:
             raise RunxinTransportError("No BroadLink device found")
+        self._stage = "device_type"
+        self._devtype = int(device.devtype)
+        advertised_lock = getattr(device, "is_locked", None)
+        self._is_locked = advertised_lock if isinstance(advertised_lock, bool) else None
+        _LOGGER.debug(
+            "BroadLink discovery succeeded (devtype=0x%04x, advertised_lock=%s)",
+            self._devtype, self._is_locked,
+        )
         if (
             self.expected_devtype is not None
             and int(device.devtype) != self.expected_devtype
@@ -144,20 +201,31 @@ class BroadlinkBL3372Transport(RunxinTransport):
                 f"Unexpected devtype 0x{int(device.devtype):04x}"
             )
         device.timeout = self.timeout
-        if device.auth() is False:
-            raise RunxinTransportError("BroadLink auth failed")
+        self._stage = "authentication"
+        try:
+            authenticated = device.auth()
+        except broadlink.exceptions.AuthenticationError as err:
+            raise BroadlinkAuthenticationError(err.errno, self._is_locked) from err
+        if authenticated is False:
+            raise BroadlinkAuthenticationError(None, self._is_locked)
         self._device = device
+        _LOGGER.debug("BroadLink local authentication succeeded")
 
         if self._firmware is None:
             try:
                 self._firmware = int(device.get_fwversion())
-            except Exception:  # noqa: BLE001 - cosmetic metadata only
+            except Exception as err:  # noqa: BLE001 - cosmetic metadata only
                 self._firmware = None
+                _LOGGER.debug(
+                    "BroadLink firmware metadata unavailable (%s)", type(err).__name__
+                )
         return device
 
     def _transact_once(self, frame: bytes) -> bytes:
         device = self._device or self._connect()
+        self._stage = "request"
         response = bytes(device.send_packet(0x6A, pack_tfb(frame)))
+        self._stage = "response"
         if len(response) < 0x38:
             raise RunxinTransportError("Short BroadLink response")
 
@@ -172,7 +240,9 @@ class BroadlinkBL3372Transport(RunxinTransport):
             plaintext = device.decrypt(encrypted)
         except BROADLINK_EXCEPTIONS as err:
             raise RunxinTransportError(f"BroadLink decrypt failed: {err}") from err
-        return unpack_tfb(plaintext)
+        result = unpack_tfb(plaintext)
+        self._stage = "ready"
+        return result
 
     def _transact_read_resilient(self, frame: bytes) -> bytes:
         """Retry bounded, idempotent read transactions.
@@ -209,10 +279,12 @@ class BroadlinkBL3372Transport(RunxinTransport):
         with self._lock:
             try:
                 return self._transact_read_resilient(frame)
-            except RunxinTransportError:
+            except RunxinTransportError as err:
+                self._record_failure(err)
                 self._drop_session()
                 raise
             except BROADLINK_EXCEPTIONS as err:
+                self._record_failure(err)
                 self._drop_session()
                 raise RunxinTransportError(str(err)) from err
 
@@ -227,9 +299,11 @@ class BroadlinkBL3372Transport(RunxinTransport):
         with self._lock:
             try:
                 return self._transact_once(frame)
-            except RunxinTransportError:
+            except RunxinTransportError as err:
+                self._record_failure(err)
                 self._drop_session()
                 raise
             except BROADLINK_EXCEPTIONS as err:
+                self._record_failure(err)
                 self._drop_session()
                 raise RunxinTransportError(str(err)) from err
