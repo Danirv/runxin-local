@@ -11,6 +11,7 @@ All notable changes to this project are documented here.
 
 ### Fixed
 - Distinguish a rejected local BroadLink handshake from generic connection failures in setup, DHCP confirmation and reconfiguration. Show a separate message when the rejected device also advertises a local-control lock.
+- Handle malformed authentication replies that make BroadLink's AES setup raise `ValueError` as transport failures, without mislabelling them as lock/rejection. The standalone report also captures unexpected library errors without emitting private exception text or a traceback.
 
 ### Notes
 - Improves diagnosis of issue #17; it does not claim to fix the physical device's authentication rejection or prove that cloud pairing caused it.

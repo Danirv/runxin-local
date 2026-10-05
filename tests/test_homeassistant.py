@@ -314,3 +314,20 @@ async def test_real_probe_logs_safe_authentication_context_before_entry_exists(h
     device.auth.assert_called_once_with()
     device.send_packet.assert_not_called()
     device.set_lock.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_real_short_auth_response_is_connection_error_even_with_advertised_lock(hass, monkeypatch, caplog):
+    transport_mod = load("transport.broadlink_bl3372")
+    device = transport_mod.broadlink.Device((TEST_HOST, 80), bytes(6), 0x520F, is_locked=True)
+    device.send_packet = Mock(return_value=bytes(0x38) + bytes(16))
+    device.decrypt = Mock(return_value=bytes(16))
+    monkeypatch.setattr(transport_mod.broadlink, "hello", Mock(return_value=device))
+    with caplog.at_level(logging.WARNING):
+        result = await _flow(hass).async_step_user({"host": TEST_HOST})
+    assert result["errors"] == {"base": "cannot_connect"}
+    assert "transport_stage=authentication" in caplog.text
+    assert "error_type=ValueError" in caplog.text
+    assert "result=cannot_connect" in caplog.text
+    assert TEST_HOST not in caplog.text
+    assert [call.args[0] for call in device.send_packet.call_args_list] == [0x65]

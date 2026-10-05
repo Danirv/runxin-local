@@ -206,6 +206,11 @@ class BroadlinkBL3372Transport(RunxinTransport):
             authenticated = device.auth()
         except broadlink.exceptions.AuthenticationError as err:
             raise BroadlinkAuthenticationError(err.errno, self._is_locked) from err
+        except ValueError as err:
+            # broadlink 0.19.0 can pass a short decrypted auth payload to AES
+            # and raise ValueError for its key length. This is a malformed
+            # response, not a proven rejection or a reason to unlock/retry.
+            raise RunxinTransportError("Invalid BroadLink authentication response") from err
         if authenticated is False:
             raise BroadlinkAuthenticationError(None, self._is_locked)
         self._device = device

@@ -15,9 +15,6 @@ import platform
 from typing import Any
 
 import broadlink
-from broadlink.exceptions import BroadlinkException
-
-PROBE_ERRORS = (BroadlinkException, OSError, TimeoutError)
 
 
 def _error_details(err: Exception) -> dict[str, Any]:
@@ -41,7 +38,7 @@ def probe_connection(host: str, *, timeout: float = 5) -> dict[str, Any]:
     }
     try:
         device = broadlink.hello(host, timeout=timeout)
-    except PROBE_ERRORS as err:
+    except Exception as err:  # noqa: BLE001 - diagnostic boundary; omit raw error text
         report["discovery"] = _error_details(err)
         return report
     if device is None:
@@ -58,7 +55,7 @@ def probe_connection(host: str, *, timeout: float = 5) -> dict[str, Any]:
     try:
         try:
             authenticated = device.auth()
-        except PROBE_ERRORS as err:
+        except Exception as err:  # noqa: BLE001 - report library/crypto errors safely too
             report["authentication"] = {"attempted": True, **_error_details(err)}
             return report
         if authenticated is False:

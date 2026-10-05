@@ -210,3 +210,23 @@ def test_later_success_preserves_historical_error_but_reports_ready_stage(monkey
     assert transport.diagnostics["last_error"]["error_code"] == -1
     assert device.auth.call_count == 2
     device.send_packet.assert_called_once_with(0x6A, transport_mod.pack_tfb(b"frame"))
+
+
+def test_short_real_broadlink_auth_response_is_transport_failure_not_rejection(monkeypatch) -> None:
+    # The real 0.19.0 auth implementation passes a 12-byte session key to AES
+    # when given only 16 decrypted bytes; cryptography raises ValueError.
+    device = transport_mod.broadlink.Device(("192.0.2.17", 80), bytes(6), 0x520F)
+    device.send_packet = Mock(return_value=bytes(0x38) + bytes(16))
+    device.decrypt = Mock(return_value=bytes(16))
+    monkeypatch.setattr(transport_mod.broadlink, "hello", Mock(return_value=device))
+    transport = transport_mod.BroadlinkBL3372Transport("192.0.2.17")
+    with pytest.raises(transport_mod.RunxinTransportError) as caught:
+        transport.transact(b"frame")
+    assert not isinstance(caught.value, transport_mod.BroadlinkAuthenticationError)
+    assert isinstance(caught.value.__cause__, ValueError)
+    assert transport.diagnostics["last_error"] == {
+        "stage": "authentication", "error_type": "ValueError", "error_code": None,
+    }
+    assert transport._device is None
+    assert [call.args[0] for call in device.send_packet.call_args_list] == [0x65]
+    assert transport.reauth_count == 0

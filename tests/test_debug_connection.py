@@ -90,3 +90,39 @@ def test_cli_prints_only_report_and_reports_handshake_outcome(monkeypatch, capsy
     assert json.loads(output.out) == report
     assert "192.0.2.17" not in output.out + output.err
     probe.assert_called_once_with("192.0.2.17", timeout=10)
+
+
+@pytest.mark.parametrize("stage", ["discovery", "authentication"])
+def test_cli_reports_unexpected_library_error_without_traceback_or_private_text(monkeypatch, capsys, stage):
+    secret = "192.0.2.17 02:00:00:00:00:17 session-key"
+    device = Mock(devtype=0x520F, is_locked=False)
+    if stage == "discovery":
+        hello = Mock(side_effect=ValueError(secret))
+    else:
+        hello = Mock(return_value=device)
+        device.auth.side_effect = ValueError(secret)
+    monkeypatch.setattr(debug_connection.broadlink, "hello", hello)
+    monkeypatch.setattr(sys, "argv", ["debug_connection.py", "192.0.2.17"])
+    assert debug_connection.main() == 1
+    output = capsys.readouterr()
+    report = json.loads(output.out)
+    assert report[stage]["error_type"] == "ValueError"
+    assert report[stage]["ok"] is False
+    assert output.err == ""
+    for value in secret.split():
+        assert value not in output.out
+    device.get_fwversion.assert_not_called()
+    device.set_lock.assert_not_called()
+
+
+def test_real_broadlink_short_auth_reply_is_a_sanitized_report(monkeypatch):
+    device = debug_connection.broadlink.Device(("192.0.2.17", 80), bytes(6), 0x520F)
+    device.send_packet = Mock(return_value=bytes(0x38) + bytes(16))
+    device.decrypt = Mock(return_value=bytes(16))
+    monkeypatch.setattr(debug_connection.broadlink, "hello", Mock(return_value=device))
+    report = debug_connection.probe_connection("192.0.2.17")
+    assert report["authentication"] == {
+        "attempted": True, "ok": False, "error_type": "ValueError", "error_code": None,
+    }
+    assert report["firmware"] == {"attempted": False}
+    assert [call.args[0] for call in device.send_packet.call_args_list] == [0x65]
