@@ -1,14 +1,22 @@
 # Ypsilon para Home Assistant
 
-Integración local para descalcificadores compatibles con **Runxin F79D + BroadLink BL3372**, probada con ATH/BWT Ypsilon G6.
+Integración local para descalcificadores compatibles con **Runxin F79D + BroadLink BL3372**, con el Ypsilon G6 como hardware de referencia y soporte experimental para Euro-Clear Midnight.
 
 - Descubrimiento DHCP y configuración manual por IP.
 - Lectura local de caudal, consumo diario, capacidad restante, fase de válvula, modo de regeneración, patrón de trabajo y avisos.
 - Escrituras con lectura física posterior estricta: un ACK no se considera estado confirmado.
-- Controles verificados de dureza, cantidad de sal añadida, protecciones de caudal/tiempo, hora de regeneración, reloj y regeneración forzada.
+- Controles de dureza, cantidad de sal añadida, protecciones de caudal/tiempo, hora de regeneración, reloj y regeneración forzada; la evidencia física se documenta por campo y modelo.
 - Estado de vacaciones solo de lectura; la 2.6.1 retira el switch de vacaciones porque la escritura local directa del campo 49 no quedó confirmada físicamente en el G6 probado.
 - Diagnósticos para fases de lavado, disolución de sal, pausa 1, errores, comunicación y mantenimiento.
 - Traducciones CA/ES/EN y branding local con icono cuadrado y logotipo horizontal independientes.
+
+## Nueva compatibilidad en la 2.7.0
+
+El **Euro-Clear Midnight (controlador modelo 12)** tiene soporte **experimental / Alpha**, probado con un Midnight 25 con cabezal ECOPRO+ y BroadLink BL3372 (`0x520F`). Las capturas coinciden con la pantalla del controlador; las escrituras de los campos 4, 6, 10 y 43 están verificadas físicamente. Los campos 7 y 47 y las acciones mecánicas del campo 34 siguen disponibles para pruebas, pero todavía no están verificados en este modelo.
+
+Alpha afecta únicamente a la compatibilidad del modelo 12. Se conservan los controles y la verificación estricta del PR original; el soporte del G6 no cambia. Los diagnósticos incluyen la evidencia por modelo y los dos bytes originales del campo 26. `FA 00` sigue mostrándose como **25 L**; esta captura no determina el significado del segundo byte ni el códec de volúmenes superiores a 25,5 L.
+
+Consulta las [pruebas pendientes del modelo 12](hardware-verification.es.md#euro-clear-midnight--modelo-de-controlador-12).
 
 ## Cambio principal de la 2.6.3
 
@@ -41,6 +49,6 @@ Para consumo acumulado utiliza **Consumo diario**. **Caudal** es una muestra ins
 
 ## Seguridad
 
-La integración puede cambiar parámetros e iniciar movimientos de válvula. No es un controlador de seguridad certificado ni debe ser la única protección contra fugas o inundaciones. Un campo conocido por el códec no se convierte en control de usuario hasta que la acción real queda verificada físicamente.
+La integración puede cambiar parámetros e iniciar movimientos de válvula. No es un controlador de seguridad certificado ni debe ser la única protección contra fugas o inundaciones. Conocer el códec no equivale a verificar la acción física. En la compatibilidad Alpha del modelo 12, los controles pendientes siguen disponibles con esta limitación documentada.
 
 Consulta el [README principal](../README.md), [`waterdevice-audit.es.md`](waterdevice-audit.es.md), [`f79d.es.md`](f79d.es.md), [`hardware-verification.es.md`](hardware-verification.es.md), [SECURITY](../SECURITY.md) y [LEGAL](../LEGAL.md).

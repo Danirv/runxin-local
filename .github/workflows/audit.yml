@@ -28,3 +28,16 @@ jobs:
         run: python -m pytest -q
       - name: Compile Python
         run: python -m compileall -q custom_components/ypsilon_local scripts tests
+
+  home-assistant:
+    name: Home Assistant regressions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+      - name: Install Home Assistant test dependencies
+        run: python -m pip install --disable-pip-version-check -r requirements-test-ha.txt
+      - name: Test config flow, entities, controls and diagnostics
+        run: python -m pytest -q tests/test_homeassistant.py

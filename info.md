@@ -4,7 +4,9 @@ Local Home Assistant integration for compatible Runxin F79D / BroadLink BL3372 w
 
 ## 2.7.0
 
-Adds the **Euro-Clear Midnight** (Runxin controller model 12, BroadLink BL3372 `0x520F`). Its real controller state decodes consistently with the F79D map, so it gets the same sensors and controls as the Ypsilon G6. Writes to the clock, continuous-flow limit, regeneration time and salt added were hardware-verified on a Midnight 25. Every write is still confirmed by fresh read-back.
+Adds **experimental / Alpha compatibility** for the **Euro-Clear Midnight** (Runxin controller model 12, BroadLink BL3372 `0x520F`), tested on a Midnight 25. It retains the original sensors and controls. Writes to the clock, continuous-flow limit, regeneration time and salt added were hardware-verified; fields 7 and 47 and mechanical field-34 actions remain pending on this model. Every write still uses strict fresh read-back. Alpha applies to model 12, not to existing G6 support.
+
+Diagnostics now expose per-model hardware evidence and both original resin-volume bytes. Midnight 25's `FA 00` still displays as 25 L; the second byte and larger resin volumes require more evidence, with no guessed codec change.
 
 ## 2.6.3
 

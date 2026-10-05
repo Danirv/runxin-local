@@ -55,9 +55,14 @@ Home Assistant
   known-safe limits; writes are sent at most once when delivery is ambiguous.
 
 `api.py`
-: Composition adapter for the Ypsilon G6. It wires `F79DClient` to
+: Composition adapter for the supported BroadLink controller models. It wires `F79DClient` to
   `BroadlinkBL3372Transport` and retains the public/internal names used before
   v2.4. It also owns Ypsilon-specific field-52 caching and write-settle timing.
+
+`models.py`
+: Accepted controller identities and per-model presentation, resin scaling and
+  evidence metadata. The support level and verified/pending field lists are
+  diagnostic metadata; they do not change the available controls or write policy.
 
 `coordinator.py`
 : Home Assistant polling, stale-state tolerance, adaptive cadence, clock
@@ -117,7 +122,13 @@ The 2.4.x architecture keeps:
 - existing entity unique ids and translation keys;
 - `protocol.py` and `api.py` compatibility facades.
 
-The integration still supports only the hardware combination it can safely
-probe and validate: F79D model 9 with BroadLink BL3372 devtype `0x520F`. Making
-the lower layers reusable does **not** mean every Runxin valve or transport is
-supported by Home Assistant.
+The integration accepts controller models 9 (reference Ypsilon G6) and 12
+(experimental / Alpha Euro-Clear Midnight, tested on Midnight 25), both with
+BroadLink BL3372 devtype `0x520F`. The model-12 captured state and four verified
+configuration writes justify incremental support; pending controls remain
+available with their evidence limits explicitly documented. Making the lower
+layers reusable does **not** mean every Runxin valve or transport is supported.
+
+Field 26 keeps its original U8 interpretation; both bytes are retained as
+`_raw_resinVolumeBytes` without guessing the second byte's meaning. Model-12
+resin scaling stays in the HA model layer, as in the original contribution.

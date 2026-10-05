@@ -15,6 +15,12 @@ Las contribuciones son bienvenidas. El proyecto prioriza control local fiable, r
 
 ## Límites de arquitectura
 
+La CI principal mantiene ligeras las pruebas de protocolo. Para probar config
+flow, entidades y controles con clases reales de Home Assistant, usa Python
+3.14, instala `requirements-test-ha.txt` y ejecuta
+`python -m pytest -q tests/test_homeassistant.py`.
+Estas pruebas simulan la E/S del dispositivo y no establecen evidencia física.
+
 Lee [`docs/architecture.es.md`](docs/architecture.es.md) antes de trabajar con el protocolo.
 
 - `runxin/` debe seguir siendo independiente de Home Assistant y BroadLink.

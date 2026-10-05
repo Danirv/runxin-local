@@ -8,6 +8,7 @@ from homeassistant.components.diagnostics import async_redact_data
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
+from .models import model_support_details
 from .runxin.semantics import (
     REGENERATION_PATTERN_KEYS,
     STATION_KEYS,
@@ -33,6 +34,7 @@ def _semantic_protocol_summary(data: dict[str, Any] | None) -> dict[str, Any] | 
     return {
         "profile": "F79D",
         "device_model": data.get("deviceModel"),
+        "model_support": model_support_details(data.get("deviceModel")),
         "volume_unit_code": volume_unit_code,
         "volume_unit": VOLUME_UNIT_KEYS.get(volume_unit_code),
         "regeneration_pattern_code": regeneration_code,

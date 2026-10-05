@@ -17,6 +17,11 @@ interoperability knowledge.
 
 ## Architecture boundaries
 
+The default CI keeps protocol tests lightweight. For config-flow/entity/control
+regressions with real Home Assistant classes, use Python 3.14, install
+`requirements-test-ha.txt`, and run `python -m pytest -q tests/test_homeassistant.py`.
+That job uses mocked device I/O and does not establish hardware-write evidence.
+
 Read [`docs/architecture.md`](docs/architecture.md) before protocol work.
 
 - `runxin/` must remain independent of Home Assistant and BroadLink.

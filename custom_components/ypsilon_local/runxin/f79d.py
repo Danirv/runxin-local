@@ -148,6 +148,11 @@ def decode_tlvs(tlvs: dict[int, tuple[int, int]]) -> dict[str, Any]:
     decoded: dict[str, Any] = {}
     unit_code = tlvs.get(8, (None, None))[0]
     for field, (low, high) in tlvs.items():
+        if field == 26:
+            # Retain both bytes for research without changing the observed U8
+            # interpretation. Midnight 25's FA 00 alone cannot establish the
+            # second byte's meaning or the codec for larger resin volumes.
+            decoded["_raw_resinVolumeBytes"] = (low, high)
         spec = F79D_FIELDS_BY_ID.get(field)
         name = spec.name if spec is not None else f"field_{field}"
         codec = spec.read_codec if spec is not None else FieldCodec.U8

@@ -343,7 +343,11 @@ class YpsilonSensor(YpsilonEntity, SensorEntity):
             # An unrecognised code (e.g. relay mode 2 on model 12) is unknown, not an error;
             # the raw code stays available as the raw_code attribute.
             options = self.entity_description.options
-            if self.entity_description.device_class == SensorDeviceClass.ENUM and options and mapped not in options:
+            if (
+                self.entity_description.device_class == SensorDeviceClass.ENUM
+                and options
+                and mapped not in options
+            ):
                 return None
             return mapped
 
@@ -385,4 +389,8 @@ class YpsilonSensor(YpsilonEntity, SensorEntity):
             raw = self.coordinator.data.get("_raw_flowRate")
             if raw is not None:
                 attributes["raw_value"] = raw
+        if self.entity_description.key == "resin_volume" and self.coordinator.data:
+            raw_bytes = self.coordinator.data.get("_raw_resinVolumeBytes")
+            if raw_bytes is not None:
+                attributes["raw_bytes"] = list(raw_bytes)
         return attributes

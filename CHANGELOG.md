@@ -5,8 +5,11 @@ All notable changes to this project are documented here.
 ## [2.7.0] - 2026-10-04
 
 ### Added
-- Support for the **Euro-Clear Midnight** (ECOPRO+ head), which reports Runxin controller model **12** behind the same BroadLink BL3372 (`0x520F`). A full read of fields 1–52 from a real Midnight 25 decodes consistently with the F79D map: clock, hardness, salt, programme times, capacity and volumes all match the controller. The captured frames are kept as regression tests.
+- Experimental / Alpha support for the **Euro-Clear Midnight** (ECOPRO+ head), which reports Runxin controller model **12** behind the same BroadLink BL3372 (`0x520F`). A full read of fields 1–52 from a real Midnight 25 decodes consistently with the F79D map: clock, hardness, salt, programme times, capacity and volumes all match the controller. The captured frames are kept as regression tests.
 - `models.py`: the accepted controller models with their entry title, device-registry model and manufacturer, kept free of Home Assistant imports so they can be unit-tested.
+- Per-model support and hardware-write evidence in diagnostics, without changing control availability or write policy.
+- Both raw field-26 resin bytes retained in state and the resin sensor's attributes, preserving the original decoding/scaling.
+- Home Assistant 2026.9.4 regressions for config flow, entity states/identity, controls and redacted diagnostics, in a separate CI job.
 
 ### Changed
 - Setup and DHCP discovery accept models 9 and 12. The config entry and device are named after the reported model.
@@ -14,6 +17,8 @@ All notable changes to this project are documented here.
 - Enum sensors report an unrecognised controller code as unknown rather than raising, keeping the code in `raw_code`. Model 12 reports output relay mode 2.
 
 ### Notes
+- Alpha is scoped to model 12; existing G6 support is unchanged. No new codec, command sequence, range or device write is introduced by the review follow-up.
+- The observed resin capture `FA 00` validates 25 L on Midnight 25, not the meaning of the second byte or resin values above 25.5 L. Raw bytes remain available for follow-up investigation.
 - Model 12 controls use the same field encodings as model 9. On the Midnight 25, local writes to fields 4 (clock), 6 (continuous-flow limit), 10 (regeneration time) and 43 (salt added) were hardware-verified with the documented baseline → set → fresh read → restore → fresh read sequence, with no side effects on other fields. Fields 7 and 47 and forced regeneration use the same encodings and the existing read-back reconciliation, but are not yet hardware-verified on model 12.
 
 ## [2.6.3] - 2026-09-13

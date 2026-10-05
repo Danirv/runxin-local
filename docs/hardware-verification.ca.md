@@ -72,6 +72,8 @@ El camp 43 té SET/read-back local verificat i canvi observat per cloud. La seva
 
 ## Euro-Clear Midnight / model de controlador 12
 
+**Suport experimental / Alpha, limitat al model 12 i provat inicialment amb Midnight 25.** Els controls continuen disponibles per validar-los i conserven el read-back estricte; aquest estat no certifica les ordres pendents. L'evidència del G6 no es transfereix automàticament al model 12. El catàleg compartit `FieldSpec` descriu l'evidència del G6 de referència; l'evidència per model és a `models.py` i als diagnòstics.
+
 Maquinari: Euro-Clear Midnight 25 (capçal ECOPRO+) amb mòdul BroadLink BL3372 (devtype `0x520F`), que informa `deviceModel` 12. Provat el 2026-10-04 amb la vàlvula en servei i les vacances desactivades.
 
 Una lectura completa dels camps 1–52 es descodifica de manera coherent amb el mapa F79D i la pantalla del controlador. Diferències: el camp 26 informa dècimes de litre (250 en una unitat de 25 L), i els camps 24 (valor 2) i 9 (valor 255) queden fora dels enums recuperats.
@@ -79,6 +81,17 @@ Una lectura completa dels camps 1–52 es descodifica de manera coherent amb el 
 Verificat localment d'extrem a extrem (GET base → un SET → GET nou → restauració → GET nou, sense efectes secundaris en altres camps): camp 43 `saltAddition` 23 → 24 → 23, camp 10 `regeneratingTriggerTime` 00:00 → 00:01 → 00:00, camp 6 `continuousWaterTime` 0 → 120 → 0 i camp 4 `currentTime` (sincronització 16:31 → 16:32).
 
 Encara sense verificació física al model 12: camp 7 (`flowRateOff`, llegeix `00 C8` = 2,00 m³/h en big-endian), camp 47 (`rawWaterHardness`) i la regeneració forçada del camp 34.
+
+`FA 00` del camp 26 confirma la visualització actual de 25 L al Midnight 25; no determina el significat del segon byte ni el còdec de volums més grans. Es conserven U8 i l'escala 0,1, i `_raw_resinVolumeBytes` desa els dos bytes per investigar-los.
+
+### Validacions pendents
+
+- Camps 7 i 47: GET inicial → un SET adequat → GET nou → comparació amb pantalla/app → restauració → GET nou. Incloure els dos bytes, el valor demanat i qualsevol error de confirmació.
+- Camp 26: informar dels dos bytes i del volum de resina mostrat a pantalla/app. No cal una altra unitat; els volums més grans queden pendents fins obtenir evidència.
+- Durant una regeneració prevista, comprovar que el botó HA inicia el cicle físic i que les fases llegides concorden. L'avanç de fase és una acció pendent separada; no cal saltar fases per completar aquestes proves.
+- Confirmar 25 L a HA, `unknown` amb `raw_code` per als enums 2/255 i possibles errors recurrents durant l'ús normal.
+
+Els resultats parcials són útils. Incloure model, firmware, data, valors inicials/restaurats i diagnòstics anonimitzats; ometre MAC, IP i credencials. Aquestes proves no es consideren completades fins que un contribuent n'informi.
 
 ## Camp 52
 

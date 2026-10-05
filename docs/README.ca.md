@@ -1,14 +1,22 @@
 # Ypsilon per a Home Assistant
 
-Integració local per a descalcificadors compatibles amb **Runxin F79D + BroadLink BL3372**, provada amb ATH/BWT Ypsilon G6.
+Integració local per a descalcificadors compatibles amb **Runxin F79D + BroadLink BL3372**, amb el Ypsilon G6 com a maquinari de referència i suport experimental per al Euro-Clear Midnight.
 
 - Descobriment DHCP i configuració manual per IP.
 - Lectura local de cabal, consum diari, capacitat restant, fase de vàlvula, mode de regeneració, patró de treball i avisos.
 - Escriptures amb lectura física posterior estricta: un ACK no es considera estat confirmat.
-- Controls verificats de duresa, quantitat de sal afegida, proteccions de cabal/temps, hora de regeneració, rellotge i regeneració forçada.
+- Controls de duresa, quantitat de sal afegida, proteccions de cabal/temps, hora de regeneració, rellotge i regeneració forçada; l'evidència física es documenta per camp i model.
 - Estat de vacances de només lectura; la 2.6.1 retira el switch de vacances perquè l'escriptura local directa del camp 49 no va quedar confirmada físicament al G6 provat.
 - Diagnòstics per fases de rentat, dissolució de sal, pausa 1, errors, comunicació i manteniment.
 - Traduccions CA/ES/EN i branding local amb icona quadrada i logo horitzontal independents.
+
+## Compatibilitat nova a la 2.7.0
+
+El **Euro-Clear Midnight (controlador model 12)** té suport **experimental / Alpha**, provat amb un Midnight 25 amb capçal ECOPRO+ i BroadLink BL3372 (`0x520F`). Les captures concorden amb la pantalla del controlador; les escriptures dels camps 4, 6, 10 i 43 estan verificades físicament. Els camps 7 i 47 i les accions mecàniques del camp 34 continuen disponibles per fer proves, però encara no estan verificats en aquest model.
+
+Alpha afecta només la compatibilitat del model 12. Es conserven els controls i la verificació estricta del PR original; el suport del G6 no canvia. Els diagnòstics inclouen l'evidència per model i els dos bytes crus del camp 26. `FA 00` es continua mostrant com **25 L**; aquesta captura no determina el significat del segon byte ni el còdec de volums superiors a 25,5 L.
+
+Consulta les [proves pendents del model 12](hardware-verification.ca.md#euro-clear-midnight--model-de-controlador-12).
 
 ## Canvi principal de la 2.6.3
 
@@ -41,6 +49,6 @@ Per a consum acumulat utilitza **Consum diari**. **Cabal** és una mostra instan
 
 ## Seguretat
 
-La integració pot canviar paràmetres i iniciar moviments de vàlvula. No és un controlador de seguretat certificat ni ha de ser l'única protecció contra fuites o inundacions. Un camp conegut pel còdec no es converteix en control d'usuari fins que l'acció real queda verificada físicament.
+La integració pot canviar paràmetres i iniciar moviments de vàlvula. No és un controlador de seguretat certificat ni ha de ser l'única protecció contra fuites o inundacions. Conèixer el còdec no equival a verificar l'acció física. En la compatibilitat Alpha del model 12, els controls pendents es mantenen disponibles amb aquesta limitació documentada.
 
 Consulta el [README principal](../README.md), [`waterdevice-audit.ca.md`](waterdevice-audit.ca.md), [`f79d.ca.md`](f79d.ca.md), [`hardware-verification.ca.md`](hardware-verification.ca.md), [SECURITY](../SECURITY.md) i [LEGAL](../LEGAL.md).
