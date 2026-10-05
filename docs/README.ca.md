@@ -10,6 +10,8 @@ Integració local per a descalcificadors compatibles amb **Runxin F79D + BroadLi
 - Diagnòstics per fases de rentat, dissolució de sal, pausa 1, errors, comunicació i manteniment.
 - Traduccions CA/ES/EN i branding local amb icona quadrada i logo horitzontal independents.
 
+El botó de regeneració només inicia el cicle després que una lectura nova confirmi servei i vacances desactivades, i rebutja peticions simultànies. Envia la mateixa ordre una sola vegada i comprova la fase resultant. Els enums sense correspondència mostren el codi decimal i conserven `raw_code`; les etiquetes conegudes es mantenen i les dades absents són `unknown`. El rellotge admet un minut d’avanç dins dels 60 segons posteriors a l’escriptura, també a mitjanit; l’hora de regeneració exigeix coincidència exacta.
+
 ## Compatibilitat nova a la 2.7.0
 
 El **Euro-Clear Midnight (controlador model 12)** té suport **experimental / Alpha**, provat amb un Midnight 25 amb capçal ECOPRO+ i BroadLink BL3372 (`0x520F`). Les captures concorden amb la pantalla del controlador; les escriptures dels camps 4, 6, 10 i 43 estan verificades físicament. Els camps 7 i 47 i les accions mecàniques del camp 34 continuen disponibles per fer proves, però encara no estan verificats en aquest model.

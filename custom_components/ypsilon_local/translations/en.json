@@ -92,6 +92,8 @@
     "advance_phase": {"name": "Advance phase", "description": "Writes system mode to move the regeneration state machine (0-4). Mechanical operation: use with care.", "fields": {"config_entry_id": {"name": "Device", "description": "Config entry."}, "phase": {"name": "Phase", "description": "0 service, 1-4 regeneration stages."}}}
   },
   "exceptions": {
+    "regeneration_busy": {"message": "A regeneration request is already being processed. Wait for it to finish."},
+    "regeneration_not_ready": {"message": "Regeneration can only start after a fresh reading confirms that the valve is in service and vacation mode is off."},
     "write_failed": {"message": "Could not write {name} to the softener: {error}"},
     "below_minimum": {"message": "{value} is below the allowed minimum ({minimum})."},
     "above_maximum": {"message": "{value} is above the allowed maximum ({maximum})."},

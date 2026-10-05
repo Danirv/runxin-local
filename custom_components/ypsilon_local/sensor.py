@@ -321,6 +321,27 @@ class YpsilonSensor(YpsilonEntity, SensorEntity):
         self._attr_unique_id = f"{base_id}_{description.key}"
 
     @property
+    def _value_map(self) -> dict[int, str] | None:
+        return {
+            "station": STATION_KEYS,
+            "volume_unit": VOLUME_UNIT_KEYS,
+            "regeneration_pattern": REGENERATION_PATTERN_KEYS,
+            "work_pattern": WORK_PATTERN_KEYS,
+        }.get(self.entity_description.key, self.entity_description.value_map)
+
+    @property
+    def options(self) -> list[str] | None:
+        """Keep known enum keys and admit the current unmapped device code."""
+        options = self.entity_description.options
+        if options is None:
+            return None
+        result = list(options)
+        value = self.native_value
+        if self._value_map is not None and value is not None and value not in result:
+            result.append(str(value))
+        return result
+
+    @property
     def native_value(self) -> StateType:
         if not self.coordinator.data:
             return None
@@ -328,28 +349,10 @@ class YpsilonSensor(YpsilonEntity, SensorEntity):
         if value is None:
             return None
 
-        if self.entity_description.key == "station":
-            return STATION_KEYS.get(value)
-        if self.entity_description.key == "volume_unit":
-            return VOLUME_UNIT_KEYS.get(value)
-        if self.entity_description.key == "regeneration_pattern":
-            return REGENERATION_PATTERN_KEYS.get(value)
-        if self.entity_description.key == "work_pattern":
-            return WORK_PATTERN_KEYS.get(value)
+        if self._value_map is not None:
+            return self._value_map.get(value, str(value))
         if self.entity_description.key == "resin_volume":
             return resin_volume_litres(value, self.coordinator.data.get("deviceModel"))
-        if self.entity_description.value_map is not None:
-            mapped = self.entity_description.value_map.get(value, str(value))
-            # An unrecognised code (e.g. relay mode 2 on model 12) is unknown, not an error;
-            # the raw code stays available as the raw_code attribute.
-            options = self.entity_description.options
-            if (
-                self.entity_description.device_class == SensorDeviceClass.ENUM
-                and options
-                and mapped not in options
-            ):
-                return None
-            return mapped
 
         if self.entity_description.unit_kind == "flow":
             unit_code = self.coordinator.data.get("waterVolumeUnit")

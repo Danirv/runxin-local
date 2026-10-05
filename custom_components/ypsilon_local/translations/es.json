@@ -83,6 +83,8 @@
     "advance_phase": {"name": "Avanzar fase", "description": "Escribe el modo del sistema para mover la máquina de estados de regeneración (0-4). Operación mecánica: usar con precaución.", "fields": {"config_entry_id": {"name": "Dispositivo", "description": "Entrada de configuración."}, "phase": {"name": "Fase", "description": "0 servicio, 1-4 fases de regeneración."}}}
   },
   "exceptions": {
+    "regeneration_busy": {"message": "Ya se está procesando una petición de regeneración. Espera a que termine."},
+    "regeneration_not_ready": {"message": "La regeneración solo puede comenzar cuando una lectura nueva confirma que la válvula está en servicio y el modo vacaciones está desactivado."},
     "write_failed": {"message": "No se ha podido escribir {name} en el descalcificador: {error}"},
     "below_minimum": {"message": "{value} está por debajo del mínimo permitido ({minimum})."},
     "above_maximum": {"message": "{value} supera el máximo permitido ({maximum})."},
