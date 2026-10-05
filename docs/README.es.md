@@ -10,7 +10,7 @@ Integración local para descalcificadores compatibles con **Runxin F79D + BroadL
 - Diagnósticos para fases de lavado, disolución de sal, pausa 1, errores, comunicación y mantenimiento.
 - Traducciones CA/ES/EN y branding local con icono cuadrado y logotipo horizontal independientes.
 
-El botón de regeneración solo inicia el ciclo tras una lectura nueva que confirme servicio y vacaciones desactivadas, y rechaza peticiones simultáneas. Envía la misma orden una sola vez y comprueba la fase resultante. Los enums sin correspondencia muestran el código decimal y conservan `raw_code`; las etiquetas conocidas se mantienen y los datos ausentes son `unknown`. El reloj admite un minuto de avance dentro de los 60 segundos posteriores a la escritura, también a medianoche; la hora de regeneración exige coincidencia exacta.
+El botón de regeneración solo inicia el ciclo tras una lectura nueva que confirme servicio y vacaciones desactivadas, y rechaza peticiones simultáneas. Envía la misma orden una sola vez y comprueba la fase resultante. Los enums sin correspondencia muestran el código decimal y conservan `raw_code`; las etiquetas conocidas se mantienen y los datos ausentes son `unknown`. El reloj admite un minuto de avance dentro de los 60 segundos posteriores a la escritura, también a medianoche, solo si una lectura previa nueva demuestra que el valor del minuto siguiente ha cambiado; la hora de regeneración exige coincidencia exacta.
 
 ## Nueva compatibilidad en la 2.7.0
 

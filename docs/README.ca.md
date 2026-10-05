@@ -10,7 +10,7 @@ Integració local per a descalcificadors compatibles amb **Runxin F79D + BroadLi
 - Diagnòstics per fases de rentat, dissolució de sal, pausa 1, errors, comunicació i manteniment.
 - Traduccions CA/ES/EN i branding local amb icona quadrada i logo horitzontal independents.
 
-El botó de regeneració només inicia el cicle després que una lectura nova confirmi servei i vacances desactivades, i rebutja peticions simultànies. Envia la mateixa ordre una sola vegada i comprova la fase resultant. Els enums sense correspondència mostren el codi decimal i conserven `raw_code`; les etiquetes conegudes es mantenen i les dades absents són `unknown`. El rellotge admet un minut d’avanç dins dels 60 segons posteriors a l’escriptura, també a mitjanit; l’hora de regeneració exigeix coincidència exacta.
+El botó de regeneració només inicia el cicle després que una lectura nova confirmi servei i vacances desactivades, i rebutja peticions simultànies. Envia la mateixa ordre una sola vegada i comprova la fase resultant. Els enums sense correspondència mostren el codi decimal i conserven `raw_code`; les etiquetes conegudes es mantenen i les dades absents són `unknown`. El rellotge admet un minut d’avanç dins dels 60 segons posteriors a l’escriptura, també a mitjanit, només si una lectura prèvia nova demostra que el valor del minut següent ha canviat; l’hora de regeneració exigeix coincidència exacta.
 
 ## Compatibilitat nova a la 2.7.0
 

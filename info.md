@@ -4,7 +4,7 @@ Local Home Assistant integration for compatible Runxin F79D / BroadLink BL3372 w
 
 ## 2.7.2
 
-Displays unmapped enum codes directly while preserving known labels and raw diagnostics. Adds fresh-state and overlapping-request checks to the regeneration button, and bounded clock-rollover confirmation without relaxing scheduled-time verification.
+Displays unmapped enum codes directly while preserving known labels and raw diagnostics. Adds fresh-state and overlapping-request checks to the regeneration button, and bounded clock-rollover confirmation with fresh pre-write evidence that the next-minute value changed, retaining exact scheduled-time verification.
 
 G6 wire encodings, units and ranges remain unchanged. Model 12 stays Alpha pending the contributor's physical validations; the consulted manuals and WaterCare do not establish meanings for codes 2/255.
 

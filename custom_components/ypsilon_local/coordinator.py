@@ -189,11 +189,16 @@ class YpsilonDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self._last_clock_sync_attempt = now
 
         async with self._mutation_lock:
+            clock_check_started = time.monotonic()
+            try:
+                before_write = await self._async_strict_read()
+            except YpsilonConnectionError as err:
+                _LOGGER.warning("Could not read valve clock before correction: %s", err)
+                return
             # Sample the clock after waiting for other writes, not before.
             local = dt_util.now()
             expected_time = f"{local.hour:02d}:{local.minute:02d}:00"
             _LOGGER.info("Valve clock is %+d min out; correcting", drift)
-            write_started = time.monotonic()
             write_error: YpsilonConnectionError | None = None
             try:
                 await self.hass.async_add_executor_job(
@@ -212,7 +217,8 @@ class YpsilonDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             if not self._clock_readback_matches(
                 confirmed.get("currentTime"),
                 expected_time,
-                time.monotonic() - write_started,
+                time.monotonic() - clock_check_started,
+                previous_clock=before_write.get("currentTime"),
             ):
                 if write_error is not None:
                     _LOGGER.warning(
@@ -310,11 +316,15 @@ class YpsilonDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         return expected
 
     @staticmethod
-    def _clock_readback_matches(actual: Any, wanted: str, elapsed: float) -> bool:
-        """Allow one ticking minute only during the first minute after SET.
+    def _clock_readback_matches(
+        actual: Any, wanted: str, elapsed: float, *, previous_clock: Any = None
+    ) -> bool:
+        """Allow one ticking minute during a read/write window of at most 60s.
 
         The wire clock has no seconds, so even a short read can cross a minute
-        boundary. This tolerance is for currentTime only, never a schedule.
+        boundary. Require a fresh pre-write clock different from the next-minute
+        value, so an ignored write cannot confirm an unchanged clock. This
+        tolerance is for currentTime only, never a schedule.
         """
         if actual == wanted:
             return True
@@ -323,6 +333,9 @@ class YpsilonDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         try:
             actual_h, actual_m, actual_s = (int(part) for part in actual.split(":"))
             wanted_h, wanted_m, wanted_s = (int(part) for part in wanted.split(":"))
+            previous_h, previous_m, previous_s = (
+                int(part) for part in previous_clock.split(":")
+            )
         except (AttributeError, TypeError, ValueError):
             return False
         if not (
@@ -332,9 +345,16 @@ class YpsilonDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             and 0 <= wanted_h < 24
             and 0 <= wanted_m < 60
             and wanted_s == 0
+            and 0 <= previous_h < 24
+            and 0 <= previous_m < 60
+            and previous_s == 0
         ):
             return False
-        return ((actual_h * 60 + actual_m) - (wanted_h * 60 + wanted_m)) % 1440 == 1
+        actual_minutes = actual_h * 60 + actual_m
+        return (
+            (actual_minutes - (wanted_h * 60 + wanted_m)) % 1440 == 1
+            and actual_minutes != previous_h * 60 + previous_m
+        )
 
     @staticmethod
     def _matches_expected(
@@ -343,12 +363,13 @@ class YpsilonDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         *,
         accept_station_active: bool,
         clock_elapsed: float = 0,
+        clock_before_write: Any = None,
     ) -> bool:
         for field_name, wanted in expected.items():
             actual = data.get(field_name)
             if field_name == "currentTime":
                 if not YpsilonDataUpdateCoordinator._clock_readback_matches(
-                    actual, wanted, clock_elapsed
+                    actual, wanted, clock_elapsed, previous_clock=clock_before_write
                 ):
                     return False
                 continue
@@ -367,6 +388,7 @@ class YpsilonDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         *,
         accept_station_active: bool,
         clock_elapsed: float = 0,
+        clock_before_write: Any = None,
     ) -> str:
         parts: list[str] = []
         for field_name, wanted in expected.items():
@@ -374,7 +396,7 @@ class YpsilonDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             if (
                 field_name == "currentTime"
                 and YpsilonDataUpdateCoordinator._clock_readback_matches(
-                    actual, wanted, clock_elapsed
+                    actual, wanted, clock_elapsed, previous_clock=clock_before_write
                 )
             ):
                 continue
@@ -412,10 +434,15 @@ class YpsilonDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         expected = self._expected_readback(values)
 
         async with self._mutation_lock:
-            if require_in_service:
+            # Include the baseline GET in the clock window: an ignored write
+            # must not look applied merely because two natural minutes passed.
+            clock_check_started = time.monotonic()
+            clock_before_write: Any = None
+            if require_in_service or "currentTime" in expected:
                 fresh = await self._async_strict_read()
                 self.async_set_updated_data(fresh)
-                if (
+                clock_before_write = fresh.get("currentTime")
+                if require_in_service and (
                     fresh.get("station") != 0
                     or fresh.get("vacationPattern") is not False
                 ):
@@ -423,7 +450,6 @@ class YpsilonDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                         translation_domain=DOMAIN, translation_key="regeneration_not_ready"
                     )
 
-            write_started = time.monotonic()
             write_error: YpsilonConnectionError | None = None
             try:
                 await self.hass.async_add_executor_job(self.client.write_fields, values)
@@ -453,7 +479,8 @@ class YpsilonDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                         last_data,
                         expected,
                         accept_station_active=accept_station_active,
-                        clock_elapsed=time.monotonic() - write_started,
+                        clock_elapsed=time.monotonic() - clock_check_started,
+                        clock_before_write=clock_before_write,
                     ):
                         self.async_set_updated_data(last_data)
                         return
@@ -466,7 +493,8 @@ class YpsilonDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                             last_data,
                             expected,
                             accept_station_active=accept_station_active,
-                            clock_elapsed=time.monotonic() - write_started,
+                            clock_elapsed=time.monotonic() - clock_check_started,
+                            clock_before_write=clock_before_write,
                         )
                     elif last_error is not None:
                         mismatch = f"confirmation reads failed: {last_error}"

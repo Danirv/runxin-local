@@ -171,19 +171,19 @@ async def test_explicit_phase_control_keeps_existing_policy(hass):
     ("10:21:01", "10:20:00", 5, False),
 ])
 def test_clock_confirmation_is_bounded_and_wraps_midnight(actual, wanted, elapsed, expected):
-    assert Coordinator._clock_readback_matches(actual, wanted, elapsed) is expected
+    assert Coordinator._clock_readback_matches(actual, wanted, elapsed, previous_clock=wanted) is expected
 
 
 def test_tolerance_only_applies_to_ticking_clock_and_reports_real_mismatch():
     data = {"currentTime": "00:00:00", "regeneratingTriggerTime": "01:01:00", "saltAddition": 24}
     expected = {"currentTime": "23:59:00", "regeneratingTriggerTime": "01:00:00", "saltAddition": 24}
-    assert not Coordinator._matches_expected(data, expected, accept_station_active=False, clock_elapsed=1)
-    mismatch = Coordinator._mismatch_text(data, expected, accept_station_active=False, clock_elapsed=1)
+    assert not Coordinator._matches_expected(data, expected, accept_station_active=False, clock_elapsed=1, clock_before_write="23:59:00")
+    mismatch = Coordinator._mismatch_text(data, expected, accept_station_active=False, clock_elapsed=1, clock_before_write="23:59:00")
     assert "regeneratingTriggerTime" in mismatch and "currentTime" not in mismatch
     data["regeneratingTriggerTime"] = "01:00:00"
-    assert Coordinator._matches_expected(data, expected, accept_station_active=False, clock_elapsed=1)
+    assert Coordinator._matches_expected(data, expected, accept_station_active=False, clock_elapsed=1, clock_before_write="23:59:00")
     data["saltAddition"] = 25
-    assert not Coordinator._matches_expected(data, expected, accept_station_active=False, clock_elapsed=1)
+    assert not Coordinator._matches_expected(data, expected, accept_station_active=False, clock_elapsed=1, clock_before_write="23:59:00")
 
 
 @pytest.mark.asyncio
@@ -192,7 +192,10 @@ async def test_manual_clock_rollover_and_strict_schedule(hass, monkeypatch, fiel
     coordinator, client, _ = _coordinator(hass)
     monkeypatch.setattr(coordinator_mod, "WRITE_VERIFY_TIMEOUT", 0)
     name = "currentTime" if field == 4 else "regeneratingTriggerTime"
-    coordinator._async_strict_read = AsyncMock(return_value={name: actual})
+    coordinator._async_strict_read = AsyncMock(
+        side_effect=[{"currentTime": "23:58:00"}, {name: actual}]
+        if field == 4 else [{name: actual}]
+    )
     if success:
         await coordinator.async_write_and_verify({field: (23, 59)})
     else:
@@ -206,7 +209,9 @@ async def test_auto_clock_samples_target_after_wait_and_confirms_rollover(hass, 
     coordinator, client, _ = _coordinator(hass)
     coordinator.auto_sync_clock = True
     monkeypatch.setattr(coordinator_mod.dt_util, "now", Mock(return_value=datetime(2026, 10, 5, 23, 58)))
-    coordinator._async_strict_read = AsyncMock(return_value={"currentTime": "00:00:00"})
+    coordinator._async_strict_read = AsyncMock(side_effect=[
+        {"currentTime": "22:00:00"}, {"currentTime": "00:00:00"},
+    ])
     data = {"currentTime": "22:00:00"}
     async with coordinator._mutation_lock:
         task = asyncio.create_task(coordinator._async_sync_clock_if_needed(data))
@@ -254,3 +259,101 @@ async def test_known_enum_keys_and_shared_options_are_unchanged(hass, key, field
     coordinator.last_update_success = False
     sensor.async_write_ha_state()
     assert hass.states.get(sensor.entity_id).state == "unavailable"
+
+
+@pytest.mark.parametrize("previous", [None, "invalid", "24:21:00", "10:21:01", "10:21:00"])
+def test_clock_rollover_requires_valid_changed_prewrite_evidence(previous):
+    assert not Coordinator._clock_readback_matches(
+        "10:21:00", "10:20:00", 1, previous_clock=previous,
+    )
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("model", [9, 12])
+@pytest.mark.parametrize("ambiguous", [False, True])
+@pytest.mark.parametrize("actual,confirmed", [("10:21:00", False), ("10:20:00", True)])
+async def test_manual_clock_does_not_confirm_unchanged_next_minute(
+    hass, monkeypatch, model, ambiguous, actual, confirmed,
+):
+    coordinator, client, _ = _coordinator(hass, model)
+    coordinator.data["currentTime"] = "10:00:00"  # A cached baseline is insufficient.
+    monkeypatch.setattr(coordinator_mod, "WRITE_VERIFY_TIMEOUT", 0)
+    if ambiguous:
+        client.write_fields.side_effect = coordinator_mod.YpsilonConnectionError("lost ack")
+    coordinator._async_strict_read = AsyncMock(side_effect=[
+        {"currentTime": "10:21:00"}, {"currentTime": actual},
+    ])
+    if confirmed:
+        await coordinator.async_write_and_verify({4: (10, 20)})
+    else:
+        with pytest.raises(coordinator_mod.YpsilonWriteNotConfirmed, match="currentTime"):
+            await coordinator.async_write_and_verify({4: (10, 20)})
+    client.write_fields.assert_called_once_with({4: (10, 20)})
+    assert coordinator._async_strict_read.await_count == 2
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("ambiguous", [False, True])
+async def test_auto_clock_does_not_count_an_unchanged_next_minute(hass, monkeypatch, ambiguous):
+    coordinator, client, _ = _coordinator(hass)
+    coordinator.auto_sync_clock = True
+    coordinator.clock_tolerance = 0
+    monkeypatch.setattr(coordinator_mod.dt_util, "now", Mock(return_value=datetime(2026, 10, 5, 10, 20)))
+    if ambiguous:
+        client.write_fields.side_effect = coordinator_mod.YpsilonConnectionError("lost ack")
+    coordinator._async_strict_read = AsyncMock(side_effect=[
+        {"currentTime": "10:21:00"}, {"currentTime": "10:21:00"},
+    ])
+    data = {"currentTime": "10:00:00"}
+    await coordinator._async_sync_clock_if_needed(data)
+    client.write_fields.assert_called_once_with({4: (10, 20)})
+    assert data["_clockSyncs"] == 0
+    assert coordinator._clock_syncs == 0
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("automatic", [False, True])
+async def test_clock_precheck_failure_sends_no_write(hass, monkeypatch, automatic):
+    coordinator, client, _ = _coordinator(hass)
+    coordinator._async_strict_read = AsyncMock(side_effect=coordinator_mod.YpsilonConnectionError("offline"))
+    if automatic:
+        coordinator.auto_sync_clock = True
+        monkeypatch.setattr(coordinator_mod.dt_util, "now", Mock(return_value=datetime(2026, 10, 5, 10, 20)))
+        await coordinator._async_sync_clock_if_needed({"currentTime": "10:00:00"})
+        assert coordinator._clock_syncs == 0
+    else:
+        with pytest.raises(coordinator_mod.YpsilonConnectionError):
+            await coordinator.async_write_and_verify({4: (10, 20)})
+    client.write_fields.assert_not_called()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("automatic", [False, True])
+async def test_clock_window_includes_the_fresh_baseline_read(hass, monkeypatch, automatic):
+    from types import SimpleNamespace
+    coordinator, client, _ = _coordinator(hass)
+    seconds = 0
+    calls = 0
+    monkeypatch.setattr(coordinator_mod, "time", SimpleNamespace(monotonic=lambda: seconds))
+    monkeypatch.setattr(coordinator_mod, "WRITE_VERIFY_TIMEOUT", 0)
+    monkeypatch.setattr(coordinator_mod.dt_util, "now", Mock(return_value=datetime(2026, 10, 5, 10, 20)))
+
+    async def read():
+        nonlocal seconds, calls
+        calls += 1
+        if calls == 1:
+            # A delayed GET makes an ignored clock advance twice naturally.
+            seconds = 61
+            return {"currentTime": "10:19:00"}
+        return {"currentTime": "10:21:00"}
+
+    coordinator._async_strict_read = read
+    if automatic:
+        coordinator.auto_sync_clock = True
+        await coordinator._async_sync_clock_if_needed({"currentTime": "10:00:00"})
+        assert coordinator._clock_syncs == 0
+    else:
+        with pytest.raises(coordinator_mod.YpsilonWriteNotConfirmed):
+            await coordinator.async_write_and_verify({4: (10, 20)})
+    client.write_fields.assert_called_once_with({4: (10, 20)})
+    assert calls == 2

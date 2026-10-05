@@ -7,7 +7,7 @@ All notable changes to this project are documented here.
 ### Fixed
 - Show unmapped enum codes as their decimal device value (for example relay `2` and work pattern `255`), with valid Home Assistant enum options and the existing `raw_code` attribute. Known state keys/translations are unchanged; missing readings still report unknown.
 - Guard the regeneration button with a fresh service/vacation read under the write lock, and reject overlapping regeneration requests. The existing field-34 value-1 command and single-write/read-back reconciliation are retained. Explicit advanced phase control keeps its existing policy.
-- Confirm the ticking device clock across a one-minute rollover, including midnight, only within 60 seconds of sending the write. Regeneration schedules and other settings still require exact read-back. Automatic sync samples the target clock after acquiring the write lock.
+- Confirm the ticking device clock across a one-minute rollover, including midnight, only within 60 seconds of sending the write and with fresh pre-write evidence that the next-minute value changed. An unchanged next-minute value never confirms an ignored or ambiguously delivered write. Regeneration schedules and other settings still require exact read-back. Automatic sync samples the target clock after acquiring the write lock.
 
 ### Added
 - Real Home Assistant regressions for enum state/options transitions, G6 and model-12 regeneration guards, ambiguous/ignored writes and clock reconciliation.
