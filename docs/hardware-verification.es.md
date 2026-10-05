@@ -70,6 +70,29 @@ El histórico real confirma que `dailyWaterConsumption` aumenta durante el día 
 
 El campo 43 tiene SET/read-back local verificado y cambio observado por cloud. Su semántica es «sal añadida» en kg, no un sensor físico de nivel.
 
+## Euro-Clear Midnight / modelo de controlador 12
+
+**Soporte experimental / Alpha, limitado al modelo 12 y probado inicialmente con Midnight 25.** Los controles siguen disponibles para validarlos y conservan el read-back estricto; este estado no certifica las órdenes pendientes. La evidencia del G6 no se transfiere automáticamente al modelo 12. El catálogo compartido `FieldSpec` describe la evidencia del G6 de referencia; la evidencia por modelo está en `models.py` y en los diagnósticos.
+
+Hardware: Euro-Clear Midnight 25 (cabezal ECOPRO+) con módulo BroadLink BL3372 (devtype `0x520F`), que informa `deviceModel` 12. Probado el 2026-10-04 con la válvula en servicio y vacaciones desactivado.
+
+Una lectura completa de los campos 1–52 se decodifica de forma coherente con el mapa F79D y la pantalla del controlador. Diferencias: el campo 26 informa décimas de litro (250 en una unidad de 25 L), y los campos 24 (valor 2) y 9 (valor 255) quedan fuera de los enums recuperados.
+
+Verificado localmente de extremo a extremo (GET base → un SET → GET nuevo → restauración → GET nuevo, sin efectos secundarios en otros campos): campo 43 `saltAddition` 23 → 24 → 23, campo 10 `regeneratingTriggerTime` 00:00 → 00:01 → 00:00, campo 6 `continuousWaterTime` 0 → 120 → 0 y campo 4 `currentTime` (sincronización 16:31 → 16:32).
+
+Aún sin verificación física en el modelo 12: campo 7 (`flowRateOff`, lee `00 C8` = 2,00 m³/h en big-endian), campo 47 (`rawWaterHardness`) y la regeneración forzada del campo 34.
+
+`FA 00` del campo 26 confirma la visualización actual de 25 L en Midnight 25; no determina el significado del segundo byte ni el códec de volúmenes mayores. Se conservan U8 y la escala 0,1, y `_raw_resinVolumeBytes` guarda los dos bytes para investigarlos.
+
+### Validaciones pendientes
+
+- Campos 7 y 47: GET inicial → un SET adecuado → GET nuevo → comparación con pantalla/app → restauración → GET nuevo. Incluir ambos bytes, el valor solicitado y cualquier error de confirmación.
+- Campo 26: informar de ambos bytes y del volumen de resina mostrado en pantalla/app. No se necesita otra unidad; los volúmenes mayores quedan pendientes hasta obtener evidencia.
+- Durante una regeneración prevista, comprobar que el botón HA inicia el ciclo físico y que las fases leídas coinciden. El avance de fase es una acción pendiente separada; no hace falta saltar fases para completar estas pruebas.
+- Confirmar 25 L en HA, `unknown` con `raw_code` para los enums 2/255 y posibles errores recurrentes durante el uso normal.
+
+Los resultados parciales son útiles. Incluir modelo, firmware, fecha, valores iniciales/restaurados y diagnósticos anonimizados; omitir MAC, IP y credenciales. Estas pruebas no se consideran completadas hasta que un contribuyente informe de ellas.
+
 ## Campo 52
 
 El campo 52 queda intencionadamente fuera del bloque normal 1..51. La capa Ypsilon lo consulta y cachea por separado porque es un intervalo de servicio que cambia lentamente.

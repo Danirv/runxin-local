@@ -95,6 +95,36 @@ The same evidence, together with vendor-app screenshots, confirms that field 39'
 
 Field 43 has full local SET/read-back verification and a cloud-side observed change. Its legacy label/behavior is “salt added” in kilograms. This verifies the configuration/bookkeeping field, not a physical salt-level sensor. The integration must not infer or decrement “salt remaining” from this field.
 
+## Euro-Clear Midnight / controller model 12
+
+**Support level: experimental / Alpha, scoped to model 12 and initially tested on Midnight 25.** Existing controls remain available for validation and retain strict fresh read-back; this status does not certify pending commands. G6 evidence is not automatically model-12 evidence. The shared `FieldSpec` evidence records the reference G6; per-model evidence is in `models.py` and diagnostics.
+
+Hardware: Euro-Clear Midnight 25 (ECOPRO+ head) with a BroadLink BL3372 module (devtype `0x520F`), which reports `deviceModel` 12. Tested 2026-10-04 over the existing transport, with the valve in service and vacation off.
+
+A full fields 1–52 read decodes consistently with the F79D map and the controller display: clock, hardness 160 mg/l, salt added 23 kg, regeneration time 00:00, programme times, and unit-2 volumes. Differences: field 26 reports tenths of a litre (raw 250 on a 25 L unit), field 24 reports 2 and field 9 reports 255. Neither code is in the recovered enums.
+
+Verified locally end-to-end (baseline GET → one SET → fresh GET → restore → fresh GET, with no side effects on other fields):
+
+| Field | Baseline | SET → fresh read | Restore → fresh read |
+|---|---|---|---|
+| 43 `saltAddition` | `17 00` (23) | `18 00` (24) | `17 00` |
+| 10 `regeneratingTriggerTime` | `00 00` | `00 01` | `00 00` |
+| 6 `continuousWaterTime` | `00 00` (0) | `78 00` (120) | `00 00` |
+| 4 `currentTime` | `10 1F` (16:31) | `10 20` (16:32, clock sync) | — |
+
+Not yet hardware-verified on model 12: field 7 (`flowRateOff`, reads `00 C8` = 2.00 m³/h big-endian as on the G6), field 47 (`rawWaterHardness`) and field 34 forced regeneration.
+
+The field-26 observation `FA 00` confirms the current Midnight 25 display of 25 L. It does not establish the second byte's meaning or the encoding of larger resin volumes. The existing U8 decode and 0.1 scale are retained; `_raw_resinVolumeBytes` preserves both bytes for investigation. Do not infer a model-12 U16 codec from this one capture.
+
+### Follow-up validation
+
+- Fields 7 and 47: baseline GET → one suitable SET → fresh GET → controller/app comparison → restore → fresh GET. Include both wire bytes, requested values and any write-confirmation errors.
+- Field 26: report both raw bytes and the resin volume shown by the controller/app. No second unit is required; larger-volume compatibility remains unverified until evidence becomes available.
+- During a normally planned regeneration, verify that the HA button starts the physical cycle and the read phases match. Phase advancement is a separate pending action; do not skip phases merely to complete this checklist.
+- Confirm 25 L in HA, `unknown` plus `raw_code` for enum values 2/255, and whether normal use produces recurring errors.
+
+Partial results are useful. Include the model, firmware, date, baseline/restore results and sanitized diagnostics; omit MAC addresses, IP addresses and credentials. None of these follow-up checks should be described as completed until a contributor reports them.
+
 ## Field 52 polling note
 
 Field 52 is intentionally not part of the normal 1..51 state block. The Ypsilon composition layer reads and caches it separately because it is a slow-changing service interval. This is a polling optimisation and does not weaken its observed-state evidence.

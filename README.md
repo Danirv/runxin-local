@@ -16,7 +16,7 @@ The integration communicates directly over the LAN and does not depend on the ve
 - Read-only vacation status derived from the controller's field-49 flag and physical valve phase.
 - Safe controls for hardness, salt-addition bookkeeping, leak-protection thresholds, regeneration schedule and clock.
 - Forced regeneration with a mechanical-state confirmation window.
-- Administrator-only advanced services restricted to known reversible fields.
+- Administrator-only configuration and phase-advance services with range validation and fresh read-back.
 - Catalan, Spanish and English translations.
 - Transport-neutral, Home-Assistant-independent **Runxin/F79D protocol layer** separated from the BroadLink BL3372 transport.
 - Declarative 52-field F79D catalogue with conservative evidence/provenance metadata.
@@ -25,11 +25,16 @@ The integration communicates directly over the LAN and does not depend on the ve
 
 ## Supported hardware
 
-Verified Home Assistant target:
+Supported Home Assistant targets (BroadLink BL3372 module, devtype `0x520F`):
 
-- ATH/BWT Ypsilon G6
-- Runxin F79D valve/controller
-- BroadLink BL3372 module, BroadLink devtype `0x520F`
+| Product | Runxin controller model (field 1) | Support | Evidence |
+|---|---|---|---|
+| ATH/BWT Ypsilon G6 | 9 (F79D) | Reference hardware | Per-field read/write evidence documented in the hardware verification guide |
+| Euro-Clear Midnight (ECOPRO+ head) | 12 | **Experimental / Alpha**, tested on Midnight 25 | Captured state matches the controller. Writes to fields 4, 6, 10 and 43 hardware-verified; fields 7 and 47 and mechanical field-34 actions remain available for testing but are not yet hardware-verified on this model |
+
+Alpha applies to model 12 compatibility, not to the existing G6 support or the entire release. The original model-12 controls and strict fresh read-back remain available; the label does not disable commands or imply that pending actions are verified. See the [model-12 evidence and follow-up checks](docs/hardware-verification.md#euro-clear-midnight--controller-model-12).
+
+Diagnostics include per-model support/evidence metadata and both raw field-26 resin bytes. The observed Midnight 25 value `FA 00` still displays as **25 L**. The second byte's meaning and resin values above 25.5 L are not established by that capture; no new byte order is assumed.
 
 Other rebranded devices using the same controller/module may work, but compatibility must be verified per model and firmware. Separating protocol and transport does **not** imply that every Runxin or non-BroadLink device is supported.
 

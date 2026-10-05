@@ -53,8 +53,13 @@ Home Assistant
   reintents acotats; una escriptura amb lliurament ambigu s'envia com a màxim un cop.
 
 `api.py`
-: adapta el perfil Ypsilon G6 i compon `F79DClient` amb el transport BL3372.
+: adapta els models compatibles i compon `F79DClient` amb el transport BL3372.
   Manté les façanes de compatibilitat i la memòria cau específica del camp 52.
+
+`models.py`
+: identitats acceptades, presentació, escala de resina i evidència per model.
+  El nivell de suport i les llistes de camps verificats/pendents són metadades
+  de diagnòstic; no canvien els controls disponibles ni la política d'escriptura.
 
 `coordinator.py`
 : polling HA, tolerància stale, cadència adaptativa, rellotge i reconciliació. La
@@ -92,5 +97,11 @@ universals els 52 camps actuals.
 
 L'arquitectura 2.4.x conserva `ypsilon_local`, config-entry v2, unique ids per MAC,
 unique ids d'entitats i les façanes `protocol.py`/`api.py`. La integració HA
-continua suportant únicament la combinació verificada F79D model 9 + BroadLink
-BL3372 devtype `0x520F`.
+accepta els models 9 (Ypsilon G6 de referència) i 12 (Euro-Clear Midnight
+experimental / Alpha, provat amb Midnight 25), amb BroadLink BL3372 `0x520F`.
+Els controls pendents del model 12 continuen disponibles amb els límits
+d'evidència documentats. Això no implica suport per a qualsevol vàlvula Runxin.
+
+El camp 26 conserva la interpretació U8 original i desa els dos bytes a
+`_raw_resinVolumeBytes`, sense deduir el significat del segon. L'escala de resina
+del model 12 es manté a la capa HA, com a la contribució original.
