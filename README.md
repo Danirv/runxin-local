@@ -23,6 +23,8 @@ The integration communicates directly over the LAN and does not depend on the ve
 - Offline protocol, entity, translation, branding and architecture regression checks in `scripts/audit.py`.
 - Proper square icon and landscape logo assets under `custom_components/ypsilon_local/brand/`.
 
+The regeneration button starts only after a fresh reading confirms service state with vacation off, and rejects overlapping requests. It sends the same single command and verifies the resulting phase. Unmapped enum values appear as decimal codes with `raw_code`; known labels are preserved and absent readings remain `unknown`. Clock confirmation allows one ticking minute within 60 seconds of the write, including midnight, only when a fresh pre-write reading proves the next-minute value changed; regeneration schedules still require exact confirmation.
+
 ## Supported hardware
 
 Supported Home Assistant targets (BroadLink BL3372 module, devtype `0x520F`):

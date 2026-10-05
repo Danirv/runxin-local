@@ -84,12 +84,20 @@ Encara sense verificació física al model 12: camp 7 (`flowRateOff`, llegeix `0
 
 `FA 00` del camp 26 confirma la visualització actual de 25 L al Midnight 25; no determina el significat del segon byte ni el còdec de volums més grans. Es conserven U8 i l'escala 0,1, i `_raw_resinVolumeBytes` desa els dos bytes per investigar-los.
 
+### Investigació dels enums i la duresa del model 12 (2026-10-05)
+
+S'han consultat el [manual del fabricant Euro-Clear Midnight (2025)](https://euro-clear.eu/shop/wp-content/uploads/2025/11/2025_Midnight_gepkonyv_HU.pdf) i el [manual Runxin F105/F136](https://manufacturervalve.com/pdf/download-center_22.pdf). No estableixen una correspondència del camp 9 amb valor 255 ni del camp 24 amb valor 2 amb cap etiqueta. El model físic de vàlvula o un menú no equival automàticament al codi del controlador BroadLink ni a un enum del protocol. Es mostren els codis decimals `255` i `2` i es conserva `raw_code` fins que hi hagi evidència específica. Les dades absents continuen sent `unknown`; les etiquetes conegudes es conserven.
+
+[WaterCare 0.6.0](https://github.com/kriziw/Euroclear-broadlink/tree/2b5b5076e6131d96d98b2263e1f7ee47ce388db7) reutilitza el nostre mapa i també mostra aquests codis crus. És evidència d'interoperabilitat, no una confirmació independent del significat. El contribuent indica que WaterDevice no es connecta a aquesta unitat; comparar amb la pantalla física i amb una lectura HA nova és útil sense exigir una app del fabricant que no funciona.
+
+El manual Midnight, pàgina impresa 16, indica multiplicar la duresa alemanya mesurada (nk°) per 10 (15 → 150 mg/L); en un altre apartat (pàgina 7) expressa la duresa de l’aigua com a CaO mg/L. Aquesta convenció ajuda a comparar lectures del model 12. Es conserven el valor informat, la unitat HA mg/L i el rang d'escriptura; no s'aplica cap conversió silenciosa ni es generalitza aquesta convenció al G6.
+
 ### Validacions pendents
 
 - Camps 7 i 47: GET inicial → un SET adequat → GET nou → comparació amb pantalla/app → restauració → GET nou. Incloure els dos bytes, el valor demanat i qualsevol error de confirmació.
 - Camp 26: informar dels dos bytes i del volum de resina mostrat a pantalla/app. No cal una altra unitat; els volums més grans queden pendents fins obtenir evidència.
 - Durant una regeneració prevista, comprovar que el botó HA inicia el cicle físic i que les fases llegides concorden. L'avanç de fase és una acció pendent separada; no cal saltar fases per completar aquestes proves.
-- Confirmar 25 L a HA, `unknown` amb `raw_code` per als enums 2/255 i possibles errors recurrents durant l'ús normal.
+- Confirmar 25 L a HA, els codis decimals `2`/`255` amb `raw_code` per als enums sense correspondència i possibles errors recurrents durant l'ús normal.
 
 Els resultats parcials són útils. Incloure model, firmware, data, valors inicials/restaurats i diagnòstics anonimitzats; ometre MAC, IP i credencials. Aquestes proves no es consideren completades fins que un contribuent n'informi.
 

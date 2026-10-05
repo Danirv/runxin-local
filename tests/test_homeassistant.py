@@ -196,18 +196,34 @@ async def test_resin_sensor_preserves_scaling_unit_and_unique_id(hass, model, ra
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("key,field,raw", [("output_relay_mode", "outRelayMode", 2), ("work_pattern", "workPattern", 255)])
-async def test_unknown_enum_writes_unknown_state_and_preserves_raw_code(hass, key, field, raw):
+async def test_unmapped_enum_shows_raw_state_with_valid_options(hass, key, field, raw):
     coordinator, entry = _entity_context(hass, {field: raw})
     description = next(desc for desc in sensor_mod.SENSORS if desc.key == key)
     # Enable the diagnostic in this test as a user can, preserving its normal
     # disabled-by-default setting in the integration.
     description = replace(description, entity_registry_enabled_default=True)
     sensor = sensor_mod.YpsilonSensor(coordinator, entry, description)
-    assert sensor.native_value is None
+    assert sensor.native_value == str(raw)
+    assert str(raw) in sensor.options
+    assert str(raw) not in description.options
     assert sensor.extra_state_attributes["raw_code"] == raw
     state = await _add_sensor(hass, sensor, f"sensor.test_{key}")
-    assert state.state == "unknown"
+    assert state.state == str(raw)
+    assert str(raw) in state.attributes["options"]
     assert state.attributes["raw_code"] == raw
+    # A later reading updates state and enum options without mutating the shared description.
+    coordinator.data[field] = 254
+    sensor.async_write_ha_state()
+    state = hass.states.get(sensor.entity_id)
+    assert state.state == "254"
+    assert "254" in state.attributes["options"]
+    assert str(raw) not in state.attributes["options"]
+    coordinator.data.pop(field)
+    sensor.async_write_ha_state()
+    state = hass.states.get(sensor.entity_id)
+    assert state.state == "unknown"
+    assert "raw_code" not in state.attributes
+    assert state.attributes["options"] == description.options
 
 
 @pytest.mark.asyncio
@@ -230,7 +246,7 @@ async def test_device_identity_uses_model_metadata_and_keeps_mac_identifier(hass
 @pytest.mark.asyncio
 async def test_alpha_model_controls_remain_available_with_same_commands(hass):
     coordinator, entry = _entity_context(hass, codec.decode_frame(STATE_FRAME))
-    coordinator.async_write_and_verify = AsyncMock()
+    coordinator.async_start_regeneration = AsyncMock()
     for desc in number_mod.NUMBERS:
         entity = number_mod.YpsilonNumber(coordinator, entry, desc)
         assert entity.available
@@ -241,7 +257,7 @@ async def test_alpha_model_controls_remain_available_with_same_commands(hass):
         entity._async_write.assert_awaited_once_with({desc.field_id: raw}, value)
     button = button_mod.YpsilonRegenerationButton(coordinator, entry)
     await button.async_press()
-    coordinator.async_write_and_verify.assert_awaited_once_with({34: 1}, accept_station_active=True)
+    coordinator.async_start_regeneration.assert_awaited_once_with()
     # The advanced service still validates unit-2 field 7 with the same raw range.
     services_mod._validate_raw_fields(coordinator, {7: 200, 47: 160})
 

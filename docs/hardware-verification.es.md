@@ -84,12 +84,20 @@ Aún sin verificación física en el modelo 12: campo 7 (`flowRateOff`, lee `00 
 
 `FA 00` del campo 26 confirma la visualización actual de 25 L en Midnight 25; no determina el significado del segundo byte ni el códec de volúmenes mayores. Se conservan U8 y la escala 0,1, y `_raw_resinVolumeBytes` guarda los dos bytes para investigarlos.
 
+### Investigación de los enums y la dureza del modelo 12 (2026-10-05)
+
+Se han consultado el [manual del fabricante Euro-Clear Midnight (2025)](https://euro-clear.eu/shop/wp-content/uploads/2025/11/2025_Midnight_gepkonyv_HU.pdf) y el [manual Runxin F105/F136](https://manufacturervalve.com/pdf/download-center_22.pdf). No establecen una correspondencia del campo 9 con valor 255 ni del campo 24 con valor 2 con una etiqueta. El modelo físico de válvula o un menú no equivale automáticamente al código del controlador BroadLink ni a un enum del protocolo. Se muestran los códigos decimales `255` y `2` y se conserva `raw_code` hasta obtener evidencia específica. Los datos ausentes siguen siendo `unknown`; las etiquetas conocidas se conservan.
+
+[WaterCare 0.6.0](https://github.com/kriziw/Euroclear-broadlink/tree/2b5b5076e6131d96d98b2263e1f7ee47ce388db7) reutiliza nuestro mapa y también muestra estos códigos sin interpretar. Es evidencia de interoperabilidad, no una confirmación independiente del significado. El contribuyente indica que WaterDevice no se conecta a esta unidad; comparar con la pantalla física y con una lectura HA nueva es útil sin exigir una app del fabricante que no funciona.
+
+El manual Midnight, página impresa 16, indica multiplicar la dureza alemana medida (nk°) por 10 (15 → 150 mg/L); en otro apartado (página 7) expresa la dureza del agua como CaO mg/L. Esta convención ayuda a comparar lecturas del modelo 12. Se conservan el valor comunicado, la unidad HA mg/L y el rango de escritura; no se aplica ninguna conversión silenciosa ni se generaliza esta convención al G6.
+
 ### Validaciones pendientes
 
 - Campos 7 y 47: GET inicial → un SET adecuado → GET nuevo → comparación con pantalla/app → restauración → GET nuevo. Incluir ambos bytes, el valor solicitado y cualquier error de confirmación.
 - Campo 26: informar de ambos bytes y del volumen de resina mostrado en pantalla/app. No se necesita otra unidad; los volúmenes mayores quedan pendientes hasta obtener evidencia.
 - Durante una regeneración prevista, comprobar que el botón HA inicia el ciclo físico y que las fases leídas coinciden. El avance de fase es una acción pendiente separada; no hace falta saltar fases para completar estas pruebas.
-- Confirmar 25 L en HA, `unknown` con `raw_code` para los enums 2/255 y posibles errores recurrentes durante el uso normal.
+- Confirmar 25 L en HA, los códigos decimales `2`/`255` con `raw_code` para los enums sin correspondencia y posibles errores recurrentes durante el uso normal.
 
 Los resultados parciales son útiles. Incluir modelo, firmware, fecha, valores iniciales/restaurados y diagnósticos anonimizados; omitir MAC, IP y credenciales. Estas pruebas no se consideran completadas hasta que un contribuyente informe de ellas.
 

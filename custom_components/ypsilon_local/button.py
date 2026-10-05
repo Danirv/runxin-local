@@ -13,7 +13,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.util import dt as dt_util
 
 from .api import YpsilonConnectionError
-from .const import DOMAIN, FIELD_CURRENT_TIME, FIELD_SYSTEM_MODE
+from .const import DOMAIN, FIELD_CURRENT_TIME
 from .coordinator import YpsilonDataUpdateCoordinator
 from .entity import YpsilonEntity
 
@@ -56,9 +56,7 @@ class YpsilonRegenerationButton(YpsilonEntity, ButtonEntity):
     async def async_press(self) -> None:
         _LOGGER.info("Requesting forced regeneration (systemMode=1)")
         try:
-            await self.coordinator.async_write_and_verify(
-                {FIELD_SYSTEM_MODE: 1}, accept_station_active=True
-            )
+            await self.coordinator.async_start_regeneration()
         except YpsilonConnectionError as err:
             raise HomeAssistantError(
                 translation_domain=DOMAIN,

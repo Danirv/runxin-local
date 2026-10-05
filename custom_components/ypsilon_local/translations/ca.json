@@ -83,6 +83,8 @@
     "advance_phase": {"name": "Avança la fase", "description": "Escriu el mode del sistema per moure la màquina d'estats de regeneració (0-4). Operació mecànica: utilitza-ho amb cura.", "fields": {"config_entry_id": {"name": "Dispositiu", "description": "Entrada de configuració."}, "phase": {"name": "Fase", "description": "0 servei, 1-4 etapes de regeneració."}}}
   },
   "exceptions": {
+    "regeneration_busy": {"message": "Ja s’està processant una petició de regeneració. Espera que acabi."},
+    "regeneration_not_ready": {"message": "La regeneració només pot començar quan una lectura nova confirma que la vàlvula està en servei i el mode vacances està desactivat."},
     "write_failed": {"message": "No s'ha pogut escriure {name} al descalcificador: {error}"},
     "below_minimum": {"message": "{value} és per sota del mínim permès ({minimum})."},
     "above_maximum": {"message": "{value} supera el màxim permès ({maximum})."},

@@ -116,12 +116,20 @@ Not yet hardware-verified on model 12: field 7 (`flowRateOff`, reads `00 C8` = 2
 
 The field-26 observation `FA 00` confirms the current Midnight 25 display of 25 L. It does not establish the second byte's meaning or the encoding of larger resin volumes. The existing U8 decode and 0.1 scale are retained; `_raw_resinVolumeBytes` preserves both bytes for investigation. Do not infer a model-12 U16 codec from this one capture.
 
+### Model-12 enum and hardness investigation (2026-10-05)
+
+The [Euro-Clear Midnight manufacturer manual (2025)](https://euro-clear.eu/shop/wp-content/uploads/2025/11/2025_Midnight_gepkonyv_HU.pdf) and [Runxin F105/F136 manual](https://manufacturervalve.com/pdf/download-center_22.pdf) were consulted. They do not establish a protocol mapping from field 9 value 255 or field 24 value 2 to a named setting. A physical valve model/menu label is not automatically a BroadLink controller-model code or a wire enum. Display the decimal codes `255` and `2`, retaining `raw_code`, until model-specific evidence supports a translation. Missing data remains `unknown`; existing known keys are unchanged.
+
+[WaterCare 0.6.0](https://github.com/kriziw/Euroclear-broadlink/tree/2b5b5076e6131d96d98b2263e1f7ee47ce388db7) reuses this project's protocol mapping and also exposes those codes raw. Its agreement is useful interoperability evidence, not independent proof of their meaning. The contributor reports that WaterDevice cannot connect to this unit; a physical display comparison plus a fresh independent HA read is useful, without requiring an unavailable vendor-app comparison.
+
+The Midnight manual, printed page 16, instructs users to multiply measured German hardness (nk°) by 10 (15 → 150 mg/L); elsewhere (page 7) it expresses water hardness as CaO mg/L. Record this model-specific convention when comparing readings. Preserve the reported setting, HA mg/L unit and write range; do not silently convert it to another hardness scale or generalise the convention to the G6.
+
 ### Follow-up validation
 
 - Fields 7 and 47: baseline GET → one suitable SET → fresh GET → controller/app comparison → restore → fresh GET. Include both wire bytes, requested values and any write-confirmation errors.
 - Field 26: report both raw bytes and the resin volume shown by the controller/app. No second unit is required; larger-volume compatibility remains unverified until evidence becomes available.
 - During a normally planned regeneration, verify that the HA button starts the physical cycle and the read phases match. Phase advancement is a separate pending action; do not skip phases merely to complete this checklist.
-- Confirm 25 L in HA, `unknown` plus `raw_code` for enum values 2/255, and whether normal use produces recurring errors.
+- Confirm 25 L in HA, decimal `2`/`255` plus `raw_code` for unmapped enums, and whether normal use produces recurring errors.
 
 Partial results are useful. Include the model, firmware, date, baseline/restore results and sanitized diagnostics; omit MAC addresses, IP addresses and credentials. None of these follow-up checks should be described as completed until a contributor reports them.
 
