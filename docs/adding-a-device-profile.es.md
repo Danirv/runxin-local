@@ -2,7 +2,7 @@
 
 # Añadir otro perfil de dispositivo Runxin
 
-No empieces copiando la tabla de campos F79D y cambiándole el nombre. Las aplicaciones antiguas WaterDevice contienen comportamiento dependiente del modelo, por lo que un segundo controlador Runxin debe tratarse como un perfil independiente hasta que las capturas demuestren qué partes son realmente compartidas.
+No copies la tabla F79D cambiándole el nombre. Trata otro controlador como no verificado hasta que las lecturas demuestren qué se comparte. Un controlador compatible puede reutilizar el perfil de protocolo con política propia; compartir tramas no demuestra semántica física idéntica.
 
 ## Política de controlador y perfil de protocolo
 
