@@ -27,7 +27,7 @@ These are limited local read requests, not passive observation. They create a no
 
 ## Report contents and privacy
 
-The integration's report includes software/firmware versions, advertised lock and authentication results, raw two-byte field values, per-query timestamps, omissions, numeric unmapped enums and reference interpretations. It preserves zero and false separately from missing fields. A name table from the public WaterDevice API describes known controller codes (9 F79D, 12 F105, 14 F136); this table does not add supported models and is not fetched from the cloud during diagnosis.
+The integration's report includes software/firmware versions, advertised lock and authentication results, raw two-byte field values, per-query timestamps, omissions, numeric unmapped enums and reference interpretations. It preserves zero and false separately from missing fields. A name table from the public WaterDevice API describes known controller codes (1 F150, 9 F79D, 12 F105, 14 F136); this table does not add supported models and is not fetched from the cloud during diagnosis.
 
 Reference meanings and units require independent confirmation on each model. Resin volume is not scaled to litres. Volume readings are decoded only with the unit and paired bytes returned together. Water usage may change between requests. Weekly-average consumption is not necessarily an app's weekly-history total, and added salt is bookkeeping rather than a measured salt level.
 
@@ -40,3 +40,5 @@ The integration's report excludes IP/MAC, names, serial numbers, keys, session I
 - For writes already performed, existing baseline/change/fresh-read/restoration evidence. The report itself never tests writes, and no new write or regeneration is needed just to request compatibility.
 
 If Home Assistant cannot run the report, the separate [connection diagnostic](../scripts/debug_connection.py) remains available. Contact us with the displayed error and your environment; there is no need to alter Home Assistant's managed dependencies.
+
+A periodic **model-1 read-only Alpha** is a separate operational mode: it creates reference sensors and polls, while still blocking writes and clock correction. See [its comparison guide](model-1-alpha.md). Downloading diagnostics from a normal entry exports cached state, including raw field pairs; it does not run the one-time collector.

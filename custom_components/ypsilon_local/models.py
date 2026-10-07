@@ -1,8 +1,8 @@
 """Controller models accepted by the integration, and their per-model presentation details.
 
 The F79D field map, framing and BL3372 transport are shared by every model listed here.
-A model is only added once its real controller state has been read through that map and
-the decoded values have been checked against the controller's own display.
+Read compatibility, presentation confidence and write permission are separate.
+New models default to no writes; a received field is not a validated conversion.
 
 This module has no Home Assistant imports so it can be unit-tested directly.
 """
@@ -37,7 +37,13 @@ class ControllerModel:
     model_name: str
     manufacturer: str
     # Multiplier from the raw field-26 value to litres.
-    resin_volume_scale: float = 1.0
+    resin_volume_scale: float | None = 1.0
+    protocol_profile: str = "f79d"
+    # An explicit integration policy, independent of theoretical codec support
+    # and the evidence lists below. Empty is the conservative default.
+    allowed_write_fields: frozenset[int] = frozenset()
+    provisional_readings: bool = False
+    unconfirmed_unit_fields: frozenset[str] = frozenset()
     evidence: str = ""
     # Evidence metadata only: these do not enable or disable any controls.
     support_level: str = "reference"
@@ -45,13 +51,41 @@ class ControllerModel:
     hardware_verified_write_fields: tuple[int, ...] = ()
     pending_write_fields: tuple[int, ...] = ()
 
+    @property
+    def read_only(self) -> bool:
+        return not self.allowed_write_fields
+
+
+# Preserve exactly the existing G6/Midnight integration write surface. These
+# pending actions are not promoted to hardware-verified evidence by this policy.
+EXISTING_CONTROL_FIELDS = frozenset({4, 6, 7, 10, 34, 43, 47})
+
 
 CONTROLLER_MODELS: dict[int, ControllerModel] = {
+    1: ControllerModel(
+        code=1,
+        title="Runxin F150 · Read-only Alpha",
+        model_name="F150 / model 1 (read-only Alpha)",
+        manufacturer="Runxin",
+        resin_volume_scale=None,
+        support_level="alpha",
+        provisional_readings=True,
+        unconfirmed_unit_fields=frozenset({"resinVolume", "periodicWaterProduction"}),
+        tested_hardware="Unbranded softener reported in issue #17",
+        evidence=(
+            "Issue #17: BL3372 0x520F firmware 62016, stable model code 1, all "
+            "fields 1..52 received in two read-only queries with no failures. "
+            "F150 is the manufacturer's API enum name, not a confirmed product "
+            "identity. App comparisons and field applicability are pending; "
+            "resin raw 240 and periodic-water reference 15 have no confirmed units."
+        ),
+    ),
     9: ControllerModel(
         code=9,
         title="Ypsilon G6",
         model_name="F79D / Ypsilon G6",
         manufacturer="ATH / BWT / Runxin",
+        allowed_write_fields=EXISTING_CONTROL_FIELDS,
         evidence="Reference hardware: reads and writes verified on an ATH/BWT Ypsilon G6.",
         tested_hardware="ATH/BWT Ypsilon G6",
         hardware_verified_write_fields=(4, 6, 7, 10, 43, 47),
@@ -62,6 +96,7 @@ CONTROLLER_MODELS: dict[int, ControllerModel] = {
         title="Euro-Clear Midnight",
         model_name="Model 12 / Euro-Clear Midnight",
         manufacturer="Euro-Clear / Runxin",
+        allowed_write_fields=EXISTING_CONTROL_FIELDS,
         # A Midnight 25 (25 L resin) reports raw 250, i.e. tenths of a litre.
         resin_volume_scale=0.1,
         support_level="alpha",
@@ -84,7 +119,7 @@ SUPPORTED_DEVICE_MODELS: frozenset[int] = frozenset(CONTROLLER_MODELS)
 
 def controller_model(code: object) -> ControllerModel | None:
     """Return the supported model for a field-1 value, or None."""
-    return CONTROLLER_MODELS.get(code) if isinstance(code, int) else None
+    return CONTROLLER_MODELS.get(code) if type(code) is int else None
 
 
 def is_supported_model(code: object) -> bool:
@@ -93,7 +128,7 @@ def is_supported_model(code: object) -> bool:
 
 
 def model_support_details(code: object) -> dict[str, Any] | None:
-    """Return per-model evidence for diagnostics, without changing write policy.
+    """Return per-model evidence and effective integration capabilities.
 
     Pending fields refer to exposed controls with incomplete hardware evidence,
     not to every field that the protocol can encode. In particular, field 49
@@ -109,6 +144,11 @@ def model_support_details(code: object) -> dict[str, Any] | None:
         "hardware_verified_write_fields": list(model.hardware_verified_write_fields),
         "pending_write_fields": list(model.pending_write_fields),
         "resin_volume_scale": model.resin_volume_scale,
+        "protocol_profile": model.protocol_profile,
+        "read_only": model.read_only,
+        "allowed_write_fields": sorted(model.allowed_write_fields),
+        "provisional_readings": model.provisional_readings,
+        "unconfirmed_unit_fields": sorted(model.unconfirmed_unit_fields),
         "evidence": model.evidence,
     }
 
@@ -119,6 +159,8 @@ def resin_volume_litres(raw: object, code: object) -> float | int | None:
         return None
     model = controller_model(code)
     scale = model.resin_volume_scale if model is not None else 1.0
+    if scale is None:
+        return None
     if scale == 1.0:
         return raw
     return round(raw * scale, 1)

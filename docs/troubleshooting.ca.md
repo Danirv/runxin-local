@@ -80,3 +80,11 @@ Si persisteix el rebuig, es pot acordar una captura limitada a descoberta i
 autenticació per comparar-la amb un G6 funcional. Acorda abans la recollida i
 l'anonimització: no publiquis PCAPs complets, que poden contenir material de sessió
 i identificadors. Aquesta investigació no necessita escriptures de configuració.
+
+## Solució d'aparellament reportada a la issue #17
+
+Un usuari amb Runxin/润新 iOS 2.0.0 va observar bloqueig anunciat i autenticació rebutjada. Tornar a fer l'aparellament complet amb Water Device 2.1.3 va substituir el vincle anterior: bloqueig false i autenticació correcta amb l'app tancada. No va reportar un restabliment de fàbrica del controlador ni canvis físics. Després només una de les apps veia/controlava el dispositiu.
+
+És un cas documentat, no una regla per a totes les versions. Reaparellar pot substituir el vincle de l'app anterior; no és simplement afegir un segon client. No implementem claus cloud ni desbloqueig automàtic. No cal repetir el procediment en un dispositiu que ja funciona.
+
+El controlador resultant retorna codi 1; autenticar no confirma identitat G6/model 9. [Issue #17](https://github.com/Danirv/runxin-local/issues/17) i [Alpha de lectura](model-1-alpha.ca.md).

@@ -16,6 +16,7 @@ from typing import Any, Protocol
 
 from .errors import RunxinProtocolError
 from .f79d import STATE_FIELDS, build_query, build_write_fields, decode_frame
+from .framing import QUERY_RESPONSE_CODE, WRITE_RESPONSE_CODE, extract_tlvs, inner_frame
 
 
 class TransactionTransport(Protocol):
@@ -29,8 +30,9 @@ class TransactionTransport(Protocol):
 class F79DClient:
     """Read/write F79D fields through an arbitrary transaction transport."""
 
-    def __init__(self, transport: TransactionTransport) -> None:
+    def __init__(self, transport: TransactionTransport, *, capture_raw: bool = False) -> None:
         self.transport = transport
+        self.capture_raw = capture_raw
         self._lock = threading.Lock()
 
     def close(self) -> None:
@@ -44,9 +46,16 @@ class F79DClient:
         if callable(invalidate):
             invalidate()
 
-    def _decode_response(self, response: bytes) -> dict[str, Any]:
+    def _decode_response(self, response: bytes, expected_opcode: int) -> dict[str, Any]:
         try:
-            return decode_frame(response)
+            decoded = decode_frame(response)
+            if inner_frame(response)[3] != expected_opcode:
+                raise RunxinProtocolError("response opcode does not match the request")
+            if self.capture_raw:
+                decoded["_rawFieldBytes"] = {
+                    field: list(pair) for field, pair in extract_tlvs(response).items()
+                }
+            return decoded
         except RunxinProtocolError:
             # A malformed product frame can mean stale framing/session state.
             # Stateful transports may reset themselves; stateless transports
@@ -55,13 +64,13 @@ class F79DClient:
             raise
 
     def _transaction(self, request: bytes) -> dict[str, Any]:
-        return self._decode_response(self.transport.transact(request))
+        return self._decode_response(self.transport.transact(request), QUERY_RESPONSE_CODE)
 
     def _write_transaction(self, request: bytes) -> dict[str, Any]:
         write_transaction = getattr(self.transport, "transact_write", None)
         if callable(write_transaction):
-            return self._decode_response(write_transaction(request))
-        return self._transaction(request)
+            return self._decode_response(write_transaction(request), WRITE_RESPONSE_CODE)
+        return self._decode_response(self.transport.transact(request), WRITE_RESPONSE_CODE)
 
     def read_fields(self, fields: list[int]) -> dict[str, Any]:
         """Read an explicit set of F79D field ids."""

@@ -24,6 +24,7 @@ from .const import (
     CONF_ADAPTIVE_POLLING,
     CONF_AUTO_SYNC_CLOCK,
     CONF_CLOCK_TOLERANCE,
+    CONF_CONTROLLER_MODEL,
     CONF_DIAGNOSTIC_ONLY,
     CONF_DIAGNOSTIC_REPORT_ID,
     CONF_SCAN_INTERVAL,
@@ -82,6 +83,31 @@ class YpsilonLocalConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self._diagnostic_task: asyncio.Task | None = None
         self._diagnostic_cancel = threading.Event()
         self._diagnostic_identifiers: list[str] = []
+        self._alpha_host: str | None = None
+        self._alpha_identity: dict[str, Any] = {}
+
+    async def _async_controller_entry(
+        self, host: str, identity: dict[str, Any]
+    ) -> config_entries.ConfigFlowResult:
+        model = controller_model(identity.get("deviceModel"))
+        if model is not None and model.read_only:
+            self._alpha_host = host
+            self._alpha_identity = identity
+            return await self.async_step_readonly_alpha()
+        return self.async_create_entry(title=_entry_title(identity), data={CONF_HOST: host})
+
+    async def async_step_readonly_alpha(
+        self, user_input: dict[str, Any] | None = None
+    ) -> config_entries.ConfigFlowResult:
+        """Explain provisional readings before enabling continuous read-only polling."""
+        if user_input is not None:
+            return self.async_create_entry(
+                title=_entry_title(self._alpha_identity),
+                data={CONF_HOST: self._alpha_host,
+                      CONF_CONTROLLER_MODEL: self._alpha_identity["deviceModel"]},
+                options={CONF_AUTO_SYNC_CLOCK: False, CONF_ADAPTIVE_POLLING: False},
+            )
+        return self.async_show_form(step_id="readonly_alpha", data_schema=vol.Schema({}))
 
     @callback
     def async_remove(self) -> None:
@@ -157,9 +183,7 @@ class YpsilonLocalConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             else:
                 if not is_supported_model(identity.get("deviceModel")):
                     return await self._diagnostic_offer(self.discovered_host, "unsupported_device", identity)
-                return self.async_create_entry(
-                    title=_entry_title(identity), data={CONF_HOST: self.discovered_host}
-                )
+                return await self._async_controller_entry(self.discovered_host, identity)
 
         self._set_confirm_only()
         return self.async_show_form(
@@ -191,9 +215,7 @@ class YpsilonLocalConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     self._abort_if_unique_id_configured(
                         updates={CONF_HOST: host}, reload_on_update=True
                     )
-                    return self.async_create_entry(
-                        title=_entry_title(identity), data={CONF_HOST: host}
-                    )
+                    return await self._async_controller_entry(host, identity)
 
         return self.async_show_form(
             step_id="user",
@@ -335,7 +357,11 @@ class YpsilonLocalOptionsFlow(config_entries.OptionsFlow):
     ) -> config_entries.ConfigFlowResult:
         if self.config_entry.data.get(CONF_DIAGNOSTIC_ONLY):
             return self.async_abort(reason="diagnostic_only")
+        model = controller_model(self.config_entry.data.get(CONF_CONTROLLER_MODEL))
+        read_only = bool(model and model.read_only)
         if user_input is not None:
+            if read_only:
+                user_input = {**user_input, CONF_AUTO_SYNC_CLOCK: False}
             return self.async_create_entry(title="", data=user_input)
         options = self.config_entry.options
         schema = vol.Schema(
@@ -379,4 +405,7 @@ class YpsilonLocalOptionsFlow(config_entries.OptionsFlow):
                 ),
             }
         )
+        if read_only:
+            schema = vol.Schema({key: value for key, value in schema.schema.items()
+                                 if key.schema not in (CONF_AUTO_SYNC_CLOCK, CONF_CLOCK_TOLERANCE)})
         return self.async_show_form(step_id="init", data_schema=schema)

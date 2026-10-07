@@ -18,8 +18,8 @@ The integration communicates directly over the LAN and does not depend on the ve
 - Water consumption, remaining treatment capacity and instantaneous flow entities with unit-aware F79D decoding.
 - Regeneration status, work pattern, maintenance reminders and diagnostics.
 - Read-only vacation status derived from the controller's field-49 flag and physical valve phase.
-- Safe controls for hardness, salt-addition bookkeeping, leak-protection thresholds, regeneration schedule and clock.
-- Forced regeneration with a mechanical-state confirmation window.
+- On models with explicit write permission, controls for hardness, salt-addition bookkeeping, leak-protection thresholds, regeneration schedule and clock.
+- On models with explicit write permission, forced regeneration with a mechanical-state confirmation window.
 - Administrator-only configuration and phase-advance services with range validation and fresh read-back.
 - Catalan, Spanish and English translations.
 - Transport-neutral, Home-Assistant-independent **Runxin/F79D protocol layer** separated from the BroadLink BL3372 transport.
@@ -35,14 +35,17 @@ Supported Home Assistant targets (BroadLink BL3372 module, devtype `0x520F`):
 
 | Product | Runxin controller model (field 1) | Support | Evidence |
 |---|---|---|---|
+| Unbranded device reported in issue #17 | 1 (F150 API name) | **Read-only Alpha** | All 52 fields received; app conversions/applicability pending; no writes or automatic clock correction |
 | ATH/BWT Ypsilon G6 | 9 (F79D) | Reference hardware | Per-field read/write evidence documented in the hardware verification guide |
 | Euro-Clear Midnight (ECOPRO+ head) | 12 | **Experimental / Alpha**, tested on Midnight 25 | Captured state matches the controller. Writes to fields 4, 6, 10 and 43 hardware-verified; fields 7 and 47 and mechanical field-34 actions remain available for testing but are not yet hardware-verified on this model |
 
-Alpha applies to model 12 compatibility, not to the existing G6 support or the entire release. The original model-12 controls and strict fresh read-back remain available; the label does not disable commands or imply that pending actions are verified. See the [model-12 evidence and follow-up checks](docs/hardware-verification.md#euro-clear-midnight--controller-model-12).
+Model 12 retains its existing Alpha compatibility and controls; model 1 has a separate, strictly read-only Alpha policy. This prerelease does not promote either model to stable support. The original model-12 controls and strict fresh read-back remain available; the label does not disable commands or imply that pending actions are verified. See the [model-12 evidence and follow-up checks](docs/hardware-verification.md#euro-clear-midnight--controller-model-12).
 
 Diagnostics include per-model support/evidence metadata and both raw field-26 resin bytes. The observed Midnight 25 value `FA 00` still displays as **25 L**. The second byte's meaning and resin values above 25.5 L are not established by that capture; no new byte order is assumed.
 
 Other rebranded devices using the same controller/module may work, but compatibility must be verified per model and firmware. Separating protocol and transport does **not** imply that every Runxin or non-BroadLink device is supported.
+
+For model 1, see the [read-only Alpha comparison guide](docs/model-1-alpha.md). All readings are provisional; resin and per-cycle quantity have no assumed units, and provisional numeric readings do not generate long-term statistics. The policy preserves G6/model-12 controls and conversions.
 
 ## Installation
 
@@ -156,7 +159,11 @@ The integration exposes administrator-only services:
 - `ypsilon_local.write_fields`
 - `ypsilon_local.advance_phase`
 
-`write_fields` only accepts known reversible configuration fields and applies range/unit validation. Field 49 vacation control is intentionally excluded from the Home Assistant write surface because it has not been physically confirmed on the tested current firmware.
+Both services reject read-only model entries. `write_fields` only accepts known reversible configuration fields and applies range/unit validation. Field 49 vacation control is intentionally excluded from the Home Assistant write surface because it has not been physically confirmed on the tested current firmware.
+
+## Model and protocol policy
+
+Controller identity, protocol profile, transport and commercial product are separate. Models that share a proven field map reuse the codec with per-model permissions/conversions; an unrelated Runxin family needs its own profile. Manufacturer enum names do not grant support. See the [architecture](docs/architecture.md), [support matrix](docs/model-support.md) and [multi-model audit](docs/multi-model-audit.md).
 
 ## Reusing the protocol work
 

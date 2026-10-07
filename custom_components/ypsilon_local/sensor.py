@@ -17,9 +17,9 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import StateType
 
-from .const import FLOW_RATE_SCALE_BY_UNIT, FLOW_RATE_SCALE_DEFAULT
+from .const import CONF_CONTROLLER_MODEL, FLOW_RATE_SCALE_BY_UNIT, FLOW_RATE_SCALE_DEFAULT
 from .entity import YpsilonEntity
-from .models import CONTROLLER_MODELS, resin_volume_litres
+from .models import CONTROLLER_MODELS, ControllerModel, controller_model, resin_volume_litres
 from .runxin.semantics import (
     BRINE_DRAW_MODE_KEYS,
     DEVICE_LANGUAGE_KEYS,
@@ -309,10 +309,50 @@ async def async_setup_entry(
 ) -> None:
     coordinator = entry.runtime_data
     async_add_entities(YpsilonSensor(coordinator, entry, desc) for desc in SENSORS)
+    model = controller_model((coordinator.data or {}).get("deviceModel"))
+    if model is not None and model.read_only:
+        async_add_entities(YpsilonSensor(coordinator, entry, desc) for desc in READ_ONLY_SETTINGS)
+
+
+# Read-only equivalents for settings normally shown by number/time controls.
+# New keys cannot collide with the legacy controls' registry identities.
+READ_ONLY_SETTINGS = (
+    YpsilonSensorDescription(key="reference_clock", translation_key="reference_clock",
+        field="currentTime", protocol_field="4", entity_category=EntityCategory.DIAGNOSTIC),
+    YpsilonSensorDescription(key="reference_schedule", translation_key="reference_schedule",
+        field="regeneratingTriggerTime", protocol_field="10", entity_category=EntityCategory.DIAGNOSTIC),
+    YpsilonSensorDescription(key="reference_salt", translation_key="reference_salt",
+        field="saltAddition", protocol_field="43", native_unit_of_measurement="kg",
+        entity_category=EntityCategory.DIAGNOSTIC),
+    YpsilonSensorDescription(key="reference_hardness", translation_key="reference_hardness",
+        field="rawWaterHardness", protocol_field="47", native_unit_of_measurement="mg/L",
+        entity_category=EntityCategory.DIAGNOSTIC),
+    YpsilonSensorDescription(key="reference_continuous_flow", translation_key="reference_continuous_flow",
+        field="continuousWaterTime", protocol_field="6", native_unit_of_measurement="min",
+        entity_category=EntityCategory.DIAGNOSTIC),
+    YpsilonSensorDescription(key="reference_flow_cutoff", translation_key="reference_flow_cutoff",
+        field="flowRateOff", protocol_field="7", entity_category=EntityCategory.DIAGNOSTIC),
+    YpsilonSensorDescription(key="reference_close_reason", translation_key="reference_close_reason",
+        field="systemCloseReason", protocol_field="12", entity_category=EntityCategory.DIAGNOSTIC),
+)
 
 
 class YpsilonSensor(YpsilonEntity, SensorEntity):
     entity_description: YpsilonSensorDescription
+
+    @property
+    def _model(self) -> ControllerModel | None:
+        configured = controller_model(getattr(self._entry, "data", {}).get(CONF_CONTROLLER_MODEL))
+        if configured is not None and configured.provisional_readings:
+            return configured
+        return controller_model((self.coordinator.data or {}).get("deviceModel"))
+
+    @property
+    def state_class(self) -> SensorStateClass | None:
+        # Provisional water conversions must not become long-term statistics.
+        if self._model is not None and self._model.provisional_readings:
+            return None
+        return self.entity_description.state_class
 
     def __init__(self, coordinator, entry, description) -> None:
         super().__init__(coordinator, entry)
@@ -352,6 +392,8 @@ class YpsilonSensor(YpsilonEntity, SensorEntity):
         if self._value_map is not None:
             return self._value_map.get(value, str(value))
         if self.entity_description.key == "resin_volume":
+            if self._model is not None and self._model.resin_volume_scale is None:
+                return value
             return resin_volume_litres(value, self.coordinator.data.get("deviceModel"))
 
         if self.entity_description.unit_kind == "flow":
@@ -366,6 +408,8 @@ class YpsilonSensor(YpsilonEntity, SensorEntity):
 
     @property
     def native_unit_of_measurement(self) -> str | None:
+        if self._model is not None and self.entity_description.field in self._model.unconfirmed_unit_fields:
+            return None
         if not self.coordinator.data or self.entity_description.unit_kind is None:
             return self.entity_description.native_unit_of_measurement
         unit_code = self.coordinator.data.get("waterVolumeUnit")
@@ -376,6 +420,25 @@ class YpsilonSensor(YpsilonEntity, SensorEntity):
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
         attributes: dict[str, Any] = {"origin": self.entity_description.source}
+        if self._model is not None and self._model.provisional_readings:
+            attributes.update(
+                interpretation="reference_f79d_pending_app_validation",
+                controller_model=self._model.code,
+                read_only=True,
+                reference_value=(self.coordinator.data or {}).get(self.entity_description.field),
+            )
+            raw = (self.coordinator.data or {}).get("_rawFieldBytes", {})
+            # Paired field IDs use an en dash in the description (e.g. 35–36).
+            ids = (self.entity_description.protocol_field or "").split("–")
+            pairs = {field: raw.get(int(field)) for field in ids if field.isdigit()}
+            if pairs:
+                attributes["raw_field_bytes"] = pairs
+            if self.entity_description.field in self._model.unconfirmed_unit_fields:
+                attributes["unit_confirmed"] = False
+            if self.entity_description.key == "reference_flow_cutoff":
+                attributes["reference_display_candidate"] = (
+                    self.native_value / 100 if self.native_value is not None else None
+                )
         if self.entity_description.protocol_field is not None:
             attributes["f79d_protocol_field"] = self.entity_description.protocol_field
         if self.coordinator.data and (

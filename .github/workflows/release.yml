@@ -93,7 +93,13 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.version.outputs.tag }}
-        run: gh release create "$TAG" "ypsilon_local-${TAG}.zip" --verify-tag --generate-notes --title "Runxin Local ${TAG}"
+        shell: bash
+        run: |
+          FLAGS=()
+          if [[ "$TAG" == *-* ]]; then
+            FLAGS+=(--prerelease --latest=false)
+          fi
+          gh release create "$TAG" "ypsilon_local-${TAG}.zip" --verify-tag --generate-notes --title "Runxin Local ${TAG}" "${FLAGS[@]}"
 
   tag-release:
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
@@ -132,4 +138,10 @@ jobs:
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" "ypsilon_local-${GITHUB_REF_NAME}.zip" --verify-tag --generate-notes --title "Runxin Local ${GITHUB_REF_NAME}"
+        shell: bash
+        run: |
+          FLAGS=()
+          if [[ "$GITHUB_REF_NAME" == *-* ]]; then
+            FLAGS+=(--prerelease --latest=false)
+          fi
+          gh release create "$GITHUB_REF_NAME" "ypsilon_local-${GITHUB_REF_NAME}.zip" --verify-tag --generate-notes --title "Runxin Local ${GITHUB_REF_NAME}" "${FLAGS[@]}"

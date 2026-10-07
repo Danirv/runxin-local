@@ -230,3 +230,14 @@ def test_short_real_broadlink_auth_response_is_transport_failure_not_rejection(m
     assert transport._device is None
     assert [call.args[0] for call in device.send_packet.call_args_list] == [0x65]
     assert transport.reauth_count == 0
+
+
+def test_rejected_authentication_releases_discovered_socket(monkeypatch):
+    device = Mock(devtype=0x520F, is_locked=True)
+    device.auth.side_effect = broadlink.exceptions.AuthenticationError(-1)
+    monkeypatch.setattr(transport_mod.broadlink, 'hello', Mock(return_value=device))
+    transport = transport_mod.BroadlinkBL3372Transport('192.0.2.1')
+    with pytest.raises(transport_mod.BroadlinkAuthenticationError):
+        transport._connect()
+    device.sock.close.assert_called_once()
+    assert transport._device is None

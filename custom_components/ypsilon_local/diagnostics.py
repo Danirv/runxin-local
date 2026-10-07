@@ -59,6 +59,12 @@ async def async_get_config_entry_diagnostics(
         return {"diagnostic_only": True, "compatibility_report": entry.runtime_data.report}
     coordinator = entry.runtime_data
     client = coordinator.client
+    state = dict(coordinator.data) if coordinator.data else None
+    if state and state.get("_lastPollError") is not None:
+        # Runtime error text can originate in a third-party library and contain
+        # an address or device repr. Export safe structured transport metadata
+        # instead of copying arbitrary exception text into an issue attachment.
+        state["_lastPollError"] = "Connection error; see connection.transport metadata"
 
     return {
         "entry": {
@@ -75,7 +81,7 @@ async def async_get_config_entry_diagnostics(
             "transport": client.connection_diagnostics,
         },
         "protocol": _semantic_protocol_summary(coordinator.data),
-        "state": async_redact_data(coordinator.data, TO_REDACT)
-        if coordinator.data
+        "state": async_redact_data(state, TO_REDACT)
+        if state
         else None,
     }

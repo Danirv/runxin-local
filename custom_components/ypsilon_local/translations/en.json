@@ -2,6 +2,7 @@
   "title": "Runxin Local",
   "config": {
     "step": {
+      "readonly_alpha": {"title": "Read-only Alpha", "description": "This controller has experimental read-only support. No settings, clock correction or mechanical commands will be sent. It polls once per minute by default. Readings use the reference F79D interpretation and still need comparison with your app; resin and per-cycle capacity have no confirmed units. No long-term statistics are created for these provisional readings. You can download diagnostics from the entry menu to share raw field bytes."},
       "user": {"title": "Connect a Runxin softener", "description": "Enter the BL3372 local IP address.", "data": {"host": "IP Address", "diagnostic_only": "Prepare a read-only diagnostic report only"}, "data_description": {"diagnostic_only": "Enable this to collect a one-time report without adding controls. Useful for unlisted models or connection problems."}},
       "discovery_confirm": {"title": "Runxin-compatible device discovered", "description": "A device was discovered at {host}. Do you want to configure it?"},
       "reconfigure": {"title": "Change IP address", "data": {"host": "Host"}},
@@ -42,6 +43,14 @@
   },
   "entity": {
     "sensor": {
+      "reference_clock": {"name": "Device clock · Reference"},
+      "reference_schedule": {"name": "Regeneration schedule · Reference"},
+      "reference_salt": {"name": "Added salt · Reference"},
+      "reference_hardness": {"name": "Hardness · Reference"},
+      "reference_continuous_flow": {"name": "Continuous-flow timeout · Reference"},
+      "reference_flow_cutoff": {"name": "Flow cutoff · Raw reference"},
+      "reference_close_reason": {"name": "Closure reason · Raw reference"},
+
       "flow_rate": {"name": "Flow rate"},
       "daily_water": {"name": "Daily consumption"},
       "residual_water": {"name": "Remaining treatment capacity"},
@@ -128,6 +137,7 @@
     }
   },
   "exceptions": {
+    "model_write_not_allowed": {"message": "This controller policy does not allow writes. Read-only Alpha support cannot change settings or start mechanical operations."},
     "regeneration_busy": {
       "message": "A regeneration request is already being processed. Wait for it to finish."
     },

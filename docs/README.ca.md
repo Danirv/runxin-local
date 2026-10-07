@@ -2,6 +2,8 @@
 
 Integració local per a descalcificadors compatibles amb **Runxin F79D + BroadLink BL3372**, amb el Ypsilon G6 com a maquinari de referència i suport experimental per al Euro-Clear Midnight.
 
+El **model 1 / F150** té una Alpha específica de només lectura: sensors periòdics, sense controls, escriptures ni correcció del rellotge. Les lectures són provisionals, sense estadístiques de llarg termini; la resina i la quantitat per cicle no tenen unitat assumida. [Guia](model-1-alpha.ca.md).
+
 ## Autodiagnòstic i canvi de nom: 2.8.0
 
 El projecte passa de Ypsilon a **Runxin Local**, amb repositori `Danirv/runxin-local`. Es conserven el domini, la carpeta, els serveis i els identificadors `ypsilon_local`; el canvi de nom no requereix tornar a afegir els dispositius ni modificar automatitzacions.
@@ -24,7 +26,7 @@ El botó de regeneració només inicia el cicle després que una lectura nova co
 
 El **Euro-Clear Midnight (controlador model 12)** té suport **experimental / Alpha**, provat amb un Midnight 25 amb capçal ECOPRO+ i BroadLink BL3372 (`0x520F`). Les captures concorden amb la pantalla del controlador; les escriptures dels camps 4, 6, 10 i 43 estan verificades físicament. Els camps 7 i 47 i les accions mecàniques del camp 34 continuen disponibles per fer proves, però encara no estan verificats en aquest model.
 
-Alpha afecta només la compatibilitat del model 12. Es conserven els controls i la verificació estricta del PR original; el suport del G6 no canvia. Els diagnòstics inclouen l'evidència per model i els dos bytes crus del camp 26. `FA 00` es continua mostrant com **25 L**; aquesta captura no determina el significat del segon byte ni el còdec de volums superiors a 25,5 L.
+El model 12 conserva el suport Alpha i els controls existents. Es conserven els controls i la verificació estricta del PR original; el suport del G6 no canvia. Els diagnòstics inclouen l'evidència per model i els dos bytes crus del camp 26. `FA 00` es continua mostrant com **25 L**; aquesta captura no determina el significat del segon byte ni el còdec de volums superiors a 25,5 L.
 
 Consulta les [proves pendents del model 12](hardware-verification.ca.md#euro-clear-midnight--model-de-controlador-12).
 

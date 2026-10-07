@@ -80,3 +80,11 @@ If rejection persists, maintainers may request a narrowly scoped discovery/auth
 capture and compare it with a working G6. Agree on collection and redaction first;
 do not post full PCAPs publicly because authentication captures can contain session
 material and identifiers. No configuration writes are needed to investigate this.
+
+## Reported app-pairing workaround (issue #17)
+
+One contributor using iOS Runxin/润新 2.0.0 reported an advertised lock and rejected local authentication. Fully pairing the same unit through Water Device 2.1.3, rather than simply opening it, replaced the previous app binding and changed the advertised lock to false; standard authentication then succeeded with the app closed. No controller factory reset or physical setting change was reported. Only one of the two apps could see/control the unit afterward.
+
+This is one documented result, not a rule for every app version or firmware. Re-pairing can replace the existing app binding; do not describe it as merely adding a second client. No cloud-issued key or automatic unlock command is implemented. There is no need to repeat this procedure or re-lock a working device for evidence.
+
+The resulting device reports controller code 1; successful authentication does not imply G6/model-9 identity. See [issue #17](https://github.com/Danirv/runxin-local/issues/17) and [read-only model-1 Alpha](model-1-alpha.md).

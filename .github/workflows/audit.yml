@@ -40,4 +40,4 @@ jobs:
       - name: Install Home Assistant test dependencies
         run: python -m pip install --disable-pip-version-check -r requirements-test-ha.txt
       - name: Test config flow, entities, controls and diagnostics
-        run: python -m pytest -q tests/test_homeassistant.py tests/test_control_guards.py
+        run: python -m pytest -q tests/test_homeassistant.py tests/test_control_guards.py tests/test_model1_homeassistant.py

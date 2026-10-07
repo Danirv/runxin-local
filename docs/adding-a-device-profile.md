@@ -4,6 +4,15 @@ Do not start by copying the F79D field table and renaming it. The old WaterDevic
 applications contain model-dependent behavior, so a second Runxin controller
 must be treated as a separate profile until captures prove what is shared.
 
+## Controller policy versus wire profile
+
+First check whether the new controller shares a demonstrated existing map. If it does, reuse the codec and add a `ControllerModel` entry with evidence, explicit `allowed_write_fields`, conversion uncertainty and applicable entities. The default write set is empty. A read-only Alpha can expose provisional readings before unit calibration, but must block clock correction, services and direct adapter writes and suppress provisional statistics. Do not inherit G6 write evidence.
+
+If bytes/enums/scales differ, add proven model-specific overrides and fixtures without changing G6/Midnight defaults. If the frame/map is different, add a separate profile and explicit selector; `protocol_profile` currently documents the shared path and is not a general codec factory. Tests must cover missing fields, unmapped values, permission bypasses, restarts and legacy identities.
+
+See [support policy](model-support.md) and [model 1](model-1-alpha.md).
+
+
 ## Suggested workflow
 
 1. Identify the controller/model and transport independently.
