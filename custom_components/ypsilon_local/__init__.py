@@ -27,6 +27,7 @@ PLATFORMS: list[Platform] = [
     Platform.SENSOR,
     Platform.TIME,
 ]
+READ_ONLY_PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR, Platform.SENSOR]
 
 type YpsilonConfigEntry = ConfigEntry[YpsilonDataUpdateCoordinator | DiagnosticReport]
 
@@ -217,7 +218,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: YpsilonConfigEntry) -> b
 
     _cleanup_legacy_entity_registry_entries(hass, entry)
     _enable_wash_start_sensor_if_integration_disabled(hass, entry)
-    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    coordinator.platforms = READ_ONLY_PLATFORMS if coordinator.read_only else PLATFORMS
+    await hass.config_entries.async_forward_entry_setups(entry, coordinator.platforms)
     entry.async_on_unload(entry.add_update_listener(_async_reload_entry))
     return True
 
@@ -226,7 +228,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: YpsilonConfigEntry) -> 
     """Unload a config entry, keeping the session and cache warm."""
     if entry.data.get(CONF_DIAGNOSTIC_ONLY):
         return True
-    return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    return await hass.config_entries.async_unload_platforms(entry, entry.runtime_data.platforms)
 
 
 async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:

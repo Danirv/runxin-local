@@ -4,6 +4,15 @@
 
 No comencis copiant la taula de camps F79D i canviant-li el nom. Les aplicacions antigues WaterDevice contenen comportament dependent del model, de manera que un segon controlador Runxin s'ha de tractar com un perfil independent fins que les captures demostrin què és realment compartit.
 
+## Política de controlador i perfil de protocol
+
+Si el mapa compartit està demostrat, reutilitza el còdec i afegeix una entrada `ControllerModel` amb evidència, permisos explícits, incertesa de conversions i entitats aplicables. `allowed_write_fields` és buit per defecte. Una Alpha de lectura pot mostrar referències provisionals, però ha de bloquejar rellotge, serveis i escriptures directes i desactivar les estadístiques provisionals.
+
+Les diferències demostrades necessiten overrides i fixtures per model, sense modificar els valors per defecte del G6/Midnight. Un mapa diferent requereix un perfil i selector explícits; `protocol_profile` encara no és una fàbrica genèrica. Cal provar absències, enums desconeguts, intents de saltar permisos, reinicis i identitats existents.
+
+Consulta la [política de suport](model-support.md) i el [model 1](model-1-alpha.ca.md).
+
+
 ## Flux de treball recomanat
 
 1. Identifica per separat el controlador/model i el transport.

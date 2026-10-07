@@ -80,3 +80,11 @@ Si persiste el rechazo, se puede acordar una captura limitada a descubrimiento y
 autenticación para compararla con un G6 funcional. Acuerda primero la recogida y
 anonimización: no publiques PCAPs completos, que pueden contener material de sesión
 e identificadores. Esta investigación no requiere escrituras de configuración.
+
+## Solución de emparejamiento reportada en la issue #17
+
+Un usuario con Runxin/润新 iOS 2.0.0 observó bloqueo anunciado y autenticación rechazada. El emparejamiento completo con Water Device 2.1.3 sustituyó el vínculo anterior: bloqueo false y autenticación correcta con la app cerrada. No reportó restablecimiento de fábrica del controlador ni cambios físicos. Después solo una app podía ver/controlar el equipo.
+
+Es un caso documentado, no una regla para todas las versiones. Reemparejar puede reemplazar el vínculo de la app anterior; no es añadir otro cliente. No implementamos claves cloud ni desbloqueo automático. No hace falta repetir el procedimiento en un dispositivo que funciona.
+
+El controlador resultante devuelve código 1; autenticar no confirma identidad G6/modelo 9. [Issue #17](https://github.com/Danirv/runxin-local/issues/17) y [Alpha de lectura](model-1-alpha.es.md).

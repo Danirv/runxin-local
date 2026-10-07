@@ -193,26 +193,37 @@ class BroadlinkBL3372Transport(RunxinTransport):
             "BroadLink discovery succeeded (devtype=0x%04x, advertised_lock=%s)",
             self._devtype, self._is_locked,
         )
-        if (
-            self.expected_devtype is not None
-            and int(device.devtype) != self.expected_devtype
-        ):
-            raise RunxinTransportError(
-                f"Unexpected devtype 0x{int(device.devtype):04x}"
-            )
-        device.timeout = self.timeout
-        self._stage = "authentication"
         try:
-            authenticated = device.auth()
-        except broadlink.exceptions.AuthenticationError as err:
-            raise BroadlinkAuthenticationError(err.errno, self._is_locked) from err
-        except ValueError as err:
-            # broadlink 0.19.0 can pass a short decrypted auth payload to AES
-            # and raise ValueError for its key length. This is a malformed
-            # response, not a proven rejection or a reason to unlock/retry.
-            raise RunxinTransportError("Invalid BroadLink authentication response") from err
-        if authenticated is False:
-            raise BroadlinkAuthenticationError(None, self._is_locked)
+            if (
+                self.expected_devtype is not None
+                and int(device.devtype) != self.expected_devtype
+            ):
+                raise RunxinTransportError(
+                    f"Unexpected devtype 0x{int(device.devtype):04x}"
+                )
+            device.timeout = self.timeout
+            self._stage = "authentication"
+            try:
+                authenticated = device.auth()
+            except broadlink.exceptions.AuthenticationError as err:
+                raise BroadlinkAuthenticationError(err.errno, self._is_locked) from err
+            except ValueError as err:
+                # broadlink 0.19.0 can pass a short decrypted auth payload to AES
+                # and raise ValueError for its key length. This is a malformed
+                # response, not a proven rejection or a reason to unlock/retry.
+                raise RunxinTransportError("Invalid BroadLink authentication response") from err
+            if authenticated is False:
+                raise BroadlinkAuthenticationError(None, self._is_locked)
+        except Exception:
+            # Discovery created a socket but authentication did not establish
+            # a reusable session. Release it before propagating the same error.
+            sock = getattr(device, "sock", None)
+            if sock is not None:
+                try:
+                    sock.close()
+                except OSError:
+                    pass
+            raise
         self._device = device
         _LOGGER.debug("BroadLink local authentication succeeded")
 

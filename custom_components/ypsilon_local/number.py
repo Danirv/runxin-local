@@ -14,6 +14,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from .api import YpsilonConnectionError
 from .const import DOMAIN
 from .entity import YpsilonEntity
+from .models import controller_model
 
 SUPPORTED_FLOW_UNIT_CODE = 2
 
@@ -57,7 +58,12 @@ async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     coordinator = entry.runtime_data
-    async_add_entities(YpsilonNumber(coordinator, entry, desc) for desc in NUMBERS)
+    if coordinator.read_only:
+        return
+    model = controller_model((coordinator.data or {}).get("deviceModel"))
+    allowed = model.allowed_write_fields if model is not None else frozenset()
+    async_add_entities(YpsilonNumber(coordinator, entry, desc) for desc in NUMBERS
+                       if desc.field_id in allowed)
 
 
 class YpsilonNumber(YpsilonEntity, NumberEntity):

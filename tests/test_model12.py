@@ -56,7 +56,7 @@ def test_real_state_frame_decodes_with_the_f79d_map() -> None:
 
 
 def test_supported_models() -> None:
-    assert models.SUPPORTED_DEVICE_MODELS == frozenset({9, 12})
+    assert models.SUPPORTED_DEVICE_MODELS == frozenset({1, 9, 12})
     assert models.is_supported_model(9)
     assert models.is_supported_model(12)
     assert not models.is_supported_model(10)

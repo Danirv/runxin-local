@@ -2,6 +2,7 @@
   "title": "Runxin Local",
   "config": {
     "step": {
+      "readonly_alpha": {"title": "Alpha de solo lectura", "description": "Este controlador tiene soporte experimental de solo lectura. No se enviarán ajustes, correcciones del reloj ni órdenes mecánicas. Por defecto se lee una vez por minuto. Las lecturas usan la interpretación F79D de referencia y deben contrastarse con la app; la resina y la capacidad por ciclo no tienen unidades confirmadas. Estas lecturas provisionales no generan estadísticas a largo plazo. Puedes descargar el diagnóstico desde el menú de la entrada para compartir los bytes de los campos."},
       "user": {"title": "Conecta un descalcificador Runxin", "description": "Introduce la dirección IP local del BL3372.", "data": {"host": "Dirección IP", "diagnostic_only": "Preparar solo un informe de diagnóstico de lectura"}, "data_description": {"diagnostic_only": "Actívalo para recoger un informe puntual sin añadir controles. Útil para modelos no admitidos o problemas de conexión."}},
       "discovery_confirm": {"title": "Dispositivo compatible con Runxin descubierto", "description": "Se ha detectado un dispositivo en {host}. ¿Quieres configurarlo?"},
       "reconfigure": {"title": "Cambiar dirección IP", "data": {"host": "Host"}},
@@ -42,6 +43,14 @@
   },
   "entity": {
     "sensor": {
+      "reference_clock": {"name": "Reloj del dispositivo · Referencia"},
+      "reference_schedule": {"name": "Horario de regeneración · Referencia"},
+      "reference_salt": {"name": "Sal añadida · Referencia"},
+      "reference_hardness": {"name": "Dureza · Referencia"},
+      "reference_continuous_flow": {"name": "Tiempo de caudal continuo · Referencia"},
+      "reference_flow_cutoff": {"name": "Corte por caudal · Referencia bruta"},
+      "reference_close_reason": {"name": "Motivo de cierre · Referencia bruta"},
+
       "flow_rate": {"name": "Caudal"},
       "daily_water": {"name": "Consumo diario"},
       "residual_water": {"name": "Capacidad de tratamiento restante"},
@@ -128,6 +137,7 @@
     }
   },
   "exceptions": {
+    "model_write_not_allowed": {"message": "La política de este controlador no permite escrituras. El soporte Alpha de solo lectura no puede cambiar ajustes ni iniciar operaciones mecánicas."},
     "regeneration_busy": {
       "message": "Ya se está procesando una petición de regeneración. Espera a que termine."
     },

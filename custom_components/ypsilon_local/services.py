@@ -62,6 +62,10 @@ def _coordinator(hass: HomeAssistant, entry_id: str):
             translation_domain=DOMAIN,
             translation_key="diagnostic_read_only",
         )
+    if entry.runtime_data.read_only:
+        raise ServiceValidationError(
+            translation_domain=DOMAIN, translation_key="model_write_not_allowed",
+        )
     return entry.runtime_data
 
 

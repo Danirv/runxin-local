@@ -2,6 +2,8 @@
 
 Integración local para descalcificadores compatibles con **Runxin F79D + BroadLink BL3372**, con el Ypsilon G6 como hardware de referencia y soporte experimental para Euro-Clear Midnight.
 
+El **modelo 1 / F150** tiene una Alpha específica de solo lectura: sensores periódicos, sin controles, escrituras ni corrección del reloj. Las lecturas son provisionales, sin estadísticas a largo plazo; la resina y la cantidad por ciclo no tienen unidad asumida. [Guia](model-1-alpha.es.md).
+
 ## Autodiagnóstico y cambio de nombre: 2.8.0
 
 El proyecto pasa de Ypsilon a **Runxin Local**, con repositorio `Danirv/runxin-local`. Se conservan el dominio, la carpeta, los servicios y los identificadores `ypsilon_local`; el cambio de nombre no requiere volver a añadir dispositivos ni modificar automatizaciones.
@@ -24,7 +26,7 @@ El botón de regeneración solo inicia el ciclo tras una lectura nueva que confi
 
 El **Euro-Clear Midnight (controlador modelo 12)** tiene soporte **experimental / Alpha**, probado con un Midnight 25 con cabezal ECOPRO+ y BroadLink BL3372 (`0x520F`). Las capturas coinciden con la pantalla del controlador; las escrituras de los campos 4, 6, 10 y 43 están verificadas físicamente. Los campos 7 y 47 y las acciones mecánicas del campo 34 siguen disponibles para pruebas, pero todavía no están verificados en este modelo.
 
-Alpha afecta únicamente a la compatibilidad del modelo 12. Se conservan los controles y la verificación estricta del PR original; el soporte del G6 no cambia. Los diagnósticos incluyen la evidencia por modelo y los dos bytes originales del campo 26. `FA 00` sigue mostrándose como **25 L**; esta captura no determina el significado del segundo byte ni el códec de volúmenes superiores a 25,5 L.
+El modelo 12 conserva el soporte Alpha y los controles existentes. Se conservan los controles y la verificación estricta del PR original; el soporte del G6 no cambia. Los diagnósticos incluyen la evidencia por modelo y los dos bytes originales del campo 26. `FA 00` sigue mostrándose como **25 L**; esta captura no determina el significado del segundo byte ni el códec de volúmenes superiores a 25,5 L.
 
 Consulta las [pruebas pendientes del modelo 12](hardware-verification.es.md#euro-clear-midnight--modelo-de-controlador-12).
 

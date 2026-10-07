@@ -16,6 +16,7 @@ from .api import YpsilonConnectionError
 from .const import DOMAIN
 from .coordinator import YpsilonDataUpdateCoordinator
 from .entity import YpsilonEntity
+from .models import controller_model
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -55,7 +56,12 @@ async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     coordinator = entry.runtime_data
-    async_add_entities(YpsilonTime(coordinator, entry, desc) for desc in TIMES)
+    if coordinator.read_only:
+        return
+    model = controller_model((coordinator.data or {}).get("deviceModel"))
+    allowed = model.allowed_write_fields if model is not None else frozenset()
+    async_add_entities(YpsilonTime(coordinator, entry, desc) for desc in TIMES
+                       if desc.field_id in allowed)
 
 
 class YpsilonTime(YpsilonEntity, TimeEntity):

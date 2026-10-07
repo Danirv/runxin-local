@@ -127,7 +127,7 @@ def architecture_checks() -> list[str]:
     for rel in required:
         if not (HERE / rel).exists():
             errors.append(f"missing architecture module: {rel}")
-    for path in (HERE / "runxin").glob("*.py"):
+    for path in (HERE / "runxin").rglob("*.py"):
         text = path.read_text()
         imports: set[str] = set()
         for node in ast.walk(ast.parse(text)):

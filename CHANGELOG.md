@@ -2,6 +2,15 @@
 
 All notable changes to this project are documented here.
 
+## [2.9.0-alpha.1] - 2026-10-07
+
+- Add controller model 1 (F150 API name) as read-only Alpha, based on issue #17's published 52-field report; app conversions remain provisional.
+- Add explicit per-model write permissions, defaulting to no writes. Enforce read-only policy in setup, coordinator, services and composition adapter, including automatic clock correction. Preserve G6/model-12 control fields and conversions.
+- Add read-only equivalents for normally writable settings, raw field-pair diagnostics, unscaled resin/per-cycle readings without assumed units and no provisional long-term statistics.
+- Add English/Catalan/Spanish pilot guides and multi-model architecture/policy documentation; document issue #17's app-pairing workaround as one reported case.
+- Close discovery sockets on failed authentication, reject too-short inner frames as protocol errors and require matching query/write response opcodes.
+- Mark hyphenated release versions as prereleases without replacing stable latest. The ypsilon_local domain and existing identities stay unchanged; PR #24 migration remains separate.
+
 ## [2.8.0] - 2026-10-07
 
 - Rename the public project and visible integration to **Runxin Local**, with repository `Danirv/runxin-local`. Keep the `ypsilon_local` domain, folder, services and existing unique IDs.
