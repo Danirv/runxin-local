@@ -3,7 +3,8 @@
 from datetime import timedelta
 from typing import Final
 
-DOMAIN: Final = "ypsilon_local"
+DOMAIN: Final = "runxin_local"
+LEGACY_DOMAIN: Final = "ypsilon_local"
 CONF_DIAGNOSTIC_ONLY: Final = "diagnostic_only"
 CONF_DIAGNOSTIC_REPORT_ID: Final = "diagnostic_report_id"
 REPOSITORY_URL: Final = "https://github.com/Danirv/runxin-local"

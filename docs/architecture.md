@@ -100,7 +100,7 @@ device profile or project starts consuming the protocol layer, `runxin/` can
 later become a separately versioned package with minimal churn.
 
 Do not make another Home Assistant custom integration depend at runtime on an
-installed `custom_components.ypsilon_local`. Contribute a transport/profile
+installed `custom_components.runxin_local`. Contribute a transport/profile
 here, vendor the pure source where the license permits, or wait for a future
 standalone package.
 
@@ -116,7 +116,7 @@ controllers by assumption.
 
 The 2.4.x architecture keeps:
 
-- domain `ypsilon_local`;
+- domain `runxin_local`;
 - config-entry version 2;
 - MAC-based unique ids;
 - existing entity unique ids and translation keys;

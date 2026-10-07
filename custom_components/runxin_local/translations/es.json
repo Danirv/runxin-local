@@ -16,6 +16,7 @@
       "unsupported_device": "Modelo de controlador no compatible."
     },
     "abort": {
+      "domain_migration_required": "La configuración existente de Ypsilon necesita primero la migración de dominio. No elimines ni vuelvas a añadir el dispositivo. Sigue la guía de migración del repositorio.",
       "invalid_auth": "El dispositivo ha respondido pero ha rechazado la autenticación local. Consulta la guía de resolución de problemas de conexión y los registros de depuración.",
       "device_locked": "El dispositivo ha rechazado la autenticación local y ha anunciado un bloqueo del control local. Comprueba si la app del fabricante ofrece alguna opción de bloqueo o control local; consulta la guía antes de restablecerlo.",
       "already_configured": "Este dispositivo ya está configurado.",

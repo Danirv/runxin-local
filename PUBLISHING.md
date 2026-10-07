@@ -1,5 +1,7 @@
 # Publishing Runxin Local on GitHub and HACS
 
+**Experimental domain-migration branch.** Version 3.0.0-alpha.1 must remain a prerelease and must not replace the stable latest release. The workflow marks hyphenated versions as prereleases; this does not authorize publication before pilot review.
+
 The source tree is prepared for the public `Danirv/runxin-local` repository and HACS distribution.
 
 ## 1. Repository metadata
@@ -17,14 +19,14 @@ python scripts/publication_check.py
 python scripts/audit.py
 python scripts/field_surface_audit.py
 python -m pytest -q
-python -m compileall -q custom_components/ypsilon_local scripts tests
+python -m compileall -q custom_components/runxin_local scripts tests
 ```
 
 ### Repository rename
 
 Rename `Danirv/ypsilon-local` to `Danirv/runxin-local` in GitHub repository Settings. Keep the old name unused so GitHub's existing redirects remain valid. Update local Git remotes to the new URL. Issues, PRs, stars and release history remain attached to the same repository; do not create a replacement repository or duplicate HACS installation.
 
-The visible manifest/HACS name changes, while `custom_components/ypsilon_local`, domain/service names, unique IDs and the release ZIP's integration folder remain unchanged. Existing HA entries should be retained. Check a normal HACS update and the GitHub redirect after renaming; if an older HACS version still shows the old repository name, refresh its metadata before considering any reinstall.
+The repository rename was completed in 2.8.0 without changing the `ypsilon_local` domain. This experimental 3.0.0-alpha.1 branch separately migrates that domain to `runxin_local`. Do not publish it as stable or recommend a normal HACS update until the offline pilot and the HACS metadata/update path have been validated. See [domain migration](docs/domain-migration.md).
 
 ## 2. Repository requirements
 
@@ -47,7 +49,7 @@ The preferred release path does not require a local Git clone:
 5. Select **Run workflow** and make sure the branch selector is `main`.
 6. Run the workflow.
 
-The web workflow reads the version directly from `custom_components/ypsilon_local/manifest.json`, runs the full publication/audit/field-surface/unit-test/compile checks, refuses an existing GitHub Release, creates or recovers the matching annotated `v<manifest version>` tag, checks out that exact tag, validates the tagged source again, builds the manual-install ZIP and creates the GitHub Release.
+The web workflow reads the version directly from `custom_components/runxin_local/manifest.json`, runs the full publication/audit/field-surface/unit-test/compile checks, refuses an existing GitHub Release, creates or recovers the matching annotated `v<manifest version>` tag, checks out that exact tag, validates the tagged source again, builds the manual-install ZIP and creates the GitHub Release.
 
 A tag pushed manually is handled by the tag-triggered job, which performs the same validation before creating the release. A tag created by the workflow's own `GITHUB_TOKEN` does not need a second workflow run; the web-release job completes the release itself after validating the tagged source.
 
@@ -56,7 +58,7 @@ A tag pushed manually is handled by the tag-triggered job, which performs the sa
 If a local clone is available, the same release can still be started by tagging the exact manifest version:
 
 ```bash
-VERSION="$(python -c 'import json; print(json.load(open("custom_components/ypsilon_local/manifest.json"))["version"])')"
+VERSION="$(python -c 'import json; print(json.load(open("custom_components/runxin_local/manifest.json"))["version"])')"
 git tag -a "v${VERSION}" -m "Runxin Local ${VERSION}"
 git push origin "v${VERSION}"
 ```

@@ -9,7 +9,7 @@ import sys
 import types
 
 ROOT = Path(__file__).resolve().parents[1]
-HERE = ROOT / "custom_components" / "ypsilon_local"
+HERE = ROOT / "custom_components" / "runxin_local"
 PKG = "_ypsilon_recovered_settings_test"
 
 

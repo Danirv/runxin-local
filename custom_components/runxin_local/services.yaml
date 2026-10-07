@@ -4,7 +4,7 @@ write_fields:
       required: true
       selector:
         config_entry:
-          integration: ypsilon_local
+          integration: runxin_local
     fields:
       required: true
       example: '{43: 50, 47: 400}'
@@ -17,7 +17,7 @@ advance_phase:
       required: true
       selector:
         config_entry:
-          integration: ypsilon_local
+          integration: runxin_local
     phase:
       required: true
       selector:

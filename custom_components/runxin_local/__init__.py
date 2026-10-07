@@ -13,7 +13,7 @@ from homeassistant.helpers import device_registry as dr, entity_registry as er
 from homeassistant.helpers.device_registry import format_mac
 
 from .api import YpsilonLocalClient
-from .const import DOMAIN, CONF_DIAGNOSTIC_ONLY, CONF_DIAGNOSTIC_REPORT_ID
+from .const import DOMAIN, LEGACY_DOMAIN, CONF_DIAGNOSTIC_ONLY, CONF_DIAGNOSTIC_REPORT_ID
 from .diagnostic_report import DiagnosticReport, report_store
 from .coordinator import YpsilonDataUpdateCoordinator
 from .services import async_setup_services
@@ -41,6 +41,12 @@ class YpsilonStore:
 
 async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
     """Set up integration-wide services independently of config entries."""
+    if hass.config_entries.async_entries(LEGACY_DOMAIN):
+        _LOGGER.error(
+            "Legacy ypsilon_local entries remain. Complete the documented offline "
+            "domain migration before starting this experimental build"
+        )
+        return False
     async_setup_services(hass)
     return True
 

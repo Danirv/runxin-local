@@ -1,6 +1,6 @@
 """Compatibility facade for the pre-v2.4 single-file F79D codec.
 
-New code should import from `ypsilon_local.runxin` / `ypsilon_local.runxin.f79d`.
+New code should import from `runxin_local.runxin` / `runxin_local.runxin.f79d`.
 The reusable implementation there has no BroadLink or Home Assistant imports.
 This module intentionally keeps the old symbol names so upgrades do not break
 internal callers or third-party research scripts that imported `protocol.py`.

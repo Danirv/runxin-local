@@ -2,7 +2,9 @@
 
 Local Home Assistant integration for water softeners with compatible **Runxin controllers** and a **BroadLink BL3372** Wi-Fi module. Tested hardware includes **ATH/BWT Ypsilon G6 (F79D, model 9)** and **Euro-Clear Midnight 25 (model 12; named F105 in the manufacturer's API)**.
 
-Previously **Ypsilon / ypsilon-local**. The project and visible integration are now **Runxin Local**. The Home Assistant domain, installation folder, service names and existing unique IDs remain `ypsilon_local`; existing installations do not need to remove/re-add their devices or edit their automations because of the name change. GitHub redirects the previous repository URL after the rename; use the new URL for new installations.
+**Experimental 3.0.0-alpha.1:** the installation folder and Home Assistant domain are now `runxin_local`. Existing `ypsilon_local` installations must complete the [offline domain migration](docs/domain-migration.md) before starting this build. Do not remove/re-add devices or install both domains. This pilot is not a normal HACS update. Version 2.8.x remains the stable domain until the pilot is validated.
+
+The migration preserves existing config-entry/device/entity IDs and configuration; old `ypsilon_local.write_fields` and `ypsilon_local.advance_phase` calls remain aliases. Public project name: **Runxin Local**, repository `Danirv/runxin-local`.
 
 **Other controller?** Version 2.8.0 adds a local **read-only compatibility report inside Home Assistant**. You do not need a Python environment or a modified model registry. See [collecting a compatibility report](docs/compatibility-report.md). Recognising a controller's name does not automatically enable its controls.
 
@@ -25,7 +27,7 @@ The integration communicates directly over the LAN and does not depend on the ve
 - Transport-neutral, Home-Assistant-independent **Runxin/F79D protocol layer** separated from the BroadLink BL3372 transport.
 - Declarative 52-field F79D catalogue with conservative evidence/provenance metadata.
 - Offline protocol, entity, translation, branding and architecture regression checks in `scripts/audit.py`.
-- Proper square icon and landscape logo assets under `custom_components/ypsilon_local/brand/`.
+- Proper square icon and landscape logo assets under `custom_components/runxin_local/brand/`.
 
 The regeneration button starts only after a fresh reading confirms service state with vacation off, and rejects overlapping requests. It sends the same single command and verifies the resulting phase. Unmapped enum values appear as decimal codes with `raw_code`; known labels are preserved and absent readings remain `unknown`. Clock confirmation allows one ticking minute within 60 seconds of the write, including midnight, only when a fresh pre-write reading proves the next-minute value changed; regeneration schedules still require exact confirmation.
 
@@ -46,6 +48,8 @@ Other rebranded devices using the same controller/module may work, but compatibi
 
 ## Installation
 
+For an existing installation, follow the [domain migration guide](docs/domain-migration.md) instead of the fresh-install steps below.
+
 ### HACS
 
 Until the repository is accepted into the HACS default catalog, add it as a custom repository:
@@ -59,7 +63,7 @@ The repository has been submitted to the HACS default-catalog review queue as `h
 
 ### Manual
 
-Copy `custom_components/ypsilon_local` into `/config/custom_components/ypsilon_local` and restart Home Assistant.
+Copy `custom_components/runxin_local` into `/config/custom_components/runxin_local` and restart Home Assistant.
 
 ## Entity model
 
@@ -153,8 +157,8 @@ This software can change water-softener settings and start mechanical operations
 
 The integration exposes administrator-only services:
 
-- `ypsilon_local.write_fields`
-- `ypsilon_local.advance_phase`
+- `runxin_local.write_fields`
+- `runxin_local.advance_phase`
 
 `write_fields` only accepts known reversible configuration fields and applies range/unit validation. Field 49 vacation control is intentionally excluded from the Home Assistant write surface because it has not been physically confirmed on the tested current firmware.
 
@@ -165,7 +169,7 @@ Home Assistant -> Ypsilon policy -> F79D client/codec -> raw Runxin frame
                                                      -> transport -> device
 ```
 
-`custom_components/ypsilon_local/runxin/` contains no Home Assistant or BroadLink imports. `transport/broadlink_bl3372.py` owns the BroadLink-specific envelope/session logic.
+`custom_components/runxin_local/runxin/` contains no Home Assistant or BroadLink imports. `transport/broadlink_bl3372.py` owns the BroadLink-specific envelope/session logic.
 
 Connection setup fails? See the [connection troubleshooting guide](docs/troubleshooting.md), including rejected authentication and a standalone sanitized probe.
 

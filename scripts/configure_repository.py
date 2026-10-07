@@ -22,7 +22,7 @@ def main() -> int:
     if not user or any(ch.isspace() for ch in user):
         parser.error("invalid GitHub username")
 
-    manifest_path = ROOT / "custom_components" / "ypsilon_local" / "manifest.json"
+    manifest_path = ROOT / "custom_components" / "runxin_local" / "manifest.json"
     manifest = json.loads(manifest_path.read_text())
     manifest["codeowners"] = [f"@{user}"]
     manifest["documentation"] = f"https://github.com/{user}/{args.repo}"

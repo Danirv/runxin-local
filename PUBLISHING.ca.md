@@ -1,6 +1,8 @@
 [English](PUBLISHING.md) | [Español](PUBLISHING.es.md) | [Català](PUBLISHING.ca.md)
 
-# Publicar Ypsilon a GitHub i HACS
+# Publicar Runxin Local a GitHub i HACS
+
+**Branca experimental de migració de domini (3.0.0-alpha.1).** No la publiquis com a estable ni recomanis una actualització normal de HACS fins que validem el pilot i el camí d’actualització de HACS. Consulta la [guia de migració](docs/domain-migration.ca.md). Les versions amb guió es publiquen com a prerelease i no substitueixen la release estable latest.
 
 L'arbre de codi està preparat per al repositori públic `Danirv/runxin-local` i la seva distribució mitjançant HACS.
 
@@ -19,7 +21,7 @@ python scripts/publication_check.py
 python scripts/audit.py
 python scripts/field_surface_audit.py
 python -m pytest -q
-python -m compileall -q custom_components/ypsilon_local scripts tests
+python -m compileall -q custom_components/runxin_local scripts tests
 ```
 
 ## 2. Requisits del repositori
@@ -37,15 +39,15 @@ El repositori inclou validació HACS, hassfest, auditoria offline de protocol/ar
 5. Prem **Run workflow** i comprova que la branca sigui `main`.
 6. Executa el workflow.
 
-El workflow web llegeix la versió de `custom_components/ypsilon_local/manifest.json`, executa publication check, auditoria, field-surface audit, tests i compilació, rebutja una GitHub Release existent, crea o recupera el tag anotat `v<versió>`, fa checkout exactament d'aquell tag, torna a validar el codi etiquetat, construeix el ZIP i crea la GitHub Release.
+El workflow web llegeix la versió de `custom_components/runxin_local/manifest.json`, executa publication check, auditoria, field-surface audit, tests i compilació, rebutja una GitHub Release existent, crea o recupera el tag anotat `v<versió>`, fa checkout exactament d'aquell tag, torna a validar el codi etiquetat, construeix el ZIP i crea la GitHub Release.
 
 Un tag pujat manualment activa el job de tags, que aplica la mateixa validació. Un tag creat pel mateix workflow amb `GITHUB_TOKEN` no necessita un segon workflow: el job web finalitza la release després de validar el tag.
 
 ### Alternativa amb Git
 
 ```bash
-VERSION="$(python -c 'import json; print(json.load(open("custom_components/ypsilon_local/manifest.json"))["version"])')"
-git tag -a "v${VERSION}" -m "Ypsilon ${VERSION}"
+VERSION="$(python -c 'import json; print(json.load(open("custom_components/runxin_local/manifest.json"))["version"])')"
+git tag -a "v${VERSION}" -m "Runxin Local ${VERSION}"
 git push origin "v${VERSION}"
 ```
 

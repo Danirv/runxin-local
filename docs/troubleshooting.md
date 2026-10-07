@@ -21,7 +21,7 @@ to `configuration.yaml` and restart Home Assistant:
 logger:
   default: warning
   logs:
-    custom_components.ypsilon_local: debug
+    custom_components.runxin_local: debug
 ```
 
 Merge this into an existing `logger:` section rather than adding a second one.

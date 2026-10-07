@@ -21,7 +21,7 @@ menú de la integració o afegeix això a `configuration.yaml` i reinicia HA:
 logger:
   default: warning
   logs:
-    custom_components.ypsilon_local: debug
+    custom_components.runxin_local: debug
 ```
 
 Si ja tens una secció `logger:`, integra-hi aquesta opció sense duplicar-la.

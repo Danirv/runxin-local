@@ -24,7 +24,7 @@ Coordinator = coordinator_mod.YpsilonDataUpdateCoordinator
 
 def _coordinator(hass, model=9):
     entry = config_entries.ConfigEntry(
-        domain="ypsilon_local", unique_id="02:00:00:00:00:09", title="Test softener",
+        domain="runxin_local", unique_id="02:00:00:00:00:09", title="Test softener",
         data={}, options={"auto_sync_clock": False}, source=config_entries.SOURCE_USER,
         version=2, minor_version=1, discovery_keys=MappingProxyType({}), subentries_data=[],
     )

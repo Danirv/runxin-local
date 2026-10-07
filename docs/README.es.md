@@ -2,9 +2,11 @@
 
 Integración local para descalcificadores compatibles con **Runxin F79D + BroadLink BL3372**, con el Ypsilon G6 como hardware de referencia y soporte experimental para Euro-Clear Midnight.
 
-## Autodiagnóstico y cambio de nombre: 2.8.0
+## Migración experimental de dominio: 3.0.0-alpha.1
 
-El proyecto pasa de Ypsilon a **Runxin Local**, con repositorio `Danirv/runxin-local`. Se conservan el dominio, la carpeta, los servicios y los identificadores `ypsilon_local`; el cambio de nombre no requiere volver a añadir dispositivos ni modificar automatizaciones.
+Esta rama pasa de `ypsilon_local` a `runxin_local`. **No es una actualización normal de HACS.** Para una instalación existente, sigue primero la [guía de migración con Home Assistant detenido](domain-migration.md). No elimines ni vuelvas a añadir dispositivos. Se conservan los IDs de configuración, dispositivos y entidades; los servicios anteriores siguen como alias. La versión 2.8.x mantiene el dominio anterior hasta validar la prueba.
+
+Se mantiene el autodiagnóstico incorporado en la 2.8.0.
 
 Si un controlador no está admitido o falla el alta, puedes preparar un **informe de lectura desde Home Assistant**, sin instalar Python ni editar modelos. Confirma la exploración, guarda la entrada de diagnóstico y descarga los diagnósticos desde su menú. La entrada no activa entidades, controles, consultas periódicas ni correcciones del reloj. Los informes parciales son útiles y no se comparten automáticamente. Hay que eliminar esta entrada antes de añadir el dispositivo normalmente cuando tenga soporte.
 
@@ -51,7 +53,7 @@ Versiones anteriores crearon estadísticas de largo plazo para el consumo medio 
 
 ## Instalación
 
-Con HACS, añade `https://github.com/Danirv/runxin-local` como repositorio personalizado de tipo **Integration** hasta que quede incorporado al catálogo por defecto. Manualmente, copia `custom_components/ypsilon_local` a `/config/custom_components/ypsilon_local`.
+Con HACS, añade `https://github.com/Danirv/runxin-local` como repositorio personalizado de tipo **Integration** hasta que quede incorporado al catálogo por defecto. Manualmente, copia `custom_components/runxin_local` a `/config/custom_components/runxin_local`.
 
 ## Consumo de agua
 

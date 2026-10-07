@@ -8,7 +8,7 @@ import sys
 import types
 
 ROOT = Path(__file__).resolve().parents[1]
-INTEGRATION = ROOT / "custom_components" / "ypsilon_local"
+INTEGRATION = ROOT / "custom_components" / "runxin_local"
 TEST_PKG = "_ypsilon_testpkg"
 
 

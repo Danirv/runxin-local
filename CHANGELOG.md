@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented here.
 
+## [3.0.0-alpha.1] - 2026-10-07
+
+Experimental domain migration to `runxin_local`. Existing installations must use
+an explicit offline migration before starting this build; this is not a normal
+HACS update. The pilot preserves entry/device/entity IDs, configuration and
+preferences, and keeps legacy service aliases. See `docs/domain-migration.md`.
+No protocol, supported models, scaling or controller command behavior changed.
+Do not publish as a stable release until the migration has been tested on a real
+Home Assistant installation.
+
 ## [2.8.0] - 2026-10-07
 
 - Rename the public project and visible integration to **Runxin Local**, with repository `Danirv/runxin-local`. Keep the `ypsilon_local` domain, folder, services and existing unique IDs.

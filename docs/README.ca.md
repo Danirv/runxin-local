@@ -2,9 +2,11 @@
 
 Integració local per a descalcificadors compatibles amb **Runxin F79D + BroadLink BL3372**, amb el Ypsilon G6 com a maquinari de referència i suport experimental per al Euro-Clear Midnight.
 
-## Autodiagnòstic i canvi de nom: 2.8.0
+## Migració experimental de domini: 3.0.0-alpha.1
 
-El projecte passa de Ypsilon a **Runxin Local**, amb repositori `Danirv/runxin-local`. Es conserven el domini, la carpeta, els serveis i els identificadors `ypsilon_local`; el canvi de nom no requereix tornar a afegir els dispositius ni modificar automatitzacions.
+Aquesta branca passa de `ypsilon_local` a `runxin_local`. **No és una actualització ordinària de HACS.** Per a una instal·lació existent, segueix primer la [guia de migració amb Home Assistant aturat](domain-migration.md). No eliminis ni tornis a afegir els dispositius. Es conserven els IDs de configuració, dispositius i entitats; els serveis antics continuen com a àlies. La versió 2.8.x manté el domini anterior fins que validem la prova.
+
+L’autodiagnòstic incorporat a la 2.8.0 es manté.
 
 Si un controlador no està admès o falla l’alta, pots preparar un **informe de lectura des de Home Assistant**, sense instal·lar Python ni editar models. Confirma l’exploració, desa l’entrada de diagnòstic i descarrega els diagnòstics des del seu menú. L’entrada no activa entitats, controls, consultes periòdiques ni correccions del rellotge. Els informes parcials són útils i no es comparteixen automàticament. Cal eliminar aquesta entrada abans d’afegir el dispositiu normalment quan tingui suport.
 
@@ -51,7 +53,7 @@ Versions anteriors van crear estadístiques de llarg termini per al consum mitj�
 
 ## Instal·lació
 
-Amb HACS, afegeix `https://github.com/Danirv/runxin-local` com a repositori personalitzat de tipus **Integration** fins que quedi incorporat al catàleg per defecte. Manualment, copia `custom_components/ypsilon_local` a `/config/custom_components/ypsilon_local`.
+Amb HACS, afegeix `https://github.com/Danirv/runxin-local` com a repositori personalitzat de tipus **Integration** fins que quedi incorporat al catàleg per defecte. Manualment, copia `custom_components/runxin_local` a `/config/custom_components/runxin_local`.
 
 ## Consum d'aigua
 

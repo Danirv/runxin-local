@@ -8,7 +8,7 @@ interoperability knowledge.
 
 1. Run `python scripts/audit.py`.
 2. Run `python scripts/publication_check.py` in a configured public clone.
-3. Run `python -m compileall -q custom_components/ypsilon_local scripts`.
+3. Run `python -m compileall -q custom_components/runxin_local scripts`.
 4. Keep user-facing strings in the translation files (`en`, `ca`, `es`).
 5. Prefer small, reviewable changes and preserve entity/config-entry unique ids
    unless a migration is provided.
@@ -69,7 +69,7 @@ an untested field writable merely because its numeric id looks plausible.
 The pure protocol layer is intentionally structured so it can later be moved to
 a public PyPI library if there are multiple real consumers. Until that happens,
 do not introduce runtime dependencies between unrelated HACS integrations by
-importing an installed `custom_components.ypsilon_local` package.
+importing an installed `custom_components.runxin_local` package.
 
 ## License
 
