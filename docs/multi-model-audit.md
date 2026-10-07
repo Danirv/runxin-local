@@ -2,6 +2,7 @@
 
 [English](multi-model-audit.md) | [Català](multi-model-audit.ca.md)
 
+This is the initial Alpha audit; see [current follow-up](audit-followup.md).
 Scope: main `7a1dbc6` (2.8.0), the model-1 report in issue #17 and the changes prepared for **2.9.0-alpha.1**. The domain-migration PR #24 was checked as a separate pending dependency, not merged into this Alpha. PR #21 was not reviewed. No device/cloud command, real HA migration, issue reply, merge, tag or release was performed during this audit.
 
 ## Assessment

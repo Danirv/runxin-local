@@ -8,8 +8,11 @@ from homeassistant.components.diagnostics import async_redact_data
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
-from .models import model_support_details
-from .const import CONF_DIAGNOSTIC_ONLY
+from .models import controller_model, model_support_details
+from .const import (
+    CONF_AUTO_SYNC_CLOCK, CONF_CONTROLLER_MODEL, CONF_DIAGNOSTIC_ONLY,
+    DEFAULT_AUTO_SYNC_CLOCK, FIELD_CURRENT_TIME,
+)
 from .runxin.semantics import (
     REGENERATION_PATTERN_KEYS,
     STATION_KEYS,
@@ -19,6 +22,36 @@ from .runxin.semantics import (
 )
 
 TO_REDACT = {"mac", "host", "unique_id"}
+
+
+def _write_policy_summary(entry: ConfigEntry, coordinator: Any) -> dict[str, Any]:
+    """Separate model evidence from the permissions retained by both guards."""
+    code = (coordinator.data or {}).get("deviceModel")
+    model = controller_model(code)
+    coordinator_blocked = bool(getattr(coordinator, "read_only", False)) or model is None
+    fields = set() if coordinator_blocked else set(model.allowed_write_fields)
+    adapter = getattr(coordinator.client, "write_policy", None)
+    if isinstance(adapter, dict):
+        if adapter.get("read_only", True):
+            fields.clear()
+        else:
+            fields.intersection_update(adapter.get("allowed_write_fields", []))
+    else:
+        adapter = None
+    clock_requested = bool(getattr(
+        coordinator, "auto_sync_clock",
+        entry.options.get(CONF_AUTO_SYNC_CLOCK, DEFAULT_AUTO_SYNC_CLOCK),
+    ))
+    return {
+        "configured_model": entry.data.get(CONF_CONTROLLER_MODEL),
+        "observed_model": code,
+        "coordinator_read_only": coordinator_blocked,
+        "adapter": adapter,
+        "read_only": not fields,
+        "allowed_write_fields": sorted(fields),
+        "auto_clock_sync_requested": clock_requested,
+        "auto_clock_sync_permitted": clock_requested and FIELD_CURRENT_TIME in fields,
+    }
 
 
 def _semantic_protocol_summary(data: dict[str, Any] | None) -> dict[str, Any] | None:
@@ -81,6 +114,7 @@ async def async_get_config_entry_diagnostics(
             "transport": client.connection_diagnostics,
         },
         "protocol": _semantic_protocol_summary(coordinator.data),
+        "write_policy": _write_policy_summary(entry, coordinator),
         "state": async_redact_data(state, TO_REDACT)
         if state
         else None,

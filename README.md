@@ -78,7 +78,7 @@ Primary operational entities include:
 - **Vacation status** (read-only)
 - **Active alerts**
 
-Configuration controls include raw-water hardness, **added salt amount**, continuous-flow safety time, maximum flow cutoff, regeneration trigger time and device clock.
+On models with explicit write permissions, configuration controls include raw-water hardness, **added salt amount**, continuous-flow safety time, maximum flow cutoff, regeneration trigger time and device clock.
 
 Maintenance flags, wash-phase timings, salt-dissolution/pause countdowns, resin volume, filter-media interval, model, polling mode and communication telemetry are exposed as **diagnostic** entities so the normal device page stays focused on operational state.
 
@@ -99,6 +99,8 @@ The raw **Operating status** entity remains available independently. Adaptive po
 ## Water quantities and statistics
 
 The integration intentionally distinguishes controller counters from derived/history views:
+
+For provisional model-1 readings, long-term statistics are disabled until the conversions are calibrated. The following semantics apply to the existing validated presentation.
 
 - **Daily consumption** (fields 37–38) is the controller's within-day cumulative counter. Observed hardware history confirms it rises during the day and resets around the day boundary. It therefore uses Home Assistant `TOTAL_INCREASING` semantics so resets are treated as meter-cycle resets rather than negative consumption.
 - **Controller weekly average consumption** (fields 39–40) is the current average value reported by the controller. It is **not** the same quantity as the vendor app's week-by-week history chart, which is obtained from a separate statistics service. It deliberately has no Home Assistant `state_class`.
@@ -167,14 +169,13 @@ Controller identity, protocol profile, transport and commercial product are sepa
 
 ## Reusing the protocol work
 
-```text
-Home Assistant -> Ypsilon policy -> F79D client/codec -> raw Runxin frame
-                                                     -> transport -> device
-```
+The HA layer applies model policy, the F79D client builds/decodes raw Runxin frames, and the selected transport carries them to the device.
 
 `custom_components/ypsilon_local/runxin/` contains no Home Assistant or BroadLink imports. `transport/broadlink_bl3372.py` owns the BroadLink-specific envelope/session logic.
 
 Connection setup fails? See the [connection troubleshooting guide](docs/troubleshooting.md), including rejected authentication and a standalone sanitized probe.
+
+Documentation is organised by use in the [documentation index](docs/index.md).
 
 Developer/research documentation:
 
@@ -201,7 +202,7 @@ Before publishing:
 python scripts/publication_check.py
 ```
 
-GitHub CI includes HACS validation, hassfest, the offline audit and release-tag/version checks.
+GitHub CI includes HACS validation, hassfest, the offline audit, the complete test suite with HA 2026.9.3/2026.9.4 and release-tag/version checks. See [development instructions](CONTRIBUTING.md) and [audit follow-up](docs/audit-followup.md).
 
 ## Branding
 

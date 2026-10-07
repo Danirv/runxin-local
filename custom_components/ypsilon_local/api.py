@@ -75,6 +75,18 @@ class YpsilonLocalClient:
         """Non-identifying discovery/authentication/transaction metadata."""
         return self._transport.diagnostics
 
+    @property
+    def write_policy(self) -> dict[str, Any]:
+        """Describe cached adapter permissions without starting device I/O."""
+        code = self._controller_model
+        model = controller_model(code)
+        blocked = self._read_only_latched or model is None or model.read_only
+        return {
+            "controller_model": code if type(code) is int else None,
+            "read_only": blocked,
+            "allowed_write_fields": [] if blocked else sorted(model.allowed_write_fields),
+        }
+
     def close(self) -> None:
         with self._lock:
             self._f79d.close()

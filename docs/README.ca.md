@@ -68,3 +68,5 @@ Consulta la [guia de resolució de problemes](troubleshooting.ca.md) per disting
 La integració pot canviar paràmetres i iniciar moviments de vàlvula. No és un controlador de seguretat certificat ni ha de ser l'única protecció contra fuites o inundacions. Conèixer el còdec no equival a verificar l'acció física. En la compatibilitat Alpha del model 12, els controls pendents es mantenen disponibles amb aquesta limitació documentada.
 
 Consulta el [README principal](../README.md), [`waterdevice-audit.ca.md`](waterdevice-audit.ca.md), [`f79d.ca.md`](f79d.ca.md), [`hardware-verification.ca.md`](hardware-verification.ca.md), [SECURITY](../SECURITY.md) i [LEGAL](../LEGAL.md).
+
+Consulta l’[índex de documentació](index.md), la [matriu de suport](model-support.md) i els [pendents de l’auditoria](audit-followup.ca.md).

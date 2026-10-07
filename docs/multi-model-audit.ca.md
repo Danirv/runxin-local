@@ -2,6 +2,7 @@
 
 [English](multi-model-audit.md) | [Català](multi-model-audit.ca.md)
 
+Aquesta és l’auditoria inicial de l’Alpha; consulta el [seguiment actual](audit-followup.ca.md).
 Revisió del main `7a1dbc6` (2.8.0), el JSON de la issue #17 i la proposta **2.9.0-alpha.1**. La migració de domini de la PR #24 continua com a pilot separat; no s'ha revisat la PR #21. No s'han executat ordres contra dispositius o cloud ni s'ha fusionat/publicat res durant aquesta auditoria.
 
 **L'estructura és una base adequada per als models compatibles que apareixen.** Transport, protocol pur, adaptador, registre de models i HA ja estan separats. No cal duplicar carpetes ni catàlegs per model. Faltava una política efectiva de capacitats: marcar Alpha només era informació i no limitava controls ni rellotge automàtic.

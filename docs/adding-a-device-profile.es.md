@@ -43,7 +43,7 @@ No ocultes la incertidumbre. `inferred` es preferible a presentar una hipótesis
 
 ## El soporte en Home Assistant es una decisión separada
 
-Un perfil reutilizable puede existir en el repositorio antes de que la integración Ypsilon lo soporte. Añadirlo al descubrimiento automático/config flow requiere trabajo adicional: nombre del modelo, identidad del dispositivo, aplicabilidad de entidades, política de escrituras seguras, traducciones, diagnósticos y pruebas con hardware real.
+Un perfil reutilizable puede existir en el repositorio antes de que la integración Runxin Local lo soporte. Añadirlo al descubrimiento automático/config flow requiere trabajo adicional: nombre del modelo, identidad del dispositivo, aplicabilidad de entidades, política de escrituras seguras, traducciones, diagnósticos y pruebas con hardware real.
 
 Esta separación permite que el trabajo de ingeniería inversa sea útil sin fingir que un modelo nuevo está listo para producción.
 

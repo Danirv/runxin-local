@@ -21,14 +21,14 @@ jobs:
             echo "Run this workflow from the main branch, not $GITHUB_REF"
             exit 1
           }
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
           python-version: "3.13"
       - name: Install release-test dependencies
-        run: python -m pip install --disable-pip-version-check pytest broadlink==0.19.0
+        run: python -m pip install --disable-pip-version-check -r requirements-test-offline.txt
       - name: Resolve manifest version
         id: version
         shell: bash
@@ -105,12 +105,12 @@ jobs:
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
           python-version: "3.13"
       - name: Install release-test dependencies
-        run: python -m pip install --disable-pip-version-check pytest broadlink==0.19.0
+        run: python -m pip install --disable-pip-version-check -r requirements-test-offline.txt
       - name: Validate release source
         run: |
           python scripts/publication_check.py

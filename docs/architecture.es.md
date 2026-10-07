@@ -29,3 +29,5 @@ Reglas:
 - Dominio `ypsilon_local`, config-entry v2, identidades MAC, unique IDs y fachadas se conservan. La migración de la PR #24 es un piloto separado.
 
 El protocolo seguirá dentro del repositorio hasta que otro consumidor real justifique una biblioteca independiente. Consulta la [matriz de soporte](model-support.md), [Alpha del modelo 1](model-1-alpha.es.md) y [auditoría](multi-model-audit.md).
+
+La auditoría offline comprueba imports relativos anidados y dependencias del transporte. `write_policy` distingue evidencia del modelo y restricciones configuradas/del coordinador/adaptador con metadatos en caché. Consulta el [seguimiento](audit-followup.es.md) para CI y pendientes.

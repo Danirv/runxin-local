@@ -38,3 +38,5 @@ Un transport nou implementarà el contracte de trama crua i s'habilitarà només
 - Es conserven `ypsilon_local`, config-entry v2, identitats MAC, unique IDs i façanes. La migració de la PR #24 és un pilot separat.
 
 El protocol es manté preparat per extreure's a una llibreria quan un altre consumidor real ho justifiqui. La [matriu de suport](model-support.md), la [guia d'Alpha](model-1-alpha.ca.md) i l'[auditoria](multi-model-audit.ca.md) concreten l'estat actual.
+
+L’auditoria offline comprova imports relatius niats i dependències del transport. `write_policy` diferencia evidència del model i restriccions configurades/del coordinador/adaptador amb metadades en memòria cau. Consulta el [seguiment](audit-followup.ca.md) per a CI i pendents.

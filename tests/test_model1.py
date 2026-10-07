@@ -114,6 +114,21 @@ def test_model1_write_block_is_latched_across_missing_or_changed_identity():
     client.close()
 
 
+def test_adapter_policy_snapshot_keeps_latched_permissions_without_device_io():
+    client = api.YpsilonLocalClient('192.0.2.1')
+    client._f79d = Mock()
+    assert client.write_policy['read_only']
+    client._observe_model({'deviceModel': 9})
+    assert client.write_policy['allowed_write_fields'] == [4, 6, 7, 10, 34, 43, 47]
+    client._observe_model({'deviceModel': 1})
+    client._observe_model({'deviceModel': 9})
+    assert client.write_policy == {'controller_model': 9, 'read_only': True, 'allowed_write_fields': []}
+    client._f79d.assert_not_called()
+    client._f79d.read_state.assert_not_called()
+    client._f79d.write_fields.assert_not_called()
+    client.close()
+
+
 @pytest.mark.parametrize('code', [9, 12])
 def test_existing_controller_write_payload_and_settle_policy_are_unchanged(code, monkeypatch):
     client = api.YpsilonLocalClient('192.0.2.1')

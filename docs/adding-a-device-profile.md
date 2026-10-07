@@ -47,7 +47,7 @@ verified protocol fact.
 
 ## Home Assistant support is a separate decision
 
-A reusable profile can exist in the repository before the Ypsilon integration
+A reusable profile can exist in the repository before the Runxin Local integration
 supports it. Adding it to automatic discovery/config flow requires additional
 work: model naming, device identity, entity applicability, safe-write policy,
 translations, diagnostics and real-device testing.
