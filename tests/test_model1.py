@@ -47,6 +47,25 @@ def test_reported_pairs_decode_without_claiming_physical_conversions():
     assert codec.decode_frame(synthetic_response()) == codec.decode_tlvs(reported_pairs())
 
 
+def test_second_ha_report_keeps_identity_and_coherent_reference_volume_changes():
+    records = json.loads(Path(__file__).with_name('fixtures').joinpath('model1_fields_ha.json').read_text())
+    pairs = {int(field): tuple(pair) for field, pair in records['fields'].items()}
+    second = codec.decode_tlvs(pairs)
+    first = reported_state()
+    assert set(pairs) == set(range(1, 53))
+    assert second['deviceModel'] == first['deviceModel'] == 1
+    assert second['waterVolumeUnit'] == first['waterVolumeUnit'] == 1
+    assert second['currentTime'] == '21:24:00'
+    assert second['residualWaterProduction'] == 1284
+    assert second['dailyWaterConsumption'] == 235
+    assert first['residualWaterProduction'] - second['residualWaterProduction'] == 20
+    assert second['dailyWaterConsumption'] - first['dailyWaterConsumption'] == 20
+    assert second['resinVolume'] == first['resinVolume'] == 240
+    assert second['periodicWaterProduction'] == first['periodicWaterProduction'] == 15
+    # This is consistency of the reference map, not an app-confirmed unit or scale.
+    assert models.resin_volume_litres(second['resinVolume'], 1) is None
+
+
 def test_models_default_to_read_only_and_evidence_does_not_enable_writes():
     new_model = models.ControllerModel(code=99, title='Test', model_name='Test', manufacturer='Test',
                                       hardware_verified_write_fields=(4,))
