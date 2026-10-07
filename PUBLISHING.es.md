@@ -2,14 +2,14 @@
 
 # Publicar Ypsilon en GitHub y HACS
 
-El árbol de código está preparado para el repositorio público `Danirv/ypsilon-local` y su distribución mediante HACS.
+El árbol de código está preparado para el repositorio público `Danirv/runxin-local` y su distribución mediante HACS.
 
 ## 1. Metadatos del repositorio
 
 En un clon/plantilla nuevo, configura el propietario una sola vez:
 
 ```bash
-python scripts/configure_repository.py Danirv --repo ypsilon-local
+python scripts/configure_repository.py Danirv --repo runxin-local
 ```
 
 Después verifica:

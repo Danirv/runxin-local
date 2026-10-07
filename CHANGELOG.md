@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented here.
 
+## [2.8.0] - 2026-10-07
+
+- Rename the public project and visible integration to **Runxin Local**, with repository `Danirv/runxin-local`. Keep the `ypsilon_local` domain, folder, services and existing unique IDs.
+- Offer an opt-in, bounded read-only compatibility report inside Home Assistant for unlisted controllers and setup failures. No external Python environment or model-registry edit is required.
+- Preserve raw bytes, unmapped numeric codes, missing fields and timestamps; identify controller enum names without extending supported models. No model-specific resin scale is applied to research reports.
+- Store reports locally in diagnostic-only entries with no entities, polling, clock correction or write methods. Reload/download performs no new scan; deletion removes the saved report. Advanced write services reject these entries.
+- Add prepared issue summaries, instructions and compatibility-report template fields. Existing G6/model-12 polling, control encodings and per-model scaling are retained.
+
 ## [2.7.2] - 2026-10-05
 
 ### Fixed

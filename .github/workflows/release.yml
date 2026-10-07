@@ -62,7 +62,7 @@ jobs:
           else
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git tag -a "$TAG" -m "Ypsilon $VERSION" "$GITHUB_SHA"
+            git tag -a "$TAG" -m "Runxin Local $VERSION" "$GITHUB_SHA"
             git push origin "$TAG"
           fi
       - name: Check out tagged release source
@@ -93,7 +93,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.version.outputs.tag }}
-        run: gh release create "$TAG" "ypsilon_local-${TAG}.zip" --verify-tag --generate-notes --title "Ypsilon ${TAG}"
+        run: gh release create "$TAG" "ypsilon_local-${TAG}.zip" --verify-tag --generate-notes --title "Runxin Local ${TAG}"
 
   tag-release:
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
@@ -132,4 +132,4 @@ jobs:
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" "ypsilon_local-${GITHUB_REF_NAME}.zip" --verify-tag --generate-notes --title "Ypsilon ${GITHUB_REF_NAME}"
+        run: gh release create "$GITHUB_REF_NAME" "ypsilon_local-${GITHUB_REF_NAME}.zip" --verify-tag --generate-notes --title "Runxin Local ${GITHUB_REF_NAME}"

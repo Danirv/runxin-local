@@ -1,6 +1,10 @@
-# Ypsilon for Home Assistant
+# Runxin Local for Home Assistant
 
-Local Home Assistant integration for compatible water softeners using a **Runxin F79D** controller and **BroadLink BL3372** Wi-Fi module, including the ATH/BWT Ypsilon G6 tested by this project.
+Local Home Assistant integration for water softeners with compatible **Runxin controllers** and a **BroadLink BL3372** Wi-Fi module. Tested hardware includes **ATH/BWT Ypsilon G6 (F79D, model 9)** and **Euro-Clear Midnight 25 (model 12; named F105 in the manufacturer's API)**.
+
+Previously **Ypsilon / ypsilon-local**. The project and visible integration are now **Runxin Local**. The Home Assistant domain, installation folder, service names and existing unique IDs remain `ypsilon_local`; existing installations do not need to remove/re-add their devices or edit their automations because of the name change. GitHub redirects the previous repository URL after the rename; use the new URL for new installations.
+
+**Other controller?** Version 2.8.0 adds a local **read-only compatibility report inside Home Assistant**. You do not need a Python environment or a modified model registry. See [collecting a compatibility report](docs/compatibility-report.md). Recognising a controller's name does not automatically enable its controls.
 
 The integration communicates directly over the LAN and does not depend on the vendor cloud for normal operation.
 
@@ -47,9 +51,9 @@ Other rebranded devices using the same controller/module may work, but compatibi
 Until the repository is accepted into the HACS default catalog, add it as a custom repository:
 
 1. HACS → **Integrations** → menu → **Custom repositories**.
-2. Add `https://github.com/Danirv/ypsilon-local` as an **Integration**.
-3. Install **Ypsilon** and restart Home Assistant.
-4. Go to **Settings → Devices & services → Add integration** and search for **Ypsilon**.
+2. Add `https://github.com/Danirv/runxin-local` as an **Integration**.
+3. Install **Runxin Local** and restart Home Assistant.
+4. Go to **Settings → Devices & services → Add integration** and search for **Runxin Local**.
 
 The repository has been submitted to the HACS default-catalog review queue as `hacs/default#10717`.
 
@@ -115,7 +119,7 @@ This distinction is intentional: a configured bookkeeping value must not be pres
 
 ## Water units and F79D codec notes
 
-Ypsilon combines recovered application knowledge with physical-controller evidence. For the tested Ypsilon G6:
+Runxin Local combines recovered application knowledge with physical-controller evidence. For the tested Ypsilon G6:
 
 - field 7 (`flowRateOff`) is **16-bit big-endian** in both read and write paths and is `HARDWARE_WRITE_VERIFIED`;
 - field 11 (`flowRate`) is also **big-endian** on the wire;
@@ -194,10 +198,10 @@ GitHub CI includes HACS validation, hassfest, the offline audit and release-tag/
 
 ## Branding
 
-Home Assistant can load local brand assets shipped by custom integrations. Ypsilon provides separate assets for their actual roles rather than reusing one square PNG for everything:
+Home Assistant can load local brand assets shipped by custom integrations. Runxin Local provides separate assets for their actual roles rather than reusing one square PNG for everything:
 
 - `icon.png` / `icon@2x.png`: square artwork with safe padding for circular/square crops;
-- `logo.png` / `logo@2x.png`: landscape Ypsilon Local wordmark;
+- `logo.png` / `logo@2x.png`: landscape Runxin Local wordmark;
 - matching dark variants on transparent backgrounds.
 
 HACS presentation depends on the HACS/Home Assistant frontend version and caching; the repository itself provides correctly proportioned local assets instead of a square image masquerading as a landscape logo.
