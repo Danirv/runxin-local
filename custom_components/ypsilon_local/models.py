@@ -13,6 +13,21 @@ from dataclasses import dataclass
 from typing import Any
 
 
+# Public WaterDevice API enum checked 2026-10-07. Names describe controller
+# codes; they do NOT extend the hardware-validated compatibility allowlist.
+# Source: https://api.waterdevice.net/api/abp/api-definition?includeTypes=true
+CONTROLLER_PROTOCOL_NAMES = dict(enumerate((
+    "F79", "F150", "F67N", "F67D", "F71D", "F63D", "F65D", "F68D",
+    "F69D", "F79D", "F82D", "F67NA", "F105", "F97", "F136", "F138",
+    "F139", "F152", "C600A", "C800D", "F104HW", "F149", "F163", "F151",
+)))
+
+
+def controller_protocol_name(code: object) -> str | None:
+    """Descriptive manufacturer enum name, independent of supported models."""
+    return CONTROLLER_PROTOCOL_NAMES.get(code) if type(code) is int else None
+
+
 @dataclass(frozen=True, slots=True)
 class ControllerModel:
     """One controller identity (F79D field 1, `deviceModel`) and how to present it."""

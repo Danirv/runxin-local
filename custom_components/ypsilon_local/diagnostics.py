@@ -9,6 +9,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
 from .models import model_support_details
+from .const import CONF_DIAGNOSTIC_ONLY
 from .runxin.semantics import (
     REGENERATION_PATTERN_KEYS,
     STATION_KEYS,
@@ -54,6 +55,8 @@ async def async_get_config_entry_diagnostics(
     hass: HomeAssistant, entry: ConfigEntry
 ) -> dict[str, Any]:
     """Return everything needed to debug a report, minus identifying data."""
+    if entry.data.get(CONF_DIAGNOSTIC_ONLY):
+        return {"diagnostic_only": True, "compatibility_report": entry.runtime_data.report}
     coordinator = entry.runtime_data
     client = coordinator.client
 

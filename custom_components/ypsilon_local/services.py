@@ -12,6 +12,7 @@ from homeassistant.helpers.service import async_register_admin_service
 
 from .api import YpsilonConnectionError
 from .const import (
+    CONF_DIAGNOSTIC_ONLY,
     DOMAIN,
     FIELD_FLOW_RATE_OFF,
     FIELD_SYSTEM_MODE,
@@ -55,6 +56,11 @@ def _coordinator(hass: HomeAssistant, entry_id: str):
         raise ServiceValidationError(
             translation_domain=DOMAIN,
             translation_key="service_entry_not_loaded",
+        )
+    if entry.data.get(CONF_DIAGNOSTIC_ONLY):
+        raise ServiceValidationError(
+            translation_domain=DOMAIN,
+            translation_key="diagnostic_read_only",
         )
     return entry.runtime_data
 

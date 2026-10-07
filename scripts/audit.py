@@ -218,8 +218,8 @@ def repository_checks() -> list[str]:
     version = manifest.get("version")
     if not isinstance(version, str) or not SEMVER.fullmatch(version):
         errors.append(f"invalid manifest version: {version!r}")
-    if manifest.get("name") != "Ypsilon":
-        errors.append("manifest name != Ypsilon")
+    if manifest.get("name") != "Runxin Local":
+        errors.append("manifest name != Runxin Local")
     if (HERE / "strings.json").exists():
         errors.append("custom integration must not ship strings.json")
 

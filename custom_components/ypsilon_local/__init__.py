@@ -13,7 +13,8 @@ from homeassistant.helpers import device_registry as dr, entity_registry as er
 from homeassistant.helpers.device_registry import format_mac
 
 from .api import YpsilonLocalClient
-from .const import DOMAIN
+from .const import DOMAIN, CONF_DIAGNOSTIC_ONLY, CONF_DIAGNOSTIC_REPORT_ID
+from .diagnostic_report import DiagnosticReport, report_store
 from .coordinator import YpsilonDataUpdateCoordinator
 from .services import async_setup_services
 
@@ -27,7 +28,7 @@ PLATFORMS: list[Platform] = [
     Platform.TIME,
 ]
 
-type YpsilonConfigEntry = ConfigEntry[YpsilonDataUpdateCoordinator]
+type YpsilonConfigEntry = ConfigEntry[YpsilonDataUpdateCoordinator | DiagnosticReport]
 
 
 @dataclass
@@ -199,6 +200,13 @@ def _enable_wash_start_sensor_if_integration_disabled(
 
 async def async_setup_entry(hass: HomeAssistant, entry: YpsilonConfigEntry) -> bool:
     """Set up Ypsilon Local from a config entry."""
+    if entry.data.get(CONF_DIAGNOSTIC_ONLY):
+        # Reloads/restarts only load the saved report. Never create a normal
+        # client/coordinator: its first refresh may automatically set the clock.
+        report_id = entry.data.get(CONF_DIAGNOSTIC_REPORT_ID)
+        report = await report_store(hass, report_id).async_load() if report_id else None
+        entry.runtime_data = DiagnosticReport(report)
+        return True
     store = _get_store(hass, entry)
 
     coordinator = YpsilonDataUpdateCoordinator(
@@ -216,11 +224,18 @@ async def async_setup_entry(hass: HomeAssistant, entry: YpsilonConfigEntry) -> b
 
 async def async_unload_entry(hass: HomeAssistant, entry: YpsilonConfigEntry) -> bool:
     """Unload a config entry, keeping the session and cache warm."""
+    if entry.data.get(CONF_DIAGNOSTIC_ONLY):
+        return True
     return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 
 
 async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
     """Close the session and drop the cache when the entry is deleted."""
+    if entry.data.get(CONF_DIAGNOSTIC_ONLY):
+        report_id = entry.data.get(CONF_DIAGNOSTIC_REPORT_ID)
+        if report_id:
+            await report_store(hass, report_id).async_remove()
+        return
     store: YpsilonStore | None = hass.data.get(DOMAIN, {}).pop(entry.entry_id, None)
     if store is not None:
         await hass.async_add_executor_job(store.client.close)

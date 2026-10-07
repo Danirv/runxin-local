@@ -1,6 +1,14 @@
-# Ypsilon per a Home Assistant
+# Runxin Local per a Home Assistant
 
 Integració local per a descalcificadors compatibles amb **Runxin F79D + BroadLink BL3372**, amb el Ypsilon G6 com a maquinari de referència i suport experimental per al Euro-Clear Midnight.
+
+## Autodiagnòstic i canvi de nom: 2.8.0
+
+El projecte passa de Ypsilon a **Runxin Local**, amb repositori `Danirv/runxin-local`. Es conserven el domini, la carpeta, els serveis i els identificadors `ypsilon_local`; el canvi de nom no requereix tornar a afegir els dispositius ni modificar automatitzacions.
+
+Si un controlador no està admès o falla l’alta, pots preparar un **informe de lectura des de Home Assistant**, sense instal·lar Python ni editar models. Confirma l’exploració, desa l’entrada de diagnòstic i descarrega els diagnòstics des del seu menú. L’entrada no activa entitats, controls, consultes periòdiques ni correccions del rellotge. Els informes parcials són útils i no es comparteixen automàticament. Cal eliminar aquesta entrada abans d’afegir el dispositiu normalment quan tingui suport.
+
+La taula del fabricant associa 9 amb F79D, 12 amb F105 i 14 amb F136; només descriu els codis i no amplia els models admesos. Continua calguent contrastar les conversions amb l’app o la pantalla del controlador. Consulta la [guia d’informes de compatibilitat](compatibility-report.md).
 
 - Descobriment DHCP i configuració manual per IP.
 - Lectura local de cabal, consum diari, capacitat restant, fase de vàlvula, mode de regeneració, patró de treball i avisos.
@@ -43,7 +51,7 @@ Versions anteriors van crear estadístiques de llarg termini per al consum mitj�
 
 ## Instal·lació
 
-Amb HACS, afegeix `https://github.com/Danirv/ypsilon-local` com a repositori personalitzat de tipus **Integration** fins que quedi incorporat al catàleg per defecte. Manualment, copia `custom_components/ypsilon_local` a `/config/custom_components/ypsilon_local`.
+Amb HACS, afegeix `https://github.com/Danirv/runxin-local` com a repositori personalitzat de tipus **Integration** fins que quedi incorporat al catàleg per defecte. Manualment, copia `custom_components/ypsilon_local` a `/config/custom_components/ypsilon_local`.
 
 ## Consum d'aigua
 

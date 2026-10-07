@@ -37,10 +37,140 @@ number_mod = load("number")
 button_mod = load("button")
 services_mod = load("services")
 diagnostics_mod = load("diagnostics")
+report_mod = load("diagnostic_report")
 codec = load("runxin.f79d")
 
 TEST_HOST = "192.0.2.12"
 TEST_MAC = "02:00:00:00:00:12"
+
+
+def _report(code=14, *, status="partial"):
+    return {
+        "controller": {"code": code, "manufacturer_protocol_name": "F136" if code == 14 else None,
+                       "supported_for_normal_use": False},
+        "summary": {"status": status, "fields_observed_count": 2},
+        "authentication": {"attempted": True, "ok": status != "authentication_failed"},
+        "fields": [{"field_id": 1, "raw_byte_pair": [code, 0]}] if code is not None else [],
+    }
+
+
+@pytest.mark.asyncio
+async def test_unknown_model_offers_named_diagnostics_without_starting_scan(hass, monkeypatch):
+    flow = _flow(hass)
+    flow._async_probe = AsyncMock(return_value=({"deviceModel":14}, TEST_MAC))
+    collect = Mock()
+    monkeypatch.setattr(flow_mod, "probe", collect)
+    result = await flow.async_step_user({"host":TEST_HOST})
+    assert result["step_id"] == "diagnostic_offer"
+    assert result["description_placeholders"]["controller"] == "F136 (14)"
+    collect.assert_not_called()
+    result = await flow.async_step_diagnostic_offer({"generate_report":False})
+    assert result["reason"] == "diagnostic_declined"
+    collect.assert_not_called()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("status,code", [("partial",14),("authentication_failed",None)])
+async def test_diagnostic_progress_and_saved_report_need_no_manual_environment(hass, monkeypatch, status, code):
+    flow = _flow(hass)
+    flow._async_probe = AsyncMock()
+    def collect(host, *, cancel, identifier_sink):
+        assert host == TEST_HOST
+        assert not cancel.is_set()
+        identifier_sink.append(TEST_MAC.replace(":",""))
+        return _report(code,status=status)
+    collect_mock=Mock(side_effect=collect)
+    monkeypatch.setattr(flow_mod,"probe",collect_mock)
+    result=await flow.async_step_user({"host":TEST_HOST,"diagnostic_only":True})
+    assert result["type"] is FlowResultType.SHOW_PROGRESS
+    await flow._diagnostic_task
+    result=await flow.async_step_diagnostic_scan()
+    assert result["type"] is FlowResultType.SHOW_PROGRESS_DONE
+    result=await flow.async_step_diagnostic_ready()
+    assert result["type"] is FlowResultType.FORM
+    assert "issues/new?" in result["description_placeholders"]["issue_url"]
+    result=await flow.async_step_diagnostic_ready({})
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert result["data"]["diagnostic_only"] is True
+    assert set(result["data"]) == {"host","diagnostic_only","diagnostic_report_id"}
+    report_id=result["data"]["diagnostic_report_id"]
+    saved=await report_mod.report_store(hass,report_id).async_load()
+    assert saved["summary"]["status"] == status
+    assert saved["integration"]["domain"] == "ypsilon_local"
+    assert TEST_HOST not in str(saved)
+    assert TEST_MAC not in str(saved)
+    assert TEST_MAC.replace(":","") not in report_id
+    collect_mock.assert_called_once()
+    flow._async_probe.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_diagnostic_entry_reloads_export_and_removal_do_not_contact_device(hass, monkeypatch):
+    init_mod=load("__init__")
+    report_id="test_opaque_id"
+    saved=report_mod.prepare_report(_report())
+    await report_mod.report_store(hass,report_id).async_save(saved)
+    entry=SimpleNamespace(entry_id="diagnostic-entry",data={
+        "host":TEST_HOST,"diagnostic_only":True,"diagnostic_report_id":report_id,
+    })
+    client=Mock()
+    coordinator=Mock()
+    forward=AsyncMock()
+    monkeypatch.setattr(init_mod,"YpsilonLocalClient",client)
+    monkeypatch.setattr(init_mod,"YpsilonDataUpdateCoordinator",coordinator)
+    monkeypatch.setattr(hass.config_entries,"async_forward_entry_setups",forward)
+    for _ in range(2):
+        assert await init_mod.async_setup_entry(hass,entry)
+        exported=await diagnostics_mod.async_get_config_entry_diagnostics(hass,entry)
+        assert exported == {"diagnostic_only":True,"compatibility_report":saved}
+        assert await init_mod.async_unload_entry(hass,entry)
+    client.assert_not_called()
+    coordinator.assert_not_called()
+    forward.assert_not_awaited()
+    await init_mod.async_remove_entry(hass,entry)
+    assert await report_mod.report_store(hass,report_id).async_load() is None
+
+
+@pytest.mark.asyncio
+async def test_advanced_services_cannot_use_diagnostic_entry(hass, monkeypatch):
+    from homeassistant.config_entries import ConfigEntryState
+    from homeassistant.exceptions import ServiceValidationError
+    writer=AsyncMock()
+    entry=SimpleNamespace(domain="ypsilon_local",state=ConfigEntryState.LOADED,
+                          data={"diagnostic_only":True},runtime_data=SimpleNamespace(async_write_and_verify=writer))
+    monkeypatch.setattr(hass.config_entries,"async_get_entry",Mock(return_value=entry))
+    services_mod.async_setup_services(hass)
+    for name,extra in (("write_fields",{"fields":{43:24}}),("advance_phase",{"phase":1})):
+        with pytest.raises(ServiceValidationError) as error:
+            await hass.services.async_call("ypsilon_local",name,{"config_entry_id":"diag",**extra},blocking=True)
+        assert error.value.translation_key == "diagnostic_read_only"
+    writer.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_flow_removal_cancels_collect_task_and_signals_worker(hass):
+    import asyncio
+    flow=_flow(hass)
+    flow._diagnostic_task=hass.async_create_task(asyncio.sleep(10),eager_start=False)
+    flow.async_remove()
+    assert flow._diagnostic_cancel.is_set()
+    with pytest.raises(asyncio.CancelledError):
+        await flow._diagnostic_task
+
+
+@pytest.mark.asyncio
+async def test_simultaneous_diagnostic_flow_cannot_open_another_session(hass, monkeypatch):
+    flow=_flow(hass)
+    flow._diagnostic_host=TEST_HOST
+    monkeypatch.setattr(flow,"_async_in_progress",Mock(return_value=[{
+        "flow_id":"other-flow","context":{"diagnostic_host":TEST_HOST},
+    }]))
+    collect=Mock()
+    monkeypatch.setattr(flow_mod,"probe",collect)
+    result=await flow.async_step_diagnostic_scan()
+    assert result["reason"] == "diagnostic_in_progress"
+    assert flow._diagnostic_task is None
+    collect.assert_not_called()
 
 
 @pytest_asyncio.fixture
@@ -155,8 +285,9 @@ async def test_discovery_rejects_model_that_changes_before_confirmation(hass):
     flow._async_probe = AsyncMock(side_effect=[({"deviceModel": 12}, TEST_MAC), ({"deviceModel": 10}, TEST_MAC)])
     await flow.async_step_dhcp(DhcpServiceInfo(ip=TEST_HOST, hostname="test", macaddress=TEST_MAC))
     result = await flow.async_step_discovery_confirm({})
-    assert result["type"] is FlowResultType.ABORT
-    assert result["reason"] == "unsupported_device"
+    assert result["type"] is FlowResultType.FORM
+    assert result["step_id"] == "diagnostic_offer"
+    assert result["errors"]["base"] == "unsupported_device"
 
 
 @pytest.mark.asyncio
@@ -302,7 +433,8 @@ async def test_setup_paths_distinguish_rejected_auth_from_timeout(hass, step, ki
     flow._async_probe = AsyncMock(side_effect=error)
     if step == "dhcp":
         result = await flow.async_step_dhcp(DhcpServiceInfo(ip=TEST_HOST, hostname="test", macaddress=TEST_MAC))
-        assert result["reason"] == expected
+        assert result["step_id"] == "diagnostic_offer"
+        assert result["errors"]["base"] == expected
     else:
         if step == "discovery_confirm":
             flow.discovered_host = TEST_HOST

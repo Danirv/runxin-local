@@ -3,7 +3,11 @@
 from __future__ import annotations
 
 import logging
+import asyncio
+from functools import partial
+import threading
 from typing import Any
+from uuid import uuid4
 
 import broadlink.exceptions
 import voluptuous as vol
@@ -20,6 +24,8 @@ from .const import (
     CONF_ADAPTIVE_POLLING,
     CONF_AUTO_SYNC_CLOCK,
     CONF_CLOCK_TOLERANCE,
+    CONF_DIAGNOSTIC_ONLY,
+    CONF_DIAGNOSTIC_REPORT_ID,
     CONF_SCAN_INTERVAL,
     DEFAULT_ACTIVE_SCAN_INTERVAL,
     DEFAULT_ADAPTIVE_POLLING,
@@ -33,7 +39,9 @@ from .const import (
     MIN_CLOCK_TOLERANCE,
     MIN_SCAN_INTERVAL,
 )
-from .models import controller_model, is_supported_model
+from .models import controller_model, controller_protocol_name, is_supported_model
+from .compatibility import probe
+from .diagnostic_report import prepare_report, report_store
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -67,6 +75,21 @@ class YpsilonLocalConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     def __init__(self) -> None:
         self.discovered_host: str | None = None
+        self._diagnostic_host: str | None = None
+        self._diagnostic_model: object = None
+        self._diagnostic_reason = "unsupported_device"
+        self._diagnostic_report: dict[str, Any] | None = None
+        self._diagnostic_task: asyncio.Task | None = None
+        self._diagnostic_cancel = threading.Event()
+        self._diagnostic_identifiers: list[str] = []
+
+    @callback
+    def async_remove(self) -> None:
+        """Cancelling a flow stops its executor worker at the next boundary."""
+        self._diagnostic_cancel.set()
+        if self._diagnostic_task is not None and not self._diagnostic_task.done():
+            self._diagnostic_task.cancel()
+        super().async_remove()
 
     @staticmethod
     @callback
@@ -114,9 +137,9 @@ class YpsilonLocalConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         try:
             identity, _ = await self._async_probe(self.discovered_host)
         except PROBE_ERRORS as err:
-            return self.async_abort(reason=_probe_error(err))
+            return await self._diagnostic_offer(self.discovered_host, _probe_error(err))
         if not is_supported_model(identity.get("deviceModel")):
-            return self.async_abort(reason="unsupported_device")
+            return await self._diagnostic_offer(self.discovered_host, "unsupported_device", identity)
 
         self.context["title_placeholders"] = {"host": self.discovered_host}
         return await self.async_step_discovery_confirm()
@@ -130,10 +153,10 @@ class YpsilonLocalConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             try:
                 identity, _ = await self._async_probe(self.discovered_host)
             except PROBE_ERRORS as err:
-                errors["base"] = _probe_error(err)
+                return await self._diagnostic_offer(self.discovered_host, _probe_error(err))
             else:
                 if not is_supported_model(identity.get("deviceModel")):
-                    return self.async_abort(reason="unsupported_device")
+                    return await self._diagnostic_offer(self.discovered_host, "unsupported_device", identity)
                 return self.async_create_entry(
                     title=_entry_title(identity), data={CONF_HOST: self.discovered_host}
                 )
@@ -151,13 +174,16 @@ class YpsilonLocalConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
         if user_input is not None:
             host = user_input[CONF_HOST].strip()
+            if user_input.get(CONF_DIAGNOSTIC_ONLY):
+                self._diagnostic_host = host
+                return await self.async_step_diagnostic_scan()
             try:
                 identity, mac = await self._async_probe(host)
             except PROBE_ERRORS as err:
-                errors["base"] = _probe_error(err)
+                return await self._diagnostic_offer(host, _probe_error(err))
             else:
                 if not is_supported_model(identity.get("deviceModel")):
-                    errors["base"] = "unsupported_device"
+                    return await self._diagnostic_offer(host, "unsupported_device", identity)
                 elif not mac:
                     errors["base"] = "cannot_connect"
                 else:
@@ -171,8 +197,104 @@ class YpsilonLocalConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="user",
-            data_schema=vol.Schema({vol.Required(CONF_HOST): str}),
+            data_schema=vol.Schema({
+                vol.Required(CONF_HOST): str,
+                vol.Optional(CONF_DIAGNOSTIC_ONLY, default=False): bool,
+            }),
             errors=errors,
+        )
+
+    async def _diagnostic_offer(
+        self, host: str, reason: str, identity: dict[str, Any] | None = None
+    ) -> config_entries.ConfigFlowResult:
+        self._diagnostic_host = host
+        self._diagnostic_model = (identity or {}).get("deviceModel")
+        self._diagnostic_reason = reason
+        return await self.async_step_diagnostic_offer()
+
+    async def async_step_diagnostic_offer(
+        self, user_input: dict[str, Any] | None = None
+    ) -> config_entries.ConfigFlowResult:
+        if user_input is not None:
+            if not user_input.get("generate_report"):
+                return self.async_abort(reason="diagnostic_declined")
+            return await self.async_step_diagnostic_scan()
+        code = self._diagnostic_model
+        name = controller_protocol_name(code)
+        model = f"{name} ({code})" if name else str(code) if code is not None else "—"
+        return self.async_show_form(
+            step_id="diagnostic_offer",
+            data_schema=vol.Schema({vol.Required("generate_report", default=True): bool}),
+            description_placeholders={"controller": model},
+            errors={"base": self._diagnostic_reason},
+        )
+
+    async def _async_collect_report(self) -> None:
+        assert self._diagnostic_host is not None
+        try:
+            report = await self.hass.async_add_executor_job(partial(
+                probe, self._diagnostic_host, cancel=self._diagnostic_cancel,
+                identifier_sink=self._diagnostic_identifiers,
+            ))
+            self._diagnostic_report = await self.hass.async_add_executor_job(prepare_report, report)
+        except asyncio.CancelledError:
+            self._diagnostic_cancel.set()
+            raise
+
+    async def async_step_diagnostic_scan(
+        self, user_input: dict[str, Any] | None = None
+    ) -> config_entries.ConfigFlowResult:
+        assert self._diagnostic_host is not None
+        for entry in self._async_current_entries():
+            if entry.data.get(CONF_HOST) == self._diagnostic_host:
+                return self.async_abort(reason="already_configured")
+        for progress in self._async_in_progress():
+            if (progress["flow_id"] != self.flow_id and
+                progress.get("context", {}).get("diagnostic_host") == self._diagnostic_host):
+                return self.async_abort(reason="diagnostic_in_progress")
+        self.context["diagnostic_host"] = self._diagnostic_host
+        if self._diagnostic_task is None:
+            self._diagnostic_task = self.hass.async_create_task(
+                self._async_collect_report(), "Runxin read-only compatibility report",
+                eager_start=False,
+            )
+        if not self._diagnostic_task.done():
+            return self.async_show_progress(
+                step_id="diagnostic_scan", progress_action="collecting_report",
+                progress_task=self._diagnostic_task,
+            )
+        try:
+            self._diagnostic_task.result()
+        except (Exception, asyncio.CancelledError):
+            return self.async_abort(reason="diagnostic_failed")
+        return self.async_show_progress_done(next_step_id="diagnostic_ready")
+
+    async def async_step_diagnostic_ready(
+        self, user_input: dict[str, Any] | None = None
+    ) -> config_entries.ConfigFlowResult:
+        assert self._diagnostic_report is not None
+        if user_input is not None:
+            if self._diagnostic_identifiers:
+                await self.async_set_unique_id(format_mac(self._diagnostic_identifiers[0]))
+                self._abort_if_unique_id_configured()
+            report_id = uuid4().hex
+            await report_store(self.hass, report_id).async_save(self._diagnostic_report)
+            controller = self._diagnostic_report.get("controller") or {}
+            code = controller.get("code")
+            name = controller.get("manufacturer_protocol_name")
+            detail = f"{name} ({code})" if name else str(code) if code is not None else "Runxin"
+            return self.async_create_entry(
+                title=f"{detail} · Diagnostic",
+                data={CONF_HOST: self._diagnostic_host, CONF_DIAGNOSTIC_ONLY: True,
+                      CONF_DIAGNOSTIC_REPORT_ID: report_id},
+            )
+        report = self._diagnostic_report
+        return self.async_show_form(
+            step_id="diagnostic_ready", data_schema=vol.Schema({}),
+            description_placeholders={
+                "fields": str(report.get("summary", {}).get("fields_observed_count", 0)),
+                "issue_url": report["issue_url"],
+            },
         )
 
     async def async_step_reconfigure(
@@ -180,6 +302,8 @@ class YpsilonLocalConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     ) -> config_entries.ConfigFlowResult:
         """Point an existing entry at a new IP without changing identity."""
         entry = self._get_reconfigure_entry()
+        if entry.data.get(CONF_DIAGNOSTIC_ONLY):
+            return self.async_abort(reason="diagnostic_only")
         errors: dict[str, str] = {}
 
         if user_input is not None:
@@ -209,6 +333,8 @@ class YpsilonLocalOptionsFlow(config_entries.OptionsFlow):
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> config_entries.ConfigFlowResult:
+        if self.config_entry.data.get(CONF_DIAGNOSTIC_ONLY):
+            return self.async_abort(reason="diagnostic_only")
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)
         options = self.config_entry.options

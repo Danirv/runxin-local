@@ -1,6 +1,14 @@
-# Ypsilon para Home Assistant
+# Runxin Local para Home Assistant
 
 Integración local para descalcificadores compatibles con **Runxin F79D + BroadLink BL3372**, con el Ypsilon G6 como hardware de referencia y soporte experimental para Euro-Clear Midnight.
+
+## Autodiagnóstico y cambio de nombre: 2.8.0
+
+El proyecto pasa de Ypsilon a **Runxin Local**, con repositorio `Danirv/runxin-local`. Se conservan el dominio, la carpeta, los servicios y los identificadores `ypsilon_local`; el cambio de nombre no requiere volver a añadir dispositivos ni modificar automatizaciones.
+
+Si un controlador no está admitido o falla el alta, puedes preparar un **informe de lectura desde Home Assistant**, sin instalar Python ni editar modelos. Confirma la exploración, guarda la entrada de diagnóstico y descarga los diagnósticos desde su menú. La entrada no activa entidades, controles, consultas periódicas ni correcciones del reloj. Los informes parciales son útiles y no se comparten automáticamente. Hay que eliminar esta entrada antes de añadir el dispositivo normalmente cuando tenga soporte.
+
+La tabla del fabricante asocia 9 con F79D, 12 con F105 y 14 con F136; solo describe los códigos y no amplía los modelos admitidos. Sigue siendo necesario contrastar las conversiones con la app o la pantalla del controlador. Consulta la [guía de informes de compatibilidad](compatibility-report.md).
 
 - Descubrimiento DHCP y configuración manual por IP.
 - Lectura local de caudal, consumo diario, capacidad restante, fase de válvula, modo de regeneración, patrón de trabajo y avisos.
@@ -43,7 +51,7 @@ Versiones anteriores crearon estadísticas de largo plazo para el consumo medio 
 
 ## Instalación
 
-Con HACS, añade `https://github.com/Danirv/ypsilon-local` como repositorio personalizado de tipo **Integration** hasta que quede incorporado al catálogo por defecto. Manualmente, copia `custom_components/ypsilon_local` a `/config/custom_components/ypsilon_local`.
+Con HACS, añade `https://github.com/Danirv/runxin-local` como repositorio personalizado de tipo **Integration** hasta que quede incorporado al catálogo por defecto. Manualmente, copia `custom_components/ypsilon_local` a `/config/custom_components/ypsilon_local`.
 
 ## Consumo de agua
 

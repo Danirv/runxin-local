@@ -1,6 +1,14 @@
-# Ypsilon 2.7.2
+# Runxin Local 2.8.0
 
 Local Home Assistant integration for compatible Runxin F79D / BroadLink BL3372 water softeners, tested with ATH/BWT Ypsilon G6 and Euro-Clear Midnight.
+
+## 2.8.0
+
+**Runxin Local** is the new public name of Ypsilon. The domain/folder/service namespace `ypsilon_local` and existing device/entity identifiers are retained. The repository is `Danirv/runxin-local`; previous GitHub links redirect after the rename.
+
+Adds an opt-in **read-only compatibility report inside Home Assistant**, including for unlisted controller models and setup failures. No Python environment or model edits are needed. The diagnostic entry stores a bounded one-time scan, has no entities/controls/polling/clock writes, and supports the normal diagnostics download menu. Reload/download does not scan again, and advanced write services cannot target it. The report retains raw field bytes, numeric unmapped codes, omissions and timestamps without model-specific resin scaling or credentials. A prepared issue summary and comparison instructions help contributors.
+
+Existing G6/model-12 controls and conversions are retained. Controller names from the manufacturer's enum (9 F79D, 12 F105, 14 F136) do not automatically establish support for additional models.
 
 ## 2.7.2
 
