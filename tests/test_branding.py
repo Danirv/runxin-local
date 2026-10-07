@@ -6,7 +6,7 @@ from pathlib import Path
 import struct
 
 ROOT = Path(__file__).resolve().parents[1]
-BRAND = ROOT / "custom_components" / "ypsilon_local" / "brand"
+BRAND = ROOT / "custom_components" / "runxin_local" / "brand"
 
 
 def png_size(path: Path) -> tuple[int, int]:

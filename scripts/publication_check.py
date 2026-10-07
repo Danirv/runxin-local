@@ -8,7 +8,7 @@ from pathlib import Path
 import re
 
 ROOT = Path(__file__).resolve().parent.parent
-MANIFEST = ROOT / "custom_components" / "ypsilon_local" / "manifest.json"
+MANIFEST = ROOT / "custom_components" / "runxin_local" / "manifest.json"
 SEMVER = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$")
 CHANGELOG_VERSION = re.compile(r"^## \[([^\]]+)\]", re.MULTILINE)
 INFO_VERSION = re.compile(r"^# Runxin Local ([^\s]+)\s*$", re.MULTILINE)
@@ -52,7 +52,7 @@ def main() -> int:
         content = (ROOT / relative).read_text()
         if "__GITHUB_USER__" in content or "__GITHUB_REPO__" in content:
             errors.append(f"{relative} still contains repository placeholders")
-    if not (ROOT / "custom_components" / "ypsilon_local" / "brand" / "icon.png").exists():
+    if not (ROOT / "custom_components" / "runxin_local" / "brand" / "icon.png").exists():
         errors.append("brand/icon.png is missing")
     if not (ROOT / "LICENSE").exists():
         errors.append("LICENSE is missing")

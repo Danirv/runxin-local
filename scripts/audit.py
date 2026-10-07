@@ -12,7 +12,7 @@ import sys
 import types
 
 ROOT = Path(__file__).resolve().parent.parent
-HERE = ROOT / "custom_components" / "ypsilon_local"
+HERE = ROOT / "custom_components" / "runxin_local"
 AUDIT_PKG = "_ypsilon_audit"
 PLATFORMS = {
     "sensor.py": "sensor",

@@ -8,7 +8,7 @@ Les contribucions són benvingudes. El projecte prioritza control local fiable, 
 
 1. Executa `python scripts/audit.py`.
 2. Executa `python scripts/publication_check.py` en un clon públic configurat.
-3. Executa `python -m compileall -q custom_components/ypsilon_local scripts`.
+3. Executa `python -m compileall -q custom_components/runxin_local scripts`.
 4. Mantén els textos visibles per a l'usuari als fitxers de traducció (`en`, `es`, `ca`).
 5. Prefereix canvis petits i revisables i conserva els unique ids d'entitats/config entries llevat que hi hagi una migració.
 6. En escriptures, diferencia transport de l'ordre, ACK de protocol i estat físic confirmat.
@@ -48,7 +48,7 @@ Consulta [`docs/adding-a-device-profile.ca.md`](docs/adding-a-device-profile.ca.
 
 ## Possible llibreria independent
 
-La capa pura de protocol està preparada per poder-se extreure més endavant a una llibreria pública de PyPI si apareixen diversos consumidors reals. Fins aleshores, no introdueixis dependències runtime entre integracions HACS important un `custom_components.ypsilon_local` instal·lat.
+La capa pura de protocol està preparada per poder-se extreure més endavant a una llibreria pública de PyPI si apareixen diversos consumidors reals. Fins aleshores, no introdueixis dependències runtime entre integracions HACS important un `custom_components.runxin_local` instal·lat.
 
 ## Llicència
 

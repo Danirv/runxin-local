@@ -33,6 +33,7 @@ from .const import (
     DEFAULT_CLOCK_TOLERANCE,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
+    LEGACY_DOMAIN,
     MAX_CLOCK_TOLERANCE,
     MAX_SCAN_INTERVAL,
     MIN_ACTIVE_SCAN_INTERVAL,
@@ -127,6 +128,8 @@ class YpsilonLocalConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_dhcp(
         self, discovery_info: DhcpServiceInfo
     ) -> config_entries.ConfigFlowResult:
+        if self.hass.config_entries.async_entries(LEGACY_DOMAIN):
+            return self.async_abort(reason="domain_migration_required")
         mac = format_mac(discovery_info.macaddress)
         self.discovered_host = discovery_info.ip
         await self.async_set_unique_id(mac)
@@ -171,6 +174,8 @@ class YpsilonLocalConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> config_entries.ConfigFlowResult:
+        if self.hass.config_entries.async_entries(LEGACY_DOMAIN):
+            return self.async_abort(reason="domain_migration_required")
         errors: dict[str, str] = {}
         if user_input is not None:
             host = user_input[CONF_HOST].strip()

@@ -16,6 +16,7 @@
       "unsupported_device": "Unsupported controller model."
     },
     "abort": {
+      "domain_migration_required": "Existing Ypsilon configuration needs the domain migration first. Do not remove or re-add the device. Follow the domain migration guide in the repository.",
       "invalid_auth": "The device responded but rejected local authentication. Check the connection troubleshooting guide and debug logs.",
       "device_locked": "The device rejected local authentication and advertised a local-control lock. Check whether the vendor app offers a lock or local-control setting; see the troubleshooting guide before resetting it.",
       "already_configured": "Device is already configured.",

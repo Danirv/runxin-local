@@ -96,7 +96,7 @@ async def test_diagnostic_progress_and_saved_report_need_no_manual_environment(h
     report_id=result["data"]["diagnostic_report_id"]
     saved=await report_mod.report_store(hass,report_id).async_load()
     assert saved["summary"]["status"] == status
-    assert saved["integration"]["domain"] == "ypsilon_local"
+    assert saved["integration"]["domain"] == "runxin_local"
     assert TEST_HOST not in str(saved)
     assert TEST_MAC not in str(saved)
     assert TEST_MAC.replace(":","") not in report_id
@@ -136,13 +136,13 @@ async def test_advanced_services_cannot_use_diagnostic_entry(hass, monkeypatch):
     from homeassistant.config_entries import ConfigEntryState
     from homeassistant.exceptions import ServiceValidationError
     writer=AsyncMock()
-    entry=SimpleNamespace(domain="ypsilon_local",state=ConfigEntryState.LOADED,
+    entry=SimpleNamespace(domain="runxin_local",state=ConfigEntryState.LOADED,
                           data={"diagnostic_only":True},runtime_data=SimpleNamespace(async_write_and_verify=writer))
     monkeypatch.setattr(hass.config_entries,"async_get_entry",Mock(return_value=entry))
     services_mod.async_setup_services(hass)
     for name,extra in (("write_fields",{"fields":{43:24}}),("advance_phase",{"phase":1})):
         with pytest.raises(ServiceValidationError) as error:
-            await hass.services.async_call("ypsilon_local",name,{"config_entry_id":"diag",**extra},blocking=True)
+            await hass.services.async_call("runxin_local",name,{"config_entry_id":"diag",**extra},blocking=True)
         assert error.value.translation_key == "diagnostic_read_only"
     writer.assert_not_awaited()
 
@@ -191,7 +191,7 @@ async def hass(tmp_path):
 def _flow(hass, *, source=config_entries.SOURCE_USER):
     flow = flow_mod.YpsilonLocalConfigFlow()
     flow.hass = hass
-    flow.handler = "ypsilon_local"
+    flow.handler = "runxin_local"
     flow.flow_id = "test-model-flow"
     flow.context = {"source": source}
     return flow
@@ -214,7 +214,7 @@ async def _add_sensor(hass, sensor, entity_id):
     """Register the entity on a real HA platform before writing its state."""
     sensor.entity_id = entity_id
     entry = config_entries.ConfigEntry(
-        domain="ypsilon_local", unique_id=TEST_MAC, title=sensor._entry.title,
+        domain="runxin_local", unique_id=TEST_MAC, title=sensor._entry.title,
         data={"host": TEST_HOST}, options={}, source=config_entries.SOURCE_USER,
         version=2, minor_version=1, discovery_keys=MappingProxyType({}),
         subentries_data=[],
@@ -224,7 +224,7 @@ async def _add_sensor(hass, sensor, entity_id):
         await hass.config_entries.async_add(entry)
     platform = EntityPlatform(
         hass=hass, logger=logging.getLogger(__name__), domain="sensor",
-        platform_name="ypsilon_local", platform=None,
+        platform_name="runxin_local", platform=None,
         scan_interval=timedelta(seconds=60), entity_namespace=None,
     )
     platform.config_entry = entry
@@ -370,7 +370,7 @@ async def test_device_identity_uses_model_metadata_and_keeps_mac_identifier(hass
     assert info["manufacturer"] == manufacturer
     assert info["model"] == model_name
     assert info["name"] == title
-    assert info["identifiers"] == {("ypsilon_local", TEST_MAC)}
+    assert info["identifiers"] == {("runxin_local", TEST_MAC)}
     assert sensor.unique_id == f"{TEST_MAC}_flow_rate"
 
 
@@ -479,3 +479,135 @@ async def test_real_short_auth_response_is_connection_error_even_with_advertised
     assert "result=cannot_connect" in caplog.text
     assert TEST_HOST not in caplog.text
     assert [call.args[0] for call in device.send_packet.call_args_list] == [0x65]
+
+
+@pytest.mark.asyncio
+async def test_domain_pilot_preserves_native_ha_registries_across_restart(hass, tmp_path):
+    """Use actual HA store schemas and reload them into a second HA instance."""
+    from pathlib import Path
+    from scripts import migrate_domain as migration
+    from homeassistant.helpers.storage import Store
+    from homeassistant.config_entries import ConfigEntryState
+
+    old = config_entries.ConfigEntry(
+        domain="ypsilon_local", unique_id=TEST_MAC, title="My G6",
+        data={"host": TEST_HOST}, options={"auto_sync_clock":False},
+        source=config_entries.SOURCE_USER, version=2, minor_version=1,
+        discovery_keys=MappingProxyType({}), subentries_data=[],
+    )
+    diag = config_entries.ConfigEntry(
+        domain="ypsilon_local", unique_id="02:00:00:00:00:14", title="Diagnostic",
+        data={"host":"192.0.2.14", "diagnostic_only":True,"diagnostic_report_id":"native_report"},
+        options={}, source=config_entries.SOURCE_USER, version=2, minor_version=1,
+        discovery_keys=MappingProxyType({}), subentries_data=[],
+    )
+    with patch.object(hass.config_entries,"async_setup",AsyncMock(return_value=True)):
+        await hass.config_entries.async_add(old)
+        await hass.config_entries.async_add(diag)
+    devreg=device_registry.async_get(hass)
+    device=devreg.async_get_or_create(config_entry_id=old.entry_id,
+        identifiers={("ypsilon_local",TEST_MAC)}, connections={("mac",TEST_MAC)},
+        name="Ypsilon G6", manufacturer="ATH / BWT", model="Ypsilon G6")
+    devreg.async_update_device(device.id,name_by_user="My water softener")
+    entreg=entity_registry.async_get(hass)
+    entity=entreg.async_get_or_create("sensor","ypsilon_local",f"{TEST_MAC}_flow_rate",
+        config_entry=old,device_id=device.id,suggested_object_id="original_custom_flow")
+    entreg.async_update_entity(entity.entity_id,name="My original flow",disabled_by=None)
+    entreg.async_update_entity_options(entity.entity_id,"sensor",{"display_precision":3})
+    await Store(hass,1,"ypsilon_local.compatibility.native_report").async_save(_report())
+    await hass.config_entries._store.async_save(hass.config_entries._data_to_save())
+    await devreg._store.async_save(devreg._data_to_save())
+    await entreg._store.async_save(entreg._data_to_save())
+    await hass.async_stop()
+    legacy=tmp_path/"custom_components/ypsilon_local"
+    legacy.mkdir(parents=True)
+    (legacy/"manifest.json").write_text('{"domain":"ypsilon_local","version":"2.8.0"}')
+    source=Path(__file__).resolve().parents[1]/"custom_components/runxin_local"
+    backup=migration.apply_plan(migration.make_plan(tmp_path),source)
+    assert migration.verify(backup)=={"entries":2,"entities":1,"devices":1,"reports":1}
+
+    new_hass=HomeAssistant(str(tmp_path))
+    new_hass.config_entries=config_entries.ConfigEntries(new_hass,{})
+    device_registry.async_setup(new_hass)
+    platform=None
+    try:
+        await new_hass.config_entries.async_initialize()
+        await device_registry.async_load(new_hass)
+        await entity_registry.async_load(new_hass)
+        restored=new_hass.config_entries.async_get_entry(old.entry_id)
+        assert restored.domain=="runxin_local"
+        assert restored.options==old.options
+        assert restored.unique_id==old.unique_id
+        new_device=device_registry.async_get(new_hass).async_get_or_create(
+            config_entry_id=restored.entry_id,identifiers={("runxin_local",TEST_MAC)},
+            connections={("mac",TEST_MAC)})
+        assert new_device.id==device.id
+        assert new_device.name_by_user=="My water softener"
+        registry=entity_registry.async_get(new_hass)
+        retained=registry.async_get_or_create("sensor","runxin_local",f"{TEST_MAC}_flow_rate",
+            config_entry=restored,device_id=new_device.id)
+        assert retained.entity_id==entity.entity_id
+        assert retained.id==entity.id
+        assert retained.name=="My original flow"
+        assert retained.options["sensor"]["display_precision"]==3
+        coordinator,_=_entity_context(new_hass,{"deviceModel":9,"flowRate":1000,"waterVolumeUnit":2})
+        description=next(d for d in sensor_mod.SENSORS if d.key=="flow_rate")
+        sensor=sensor_mod.YpsilonSensor(coordinator,restored,description)
+        platform=EntityPlatform(hass=new_hass,logger=logging.getLogger(__name__),domain="sensor",
+            platform_name="runxin_local",platform=None,scan_interval=timedelta(seconds=60),entity_namespace=None)
+        platform.config_entry=restored
+        await platform.async_add_entities([sensor])
+        assert sensor.entity_id==entity.entity_id
+        state=new_hass.states.get(entity.entity_id)
+        assert float(state.state)==10.0
+        assert state.attributes["unit_of_measurement"]=="m³/h"
+        assert registry.async_get(entity.entity_id).id==entity.id
+        assert await report_mod.report_store(new_hass,"native_report").async_load()==_report()
+        # Both action namespaces have identical write validation and entry IDs.
+        services_mod.async_setup_services(new_hass)
+        restored._async_set_state(new_hass,ConfigEntryState.LOADED,None)
+        writer=AsyncMock()
+        restored.runtime_data=SimpleNamespace(data={"waterVolumeUnit":2},async_write_and_verify=writer)
+        for domain in ("runxin_local","ypsilon_local"):
+            await new_hass.services.async_call(domain,"write_fields",
+                {"config_entry_id":restored.entry_id,"fields":{43:24}},blocking=True)
+        assert writer.await_count==2
+        for call in writer.await_args_list: assert call.args==({43:24},)
+    finally:
+        if platform:await platform.async_reset()
+        await new_hass.async_stop()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("source",["user","dhcp"])
+async def test_legacy_entries_block_new_domain_duplicate_before_device_io(hass, monkeypatch, source):
+    old=SimpleNamespace(entry_id="legacy",domain="ypsilon_local")
+    monkeypatch.setattr(hass.config_entries,"async_entries",lambda domain,*args,**kwargs:[old] if domain=="ypsilon_local" else [])
+    flow=_flow(hass,source=source)
+    flow._async_probe=AsyncMock()
+    if source=="user":result=await flow.async_step_user({"host":TEST_HOST})
+    else:result=await flow.async_step_dhcp(DhcpServiceInfo(ip=TEST_HOST,hostname="test",macaddress=TEST_MAC))
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"]=="domain_migration_required"
+    flow._async_probe.assert_not_awaited()
+    init_mod=load("__init__")
+    setup=Mock()
+    monkeypatch.setattr(init_mod,"async_setup_services",setup)
+    assert not await init_mod.async_setup(hass,{})
+    setup.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_legacy_service_aliases_retain_diagnostic_write_block(hass, monkeypatch):
+    from homeassistant.config_entries import ConfigEntryState
+    from homeassistant.exceptions import ServiceValidationError
+    writer=AsyncMock()
+    entry=SimpleNamespace(domain="runxin_local",state=ConfigEntryState.LOADED,
+        data={"diagnostic_only":True},runtime_data=SimpleNamespace(async_write_and_verify=writer))
+    monkeypatch.setattr(hass.config_entries,"async_get_entry",Mock(return_value=entry))
+    services_mod.async_setup_services(hass)
+    for name,data in (("write_fields",{"fields":{43:24}}),("advance_phase",{"phase":1})):
+        with pytest.raises(ServiceValidationError) as error:
+            await hass.services.async_call("ypsilon_local",name,{"config_entry_id":"diag",**data},blocking=True)
+        assert error.value.translation_key=="diagnostic_read_only"
+    writer.assert_not_awaited()

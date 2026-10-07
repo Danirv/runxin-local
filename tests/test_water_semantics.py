@@ -10,7 +10,7 @@ from pathlib import Path
 import re
 
 ROOT = Path(__file__).resolve().parents[1]
-INTEGRATION = ROOT / "custom_components" / "ypsilon_local"
+INTEGRATION = ROOT / "custom_components" / "runxin_local"
 SENSOR = (INTEGRATION / "sensor.py").read_text()
 FIELDS = (INTEGRATION / "runxin" / "fields.py").read_text()
 

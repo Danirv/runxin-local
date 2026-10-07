@@ -27,7 +27,7 @@ jobs:
       - name: Unit tests
         run: python -m pytest -q
       - name: Compile Python
-        run: python -m compileall -q custom_components/ypsilon_local scripts tests
+        run: python -m compileall -q custom_components/runxin_local scripts tests
 
   home-assistant:
     name: Home Assistant regressions

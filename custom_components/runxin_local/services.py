@@ -14,6 +14,7 @@ from .api import YpsilonConnectionError
 from .const import (
     CONF_DIAGNOSTIC_ONLY,
     DOMAIN,
+    LEGACY_DOMAIN,
     FIELD_FLOW_RATE_OFF,
     FIELD_SYSTEM_MODE,
     SAFE_RAW_WRITE_RANGES,
@@ -151,9 +152,14 @@ def async_setup_services(hass: HomeAssistant) -> None:
                 translation_placeholders={"error": str(err)},
             ) from err
 
-    async_register_admin_service(
-        hass, DOMAIN, SERVICE_WRITE_FIELDS, _write_fields, schema=WRITE_FIELDS_SCHEMA
-    )
-    async_register_admin_service(
-        hass, DOMAIN, SERVICE_ADVANCE_PHASE, _advance_phase, schema=ADVANCE_PHASE_SCHEMA
-    )
+    # Existing automations keep their service names and config_entry_id after
+    # the offline migration. Both namespaces use the exact same guarded handler.
+    for service_domain in (DOMAIN, LEGACY_DOMAIN):
+        async_register_admin_service(
+            hass, service_domain, SERVICE_WRITE_FIELDS, _write_fields,
+            schema=WRITE_FIELDS_SCHEMA,
+        )
+        async_register_admin_service(
+            hass, service_domain, SERVICE_ADVANCE_PHASE, _advance_phase,
+            schema=ADVANCE_PHASE_SCHEMA,
+        )

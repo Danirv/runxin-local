@@ -86,7 +86,7 @@ Entitats
 El codi està preparat per extreure's a una llibreria independent quan existeixi
 un segon consumidor real, però avui mantenir un altre paquet seria cost sense
 benefici. No facis que una altra integració custom depengui en runtime de
-`custom_components.ypsilon_local`.
+`custom_components.runxin_local`.
 
 Un segon transport per al mateix F79D ha d'implementar el contracte de trama crua
 sense modificar el codec F79D. Un altre controlador Runxin ha d'afegir un perfil
@@ -95,7 +95,7 @@ universals els 52 camps actuals.
 
 ## Compatibilitat
 
-L'arquitectura 2.4.x conserva `ypsilon_local`, config-entry v2, unique ids per MAC,
+L'arquitectura 2.4.x conserva `runxin_local`, config-entry v2, unique ids per MAC,
 unique ids d'entitats i les façanes `protocol.py`/`api.py`. La integració HA
 accepta els models 9 (Ypsilon G6 de referència) i 12 (Euro-Clear Midnight
 experimental / Alpha, provat amb Midnight 25), amb BroadLink BL3372 `0x520F`.

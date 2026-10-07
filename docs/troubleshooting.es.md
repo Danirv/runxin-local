@@ -21,7 +21,7 @@ depuración en el menú de la integración o añade esto a `configuration.yaml` 
 logger:
   default: warning
   logs:
-    custom_components.ypsilon_local: debug
+    custom_components.runxin_local: debug
 ```
 
 Si ya tienes una sección `logger:`, integra esta opción sin duplicarla.

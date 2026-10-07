@@ -11,7 +11,7 @@ from __future__ import annotations
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-INTEGRATION = ROOT / "custom_components" / "ypsilon_local"
+INTEGRATION = ROOT / "custom_components" / "runxin_local"
 COORDINATOR = (INTEGRATION / "coordinator.py").read_text()
 CONST = (INTEGRATION / "const.py").read_text()
 INIT = (INTEGRATION / "__init__.py").read_text()

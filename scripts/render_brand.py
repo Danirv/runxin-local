@@ -8,7 +8,7 @@ from pathlib import Path
 
 import cairosvg
 
-BRAND = Path(__file__).resolve().parents[1] / "custom_components/ypsilon_local/brand"
+BRAND = Path(__file__).resolve().parents[1] / "custom_components/runxin_local/brand"
 
 if __name__ == "__main__":
     for prefix in ("", "dark_"):
