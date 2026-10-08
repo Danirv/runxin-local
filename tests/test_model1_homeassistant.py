@@ -203,6 +203,33 @@ async def test_model1_diagnostics_include_raw_pairs_and_permissions_without_iden
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize('configured,observed,adapter_blocked,expected_blocked', [
+    (1, 9, False, True), (None, 9, True, True),
+    (None, 9, False, False), (None, None, False, True),
+])
+async def test_exported_permissions_reflect_configured_and_adapter_guards(
+    hass, configured, observed, adapter_blocked, expected_blocked,
+):
+    coordinator, client, entry = _coordinator(hass, observed, data={'controller_model': configured})
+    coordinator.auto_sync_clock = True
+    client.write_policy = {'controller_model': observed, 'read_only': adapter_blocked,
+                          'allowed_write_fields': [] if adapter_blocked else [4, 6, 7, 10, 34, 43, 47]}
+    client.connection_diagnostics = {'stage': 'ready'}
+    client.firmware = 62016
+    client.reauth_count = client.transient_retries = 0
+    entry.runtime_data = coordinator
+    result = await diagnostics_mod.async_get_config_entry_diagnostics(hass, entry)
+    policy = result['write_policy']
+    assert policy['read_only'] is expected_blocked
+    assert bool(policy['allowed_write_fields']) is not expected_blocked
+    assert policy['auto_clock_sync_requested']
+    assert policy['auto_clock_sync_permitted'] is not expected_blocked
+    assert policy['configured_model'] == configured
+    assert policy['observed_model'] == observed
+    assert not client.method_calls  # Export uses cached metadata, with no new read/write.
+
+
+@pytest.mark.asyncio
 async def test_read_only_options_hide_clock_and_ignore_attempt_to_enable_it(hass):
     coordinator, client, entry = _coordinator(hass, 1, data={'controller_model': 1})
     options = flow_mod.YpsilonLocalOptionsFlow()

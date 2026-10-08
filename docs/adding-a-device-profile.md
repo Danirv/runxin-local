@@ -1,8 +1,6 @@
 # Adding another Runxin device profile
 
-Do not start by copying the F79D field table and renaming it. The old WaterDevice
-applications contain model-dependent behavior, so a second Runxin controller
-must be treated as a separate profile until captures prove what is shared.
+Do not copy the F79D table and rename it. Treat another controller as unverified until read-only evidence establishes what is shared. A compatible controller may reuse the existing wire profile with model-specific policy; shared framing does not establish identical physical semantics.
 
 ## Controller policy versus wire profile
 
@@ -47,7 +45,7 @@ verified protocol fact.
 
 ## Home Assistant support is a separate decision
 
-A reusable profile can exist in the repository before the Ypsilon integration
+A reusable profile can exist in the repository before the Runxin Local integration
 supports it. Adding it to automatic discovery/config flow requires additional
 work: model naming, device identity, entity applicability, safe-write policy,
 translations, diagnostics and real-device testing.

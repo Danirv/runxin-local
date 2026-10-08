@@ -68,3 +68,5 @@ Consulta la [guía de resolución de problemas](troubleshooting.es.md) para dist
 La integración puede cambiar parámetros e iniciar movimientos de válvula. No es un controlador de seguridad certificado ni debe ser la única protección contra fugas o inundaciones. Conocer el códec no equivale a verificar la acción física. En la compatibilidad Alpha del modelo 12, los controles pendientes siguen disponibles con esta limitación documentada.
 
 Consulta el [README principal](../README.md), [`waterdevice-audit.es.md`](waterdevice-audit.es.md), [`f79d.es.md`](f79d.es.md), [`hardware-verification.es.md`](hardware-verification.es.md), [SECURITY](../SECURITY.md) y [LEGAL](../LEGAL.md).
+
+Consulta el [índice de documentación](index.md), la [matriz de soporte](model-support.md).

@@ -51,6 +51,12 @@ The web workflow reads the version directly from `custom_components/ypsilon_loca
 
 A tag pushed manually is handled by the tag-triggered job, which performs the same validation before creating the release. A tag created by the workflow's own `GITHUB_TOKEN` does not need a second workflow run; the web-release job completes the release itself after validating the tagged source.
 
+### Prereleases and maintenance changes
+
+A version containing `-` (for example `2.9.0-alpha.1`) is published automatically with `--prerelease --latest=false`; the latest stable release remains selected. Verify the prerelease flag and ZIP after publication. Model support/evidence is independent of the release label: an Alpha tag does not itself disable controls.
+
+Unreleased maintenance changes must use a **new version before publishing**. Never rerun publication of an existing tag to distribute newer main code. Run the complete native HA suite using `requirements-test-ha.txt` and `requirements-test-ha-baseline.txt` as separate environments; the release job itself runs the lightweight offline suite.
+
 ### Git CLI alternative
 
 If a local clone is available, the same release can still be started by tagging the exact manifest version:

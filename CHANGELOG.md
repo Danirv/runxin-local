@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented here.
 
+## Unreleased
+
+- Add cached effective write-policy diagnostics that distinguish controller evidence, configured read-only restrictions and adapter session restrictions, without device I/O.
+- Enforce recursive protocol/transport import boundaries and immutable action references in the offline audit.
+- Pin workflow action source revisions, pin offline test tools and run the full suite against HA 2026.9.3 and 2026.9.4. Validator container images still follow upstream tags.
+- Clarify shared protocol profiles, per-model permissions and standalone transport examples; align contribution/publishing guidance in English, Catalan and Spanish. No new write commands, conversions or domain migration.
+
 ## [2.9.0-alpha.1] - 2026-10-07
 
 - Add controller model 1 (F150 API name) as read-only Alpha, based on issue #17's published 52-field report; app conversions remain provisional.
