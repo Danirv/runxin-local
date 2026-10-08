@@ -14,8 +14,6 @@ Start with the [project README](../README.md), [Català](README.ca.md) or [Espa�
 | Physical read/write evidence | [Hardware verification](hardware-verification.md) · [CA](hardware-verification.ca.md) · [ES](hardware-verification.es.md) |
 | Protocol details | [Protocol](protocol.md), [F79D fields](f79d.md), [BL3372](broadlink-bl3372.md) |
 | Recovered app evidence and disagreements | [WaterDevice audit](waterdevice-audit.md) |
-| Initial Alpha audit | [Multi-model audit](multi-model-audit.md) · [CA](multi-model-audit.ca.md) |
-| Current completed and pending shared work | [Audit follow-up](audit-followup.md) · [CA](audit-followup.ca.md) · [ES](audit-followup.es.md) |
 | Tests and contributions | [CONTRIBUTING](../CONTRIBUTING.md) · [CA](../CONTRIBUTING.ca.md) · [ES](../CONTRIBUTING.es.md) |
 | Publishing and prereleases | [PUBLISHING](../PUBLISHING.md) · [CA](../PUBLISHING.ca.md) · [ES](../PUBLISHING.es.md) |
 

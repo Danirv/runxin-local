@@ -165,7 +165,7 @@ Both services reject read-only model entries. `write_fields` only accepts known 
 
 ## Model and protocol policy
 
-Controller identity, protocol profile, transport and commercial product are separate. Models that share a proven field map reuse the codec with per-model permissions/conversions; an unrelated Runxin family needs its own profile. Manufacturer enum names do not grant support. See the [architecture](docs/architecture.md), [support matrix](docs/model-support.md) and [multi-model audit](docs/multi-model-audit.md).
+Controller identity, protocol profile, transport and commercial product are separate. Models that share a proven field map reuse the codec with per-model permissions/conversions; an unrelated Runxin family needs its own profile. Manufacturer enum names do not grant support. See the [architecture](docs/architecture.md) and [support matrix](docs/model-support.md).
 
 ## Reusing the protocol work
 
@@ -202,7 +202,7 @@ Before publishing:
 python scripts/publication_check.py
 ```
 
-GitHub CI includes HACS validation, hassfest, the offline audit, the complete test suite with HA 2026.9.3/2026.9.4 and release-tag/version checks. See [development instructions](CONTRIBUTING.md) and [audit follow-up](docs/audit-followup.md).
+GitHub CI includes HACS validation, hassfest, the offline audit, the complete test suite with HA 2026.9.3/2026.9.4 and release-tag/version checks. See [development instructions](CONTRIBUTING.md).
 
 ## Branding
 

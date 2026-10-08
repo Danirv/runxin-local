@@ -41,6 +41,6 @@ The same rule applies to another transport: implement the raw-frame contract ind
 
 The pure protocol layer remains extractable inside this repository. A separate PyPI package is deferred until another real consumer justifies release/dependency overhead. Do not make another custom integration depend on an installed `custom_components.ypsilon_local` at runtime.
 
-See the [support matrix](model-support.md), [profile guide](adding-a-device-profile.md), [compatibility reports](compatibility-report.md) and [audit](multi-model-audit.md).
+See the [support matrix](model-support.md), [profile guide](adding-a-device-profile.md) and [compatibility reports](compatibility-report.md).
 
-The offline audit checks nested relative imports and transport dependencies. Exported `write_policy` distinguishes model evidence from configured/coordinator/adapter restrictions using cached metadata. For CI coverage and unresolved work, see the [follow-up](audit-followup.md).
+The offline audit checks nested relative imports and transport dependencies. Exported `write_policy` distinguishes model evidence from configured/coordinator/adapter restrictions using cached metadata. For test environments and CI coverage, see [CONTRIBUTING](../CONTRIBUTING.md).

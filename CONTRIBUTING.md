@@ -35,7 +35,9 @@ These boundaries are enforced by the offline audit where practical.
 
 The native job runs the complete suite on HA 2026.9.4; a separate baseline job uses `requirements-test-ha-baseline.txt` for HA 2026.9.3. Both use mocked device I/O. These are tested releases, not a declared minimum HA version.
 
-For a compatible new model, reuse the shared map, document unit/applicability uncertainty and start with empty write permissions. Read-only Alpha tests must cover clock/admin/adapter bypasses and existing G6/model-12 identities and conversions. A different wire family needs its own evidence and profile, not a copy of the existing catalogue. See the [support matrix](docs/model-support.md) and [pending work](docs/audit-followup.md).
+Workflow action source revisions are pinned, but the upstream HACS/hassfest actions still use floating container tags. This does not pin the entire toolchain. Import checks are static architecture checks, not a runtime sandbox.
+
+For a compatible new model, reuse the shared map, document unit/applicability uncertainty and start with empty write permissions. Read-only Alpha tests must cover clock/admin/adapter bypasses and existing G6/model-12 identities and conversions. A different wire family needs its own evidence and profile, not a copy of the existing catalogue. See the [support matrix](docs/model-support.md) and [hardware verification guide](docs/hardware-verification.md).
 
 ## Protocol research and test data
 

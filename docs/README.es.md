@@ -69,4 +69,4 @@ La integración puede cambiar parámetros e iniciar movimientos de válvula. No 
 
 Consulta el [README principal](../README.md), [`waterdevice-audit.es.md`](waterdevice-audit.es.md), [`f79d.es.md`](f79d.es.md), [`hardware-verification.es.md`](hardware-verification.es.md), [SECURITY](../SECURITY.md) y [LEGAL](../LEGAL.md).
 
-Consulta el [índice de documentación](index.md), la [matriz de soporte](model-support.md) y los [pendientes de la auditoría](audit-followup.es.md).
+Consulta el [índice de documentación](index.md), la [matriz de soporte](model-support.md).

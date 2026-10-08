@@ -6,7 +6,7 @@ Local Home Assistant integration for compatible Runxin F79D / BroadLink BL3372 w
 
 Adds **model 1 / F150 read-only Alpha**: continuous reference sensors and read-only settings, no control entities, no automatic clock correction and no admin-service writes. Resin and per-cycle quantity have unconfirmed units and remain unscaled. Provisional readings do not create long-term statistics. Diagnostics preserve raw field pairs for app comparisons.
 
-Explicit per-model permissions default to no writes; existing G6/model-12 commands, identities and conversions are retained. See [model-1 instructions](docs/model-1-alpha.md) and the [architecture audit](docs/multi-model-audit.md). Failed-auth sockets are closed, short malformed frames fail as protocol errors and responses must match the request opcode. Prerelease publication does not replace stable latest. Domain migration remains a separate pilot.
+Explicit per-model permissions default to no writes; existing G6/model-12 commands, identities and conversions are retained. See [model-1 instructions](docs/model-1-alpha.md) and the [architecture guide](docs/architecture.md). Failed-auth sockets are closed, short malformed frames fail as protocol errors and responses must match the request opcode. Prerelease publication does not replace stable latest. Domain migration remains a separate pilot.
 
 ## 2.8.0
 

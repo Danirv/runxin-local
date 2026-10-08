@@ -31,4 +31,4 @@ The catalogue's hardware-write evidence is reference G6 evidence, not a blanket 
 - Controls: per-field write encoding, range and baseline/set/fresh-read/restore evidence. Metadata must distinguish verified and pending actions.
 - Beta/release: sustained real HA operation, reload/restart checks, missing-field/unknown-enum handling and documented hardware/firmware scope. Software tests do not replace those hardware checks.
 
-See [model 1 comparison](model-1-alpha.md), [hardware evidence](hardware-verification.md), [adding a profile](adding-a-device-profile.md) and [audit findings](multi-model-audit.md).
+See [model 1 comparison](model-1-alpha.md), [hardware evidence](hardware-verification.md) and [adding a profile](adding-a-device-profile.md).

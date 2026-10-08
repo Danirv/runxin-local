@@ -32,7 +32,9 @@ Lee [`docs/architecture.es.md`](docs/architecture.es.md) antes de trabajar con e
 
 El trabajo nativo ejecuta toda la suite con HA 2026.9.4; otro usa `requirements-test-ha-baseline.txt` con HA 2026.9.3. Son versiones probadas con E/S simulada, no una versión mínima declarada.
 
-Para un modelo compatible nuevo, reutiliza el mapa compartido, documenta la incertidumbre de unidades/aplicabilidad y empieza con permisos de escritura vacíos. Las pruebas Alpha deben cubrir bloqueos de reloj, servicios y adaptador, y conservar identidades y conversiones del G6/modelo 12. Una familia de protocolo distinta necesita evidencia y perfil propios. Consulta la [matriz de soporte](docs/model-support.md) y los [pendientes](docs/audit-followup.es.md).
+Las revisiones del código de las acciones están fijadas, pero HACS/hassfest aún utilizan etiquetas de contenedores que pueden cambiar. Esto no fija toda la cadena de herramientas. Las comprobaciones de imports son estáticas; no aíslan el código durante la ejecución.
+
+Para un modelo compatible nuevo, reutiliza el mapa compartido, documenta la incertidumbre de unidades/aplicabilidad y empieza con permisos de escritura vacíos. Las pruebas Alpha deben cubrir bloqueos de reloj, servicios y adaptador, y conservar identidades y conversiones del G6/modelo 12. Una familia de protocolo distinta necesita evidencia y perfil propios. Consulta la [matriz de soporte](docs/model-support.md) y la [guía de verificación física](docs/hardware-verification.es.md).
 
 ## Investigación del protocolo y datos de prueba
 

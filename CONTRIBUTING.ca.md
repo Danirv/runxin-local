@@ -32,7 +32,9 @@ Llegeix [`docs/architecture.ca.md`](docs/architecture.ca.md) abans de treballar 
 
 La feina nativa executa tota la suite amb HA 2026.9.4; una altra usa `requirements-test-ha-baseline.txt` amb HA 2026.9.3. Són versions provades amb E/S simulada, no una versió mínima declarada.
 
-Per a un model compatible nou, reutilitza el mapa compartit, documenta la incertesa d'unitats/aplicabilitat i comença amb permisos d'escriptura buits. Les proves Alpha han de cobrir els bloquejos de rellotge, serveis i adaptador, i conservar identitats i conversions del G6/model 12. Una família de protocol diferent necessita evidència i perfil propis. Consulta la [matriu de suport](docs/model-support.md) i els [pendents](docs/audit-followup.ca.md).
+Les revisions del codi de les accions estan fixades, però HACS/hassfest encara utilitzen etiquetes de contenidors que poden canviar. Això no fixa tota la cadena d'eines. Les comprovacions d'imports són estàtiques; no aïllen el codi durant l'execució.
+
+Per a un model compatible nou, reutilitza el mapa compartit, documenta la incertesa d'unitats/aplicabilitat i comença amb permisos d'escriptura buits. Les proves Alpha han de cobrir els bloquejos de rellotge, serveis i adaptador, i conservar identitats i conversions del G6/model 12. Una família de protocol diferent necessita evidència i perfil propis. Consulta la [matriu de suport](docs/model-support.md) i la [guia de verificació física](docs/hardware-verification.ca.md).
 
 ## Recerca del protocol i dades de prova
 

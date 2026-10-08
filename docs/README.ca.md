@@ -69,4 +69,4 @@ La integració pot canviar paràmetres i iniciar moviments de vàlvula. No és u
 
 Consulta el [README principal](../README.md), [`waterdevice-audit.ca.md`](waterdevice-audit.ca.md), [`f79d.ca.md`](f79d.ca.md), [`hardware-verification.ca.md`](hardware-verification.ca.md), [SECURITY](../SECURITY.md) i [LEGAL](../LEGAL.md).
 
-Consulta l’[índex de documentació](index.md), la [matriu de suport](model-support.md) i els [pendents de l’auditoria](audit-followup.ca.md).
+Consulta l’[índex de documentació](index.md), la [matriu de suport](model-support.md).
