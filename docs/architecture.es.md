@@ -31,3 +31,5 @@ Reglas:
 El protocolo seguirá dentro del repositorio hasta que otro consumidor real justifique una biblioteca independiente. Consulta la [matriz de soporte](model-support.md), [Alpha del modelo 1](model-1-alpha.es.md).
 
 La auditoría offline comprueba imports relativos anidados y dependencias del transporte. `write_policy` distingue evidencia del modelo y restricciones configuradas/del coordinador/adaptador con metadatos en caché. Consulta [CONTRIBUTING](../CONTRIBUTING.es.md) para los entornos de pruebas y la cobertura de CI.
+
+El modelo 14 / F136 reutiliza el perfil y los controles Midnight, con las verificaciones aportadas en la issue #22 y los campos pendientes diferenciados. La release 2.9.0 es estable; Alpha se aplica por modelo. Consulta la [guía del modelo 14](model-14-alpha.es.md).

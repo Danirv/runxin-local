@@ -2,11 +2,13 @@
 
 [English](model-1-alpha.md) | [Català](model-1-alpha.ca.md) | [Español](model-1-alpha.es.md)
 
-La versió **2.9.0-alpha.1** admet el codi de controlador **1** amb sensors de lectura periòdica. El fabricant anomena aquest codi **F150**, però no tenim confirmat el producte comercial ni la vàlvula de la issue #17. No és suport general per a qualsevol equip F150.
+La versió **2.9.0** admet el codi de controlador **1** amb sensors de lectura periòdica. El fabricant anomena aquest codi **F150**, però no tenim confirmat el producte comercial ni la vàlvula de la issue #17. No és suport general per a qualsevol equip F150.
+
+La release de la integració és estable; Alpha descriu només el suport d’aquest model.
 
 ## Instal·lació i comparació
 
-1. Instal·la la prerelease quan estigui publicada, o descarrega el ZIP de la branca de la PR i copia només `custom_components/ypsilon_local` a `/config/custom_components/ypsilon_local`. Desa una còpia de la carpeta anterior i reinicia HA. Aquesta Alpha conserva `ypsilon_local`; no necessita la migració a `runxin_local`.
+1. Instal·la la versió 2.9.0 o posterior amb HACS, o descarrega el ZIP de la release i copia només `custom_components/ypsilon_local` a `/config/custom_components/ypsilon_local`. Desa una còpia de la carpeta anterior i reinicia HA. Aquesta Alpha conserva `ypsilon_local`; no necessita la migració a `runxin_local`.
 2. Si tens una entrada de només diagnòstic del mateix dispositiu, descarrega primer el seu informe i elimina aquesta entrada abans de donar d'alta el dispositiu normalment. No es transforma automàticament en una entrada amb sensors.
 3. Afegeix **Runxin Local**, indica la IP local i accepta l'explicació **Alpha de només lectura**. Per defecte llegeix cada minut, sense cadència adaptativa. La correcció del rellotge està bloquejada encara que hi hagi una opció antiga activada.
 4. Compara els sensors amb l'app que funciona. Algunes entitats de diagnòstic estan desactivades per defecte; activa les que necessitis des de la llista d'entitats. No cal canviar ajustos per comparar-los.

@@ -1,5 +1,7 @@
 [English](PUBLISHING.md) | [Español](PUBLISHING.es.md) | [Català](PUBLISHING.ca.md)
 
+La **2.9.0** utilitza una etiqueta de release estable. Alpha és metadada de suport per model (1/12/14), no un requisit de prerelease de la integració. Una versió normal actualitza el canal estable.
+
 # Publicar Runxin Local a GitHub i HACS
 
 L'arbre de codi està preparat per al repositori públic `Danirv/runxin-local` i la seva distribució mitjançant HACS.

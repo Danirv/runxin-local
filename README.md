@@ -1,6 +1,6 @@
 # Runxin Local for Home Assistant
 
-Local Home Assistant integration for water softeners with compatible **Runxin controllers** and a **BroadLink BL3372** Wi-Fi module. Tested hardware includes **ATH/BWT Ypsilon G6 (F79D, model 9)** and **Euro-Clear Midnight 25 (model 12; named F105 in the manufacturer's API)**.
+Local Home Assistant integration for water softeners with compatible **Runxin controllers** and a **BroadLink BL3372** Wi-Fi module. Tested hardware includes **ATH/BWT Ypsilon G6 (F79D, model 9)** and **Euro-Clear Midnight 25 variants (F105 / model 12 and F136 / model 14)**.
 
 Previously **Ypsilon / ypsilon-local**. The project and visible integration are now **Runxin Local**. The Home Assistant domain, installation folder, service names and existing unique IDs remain `ypsilon_local`; existing installations do not need to remove/re-add their devices or edit their automations because of the name change. GitHub redirects the previous repository URL after the rename; use the new URL for new installations.
 
@@ -37,9 +37,10 @@ Supported Home Assistant targets (BroadLink BL3372 module, devtype `0x520F`):
 |---|---|---|---|
 | Unbranded device reported in issue #17 | 1 (F150 API name) | **Read-only Alpha** | All 52 fields received; app conversions/applicability pending; no writes or automatic clock correction |
 | ATH/BWT Ypsilon G6 | 9 (F79D) | Reference hardware | Per-field read/write evidence documented in the hardware verification guide |
-| Euro-Clear Midnight (ECOPRO+ head) | 12 | **Experimental / Alpha**, tested on Midnight 25 | Captured state matches the controller. Writes to fields 4, 6, 10 and 43 hardware-verified; fields 7 and 47 and mechanical field-34 actions remain available for testing but are not yet hardware-verified on this model |
+| Euro-Clear Midnight (ECOPRO+ head) | 12 (F105 API name) | **Experimental / Alpha**, tested on Midnight 25 | Captured state matches the controller. Writes to fields 4, 6, 10 and 43 hardware-verified; fields 7 and 47 and mechanical field-34 actions remain available for testing but are not yet hardware-verified on this model |
+| Euro-Clear Midnight (F136 / ECOPRO+ head) | 14 (F136) | **Experimental / Alpha**, reported on Midnight 25 | Contributor enabled the model locally and reports working F79D reads and verified writes to 4/6/10/43; 7/34/47 pending. Midnight resin scale 0.1 remains pending a direct comparison |
 
-Model 12 retains its existing Alpha compatibility and controls; model 1 has a separate, strictly read-only Alpha policy. This prerelease does not promote either model to stable support. The original model-12 controls and strict fresh read-back remain available; the label does not disable commands or imply that pending actions are verified. See the [model-12 evidence and follow-up checks](docs/hardware-verification.md#euro-clear-midnight--controller-model-12).
+**2.9.0 is a normal stable integration release. Alpha describes support for individual models:** model 1 is read-only, while models 12 and 14 have configuration controls and documented pending validations. The Midnight controls and strict fresh read-back remain available; the label does not disable commands or imply that pending actions are verified. See the [model-12 evidence](docs/hardware-verification.md#euro-clear-midnight--controller-model-12) and [model-14 guide](docs/model-14-alpha.md).
 
 Diagnostics include per-model support/evidence metadata and both raw field-26 resin bytes. The observed Midnight 25 value `FA 00` still displays as **25 L**. The second byte's meaning and resin values above 25.5 L are not established by that capture; no new byte order is assumed.
 

@@ -1,6 +1,12 @@
-# Runxin Local 2.9.0-alpha.1
+# Runxin Local 2.9.0
 
 Local Home Assistant integration for compatible Runxin F79D / BroadLink BL3372 water softeners, tested with ATH/BWT Ypsilon G6 and Euro-Clear Midnight.
+
+## 2.9.0
+
+Normal stable integration release, with **Alpha support scoped to controller models**. Adds Euro-Clear Midnight 25 **Runxin F136 / model 14** based on issue #22: working local discovery/authentication/F79D reads and contributor-reported verified writes to 4/6/10/43. Fields 7/34/47 remain pending but available with the existing Midnight controls and fresh read-back. Resin scale 0.1 follows the reported shared map and is explicitly marked pending a direct raw/app comparison.
+
+Model 12 is identified as **F105 / Euro-Clear Midnight**, retaining its entry title, IDs, conversions and controls. Model 1 / F150 remains read-only Alpha. G6 support and the `ypsilon_local` domain are retained. Adds effective cached write-policy diagnostics, stronger architecture checks and full HA 2026.9.3/2026.9.4 coverage. See the [support matrix](docs/model-support.md) and [model-14 guide](docs/model-14-alpha.md).
 
 ## 2.9.0-alpha.1
 

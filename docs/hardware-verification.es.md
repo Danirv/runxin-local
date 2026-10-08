@@ -110,3 +110,7 @@ El campo 52 queda intencionadamente fuera del bloque normal 1..51. La capa Ypsil
 La evidencia de un controlador o firmware no debe generalizarse automáticamente a todos los dispositivos Runxin. Antes de ampliar soporte a otro transporte, rebrand o firmware, deben verificarse de forma independiente el códec y el comportamiento físico.
 
 Consulta también [`waterdevice-audit.es.md`](waterdevice-audit.es.md).
+
+## Euro-Clear Midnight / controlador modelo 14 (F136)
+
+La [issue #22](https://github.com/Danirv/runxin-local/issues/22) declara lecturas F79D funcionales tras añadir el modelo localmente y escrituras verificadas en **4/6/10/43**. Es evidencia física aportada por el usuario, diferenciada de las capturas del modelo 12. **7/34/47** siguen pendientes. La 2.9.0 admite el modelo con soporte Alpha y controles Midnight; la escala de resina 0,1 queda pendiente de comparación directa y se marca en diagnósticos. [Guía del modelo 14](model-14-alpha.es.md).

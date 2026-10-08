@@ -1,22 +1,24 @@
 # Controller support and evidence
 
-This is the current model policy for **2.9.0-alpha.1**. A commercial brand, valve reference, BroadLink device type and Runxin `deviceModel` code are different identifiers.
+This is the current model policy for **2.9.0**. A commercial brand, valve reference, BroadLink device type and Runxin `deviceModel` code are different identifiers.
 
 | Controller code | Manufacturer enum name | Integration policy | Field evidence | Writes |
 |---|---|---|---|---|
 | 9 | F79D | Reference ATH/BWT Ypsilon G6 | Reference hardware and per-field checks | Existing fields 4/6/7/10/34/43/47; field 34 remains pending physical verification |
 | 12 | F105 | Alpha Euro-Clear Midnight 25 | Captured state/app comparison; resin scale 0.1 | Existing fields 4/6/7/10/34/43/47; 4/6/10/43 hardware-verified, 7/34/47 pending |
 | 1 | F150 | Read-only Alpha, issue #17 | All 52 requested field IDs received; reference semantics/applicability pending | None; clock correction and admin services blocked |
-| 14 | F136 | One-time diagnostic report only | Contributor report in issue #22; independent comparisons pending | None through a diagnostic entry |
+| 14 | F136 | Alpha Euro-Clear Midnight 25 | Contributor reports working F79D map after local model addition; direct conversion comparisons pending | Existing fields 4/6/7/10/34/43/47; contributor reports 4/6/10/43 verified, 7/34/47 pending |
 | Other codes | Descriptive API names, where known | One-time diagnostic report only | No automatic support from the name table | None through a diagnostic entry |
 
 `models.py` is the authoritative policy registry. `allowed_write_fields` is effective permission; `hardware_verified_write_fields`/`pending_write_fields` document evidence. They serve different purposes: legacy pending controls for 9/12 are preserved, while a new model defaults to an empty permission set. An Alpha label alone does not grant or withdraw write permission.
 
 A periodic read-only Alpha is distinct from a saved diagnostic-only entry. The Alpha authenticates/polls and creates reference sensors; a diagnostic-only entry loads a saved one-time report without polling or entities. Neither permits writes.
 
+The integration release is stable; Alpha status applies to the individual model policies above. Reported model-14 write evidence is attributed to [issue #22](https://github.com/Danirv/runxin-local/issues/22), not to a new maintainer hardware test.
+
 ## Shared maps and model-specific behavior
 
-Models 1/9/12 currently use the F79D-compatible frame and field-map path. That does not mean their full physical semantics are identical. Model 12 keeps its resin scale. Model 1 keeps resin/per-cycle values without confirmed units and all readings marked provisional, with long-term statistics disabled. Original bytes are retained for comparison.
+Models 1/9/12/14 currently use the F79D-compatible frame and field-map path. That does not mean their full physical semantics are identical. Models 12/14 use the Midnight resin scale 0.1; it is observed on model 12 and adopted from the reported shared map on model 14, with `resin_volume_scale_confirmed=false` until a direct raw/app comparison. Model 1 keeps resin/per-cycle values without confirmed units and all readings marked provisional, with long-term statistics disabled. Original bytes are retained for comparison.
 
 The catalogue's hardware-write evidence is reference G6 evidence, not a blanket claim for every model. Future differences in byte order, enums, units or applicability require model/profile-specific evidence and regression fixtures; do not change the shared G6 definition to fit another controller.
 

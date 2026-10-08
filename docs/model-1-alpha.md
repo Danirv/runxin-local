@@ -2,11 +2,13 @@
 
 [English](model-1-alpha.md) | [Català](model-1-alpha.ca.md) | [Español](model-1-alpha.es.md)
 
-Version **2.9.0-alpha.1** admits controller code **1** with continuous read-only entities. The public manufacturer's enumeration calls this code **F150**; the commercial product and valve identity in issue #17 are unconfirmed. This does not claim support for every F150-branded product or firmware.
+Version **2.9.0** admits controller code **1** with continuous read-only entities. The public manufacturer's enumeration calls this code **F150**; the commercial product and valve identity in issue #17 are unconfirmed. This does not claim support for every F150-branded product or firmware.
+
+The integration release is stable; Alpha describes support for this particular model.
 
 ## Install and compare
 
-1. Install this prerelease when published, or download the PR branch's source ZIP and copy only `custom_components/ypsilon_local` to `/config/custom_components/ypsilon_local`. Keep a backup of the previous integration folder and restart Home Assistant. Do not install `runxin_local`; the domain-migration pilot is separate.
+1. Install version 2.9.0 or later through HACS, or download the release ZIP and copy only `custom_components/ypsilon_local` to `/config/custom_components/ypsilon_local`. Keep a backup of the previous integration folder and restart Home Assistant. Do not install `runxin_local`; the domain-migration pilot is separate.
 2. If you saved a diagnostic-only entry for this device, download its report first, then delete that entry before adding the device normally. Diagnostic entries have no operational entities and are not silently converted.
 3. Add **Runxin Local**, enter the local IP, and accept the **Read-only Alpha** explanation. Default polling is once per minute, with adaptive polling off. Clock correction remains blocked even if an old option is enabled.
 4. Open the device and compare its sensors with the working vendor app. Some reference/diagnostic entities are disabled by default; enable them in the entity list if useful. No settings need to be changed to make a comparison.

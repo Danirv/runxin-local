@@ -57,12 +57,12 @@ def _report(code=14, *, status="partial"):
 @pytest.mark.asyncio
 async def test_unknown_model_offers_named_diagnostics_without_starting_scan(hass, monkeypatch):
     flow = _flow(hass)
-    flow._async_probe = AsyncMock(return_value=({"deviceModel":14}, TEST_MAC))
+    flow._async_probe = AsyncMock(return_value=({"deviceModel":15}, TEST_MAC))
     collect = Mock()
     monkeypatch.setattr(flow_mod, "probe", collect)
     result = await flow.async_step_user({"host":TEST_HOST})
     assert result["step_id"] == "diagnostic_offer"
-    assert result["description_placeholders"]["controller"] == "F136 (14)"
+    assert result["description_placeholders"]["controller"] == "F138 (15)"
     collect.assert_not_called()
     result = await flow.async_step_diagnostic_offer({"generate_report":False})
     assert result["reason"] == "diagnostic_declined"
@@ -234,7 +234,7 @@ async def _add_sensor(hass, sensor, entity_id):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("model,title", [(9, "Ypsilon G6"), (12, "Euro-Clear Midnight")])
+@pytest.mark.parametrize("model,title", [(9, "Ypsilon G6"), (12, "Euro-Clear Midnight"), (14, "Euro-Clear Midnight (F136)")])
 async def test_manual_flow_creates_supported_model_with_mac_identity(hass, model, title):
     flow = _flow(hass)
     flow._async_probe = AsyncMock(return_value=({"deviceModel": model}, TEST_MAC))
@@ -262,7 +262,7 @@ async def test_manual_flow_rejects_unsupported_model_or_missing_identity(hass, i
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("model,title", [(9, "Ypsilon G6"), (12, "Euro-Clear Midnight")])
+@pytest.mark.parametrize("model,title", [(9, "Ypsilon G6"), (12, "Euro-Clear Midnight"), (14, "Euro-Clear Midnight (F136)")])
 async def test_dhcp_flow_reprobes_before_creating_entry(hass, model, title):
     flow = _flow(hass, source=config_entries.SOURCE_DHCP)
     flow._async_probe = AsyncMock(return_value=({"deviceModel": model}, TEST_MAC))
@@ -361,7 +361,8 @@ async def test_unmapped_enum_shows_raw_state_with_valid_options(hass, key, field
 @pytest.mark.parametrize(
     "model,manufacturer,model_name,title",
     [(9, "ATH / BWT / Runxin", "F79D / Ypsilon G6", "Ypsilon G6"),
-     (12, "Euro-Clear / Runxin", "Model 12 / Euro-Clear Midnight", "Euro-Clear Midnight")],
+     (12, "Euro-Clear / Runxin", "F105 / Model 12 / Euro-Clear Midnight", "Euro-Clear Midnight"),
+     (14, "Euro-Clear / Runxin", "F136 / Model 14 / Euro-Clear Midnight", "Euro-Clear Midnight (F136)")],
 )
 async def test_device_identity_uses_model_metadata_and_keeps_mac_identifier(hass, model, manufacturer, model_name, title):
     coordinator, entry = _entity_context(hass, {"deviceModel": model}, title=title)
@@ -375,8 +376,11 @@ async def test_device_identity_uses_model_metadata_and_keeps_mac_identifier(hass
 
 
 @pytest.mark.asyncio
-async def test_alpha_model_controls_remain_available_with_same_commands(hass):
-    coordinator, entry = _entity_context(hass, codec.decode_frame(STATE_FRAME))
+@pytest.mark.parametrize("model", [12, 14])
+async def test_alpha_model_controls_remain_available_with_same_commands(hass, model):
+    state = codec.decode_frame(STATE_FRAME)
+    state["deviceModel"] = model  # Model 14 is synthetic; fixture is model 12.
+    coordinator, entry = _entity_context(hass, state)
     coordinator.async_start_regeneration = AsyncMock()
     for desc in number_mod.NUMBERS:
         entity = number_mod.YpsilonNumber(coordinator, entry, desc)
@@ -391,6 +395,19 @@ async def test_alpha_model_controls_remain_available_with_same_commands(hass):
     coordinator.async_start_regeneration.assert_awaited_once_with()
     # The advanced service still validates unit-2 field 7 with the same raw range.
     services_mod._validate_raw_fields(coordinator, {7: 200, 47: 160})
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("model,raw,expected", [(9, 25, "25"), (12, 250, "25.0"), (14, 250, "25.0")])
+async def test_midnight_resin_scale_confidence_is_visible_without_changing_units(hass, model, raw, expected):
+    coordinator, entry = _entity_context(hass, {"deviceModel": model, "resinVolume": raw})
+    description = next(d for d in sensor_mod.SENSORS if d.key == "resin_volume")
+    sensor = sensor_mod.YpsilonSensor(coordinator, entry, description)
+    state = await _add_sensor(hass, sensor, "sensor.test_resin_volume")
+    assert state.state == expected
+    assert state.attributes["unit_of_measurement"] == "L"
+    assert (state.attributes.get("resin_volume_scale_confirmed") is False) == (model == 14)
+    assert sensor.unique_id == f"{TEST_MAC}_resin_volume"
 
 
 @pytest.mark.asyncio

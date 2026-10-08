@@ -2,7 +2,12 @@
 
 All notable changes to this project are documented here.
 
-## Unreleased
+## [2.9.0] - 2026-10-08
+
+- Publish a normal stable integration version; Alpha status remains scoped to models 1, 12 and 14.
+- Add Euro-Clear Midnight 25 Runxin F136 / controller model 14 based on issue #22: reported working F79D reads and verified local writes to 4/6/10/43, with 7/34/47 pending. Reuse Midnight controls and strict fresh read-back without enabling vacation writes.
+- Adopt Midnight resin scale 0.1 for model 14 from the reported shared map; expose its pending direct comparison in diagnostics and resin-sensor attributes. Preserve raw resin bytes.
+- Identify model 12 as F105 in device metadata while retaining its entry title, unique IDs, conversions and controls.
 
 - Add cached effective write-policy diagnostics that distinguish controller evidence, configured read-only restrictions and adapter session restrictions, without device I/O.
 - Enforce recursive protocol/transport import boundaries and immutable action references in the offline audit.

@@ -118,11 +118,11 @@ class ProbeValidation(unittest.TestCase):
 
     def test_name_lookup_never_enables_unknown_models_or_exports_identifier(self):
         values={field:(0,0) for field in range(1,53)}
-        values[1]=(14,0)
+        values[1]=(15,0)
         identifiers=[]
         with patch("broadlink.hello", return_value=MockWireDevice(values)):
             report=probe.probe("192.0.2.17", identifier_sink=identifiers)
-        self.assertEqual(report["controller"]["manufacturer_protocol_name"],"F136")
+        self.assertEqual(report["controller"]["manufacturer_protocol_name"],"F138")
         self.assertFalse(report["controller"]["supported_for_normal_use"])
         self.assertEqual(identifiers,["020000000017"])
         self.assertNotIn(identifiers[0],json.dumps(report))
