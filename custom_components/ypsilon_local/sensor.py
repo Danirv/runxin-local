@@ -423,6 +423,7 @@ class YpsilonSensor(YpsilonEntity, SensorEntity):
         if (
             self.entity_description.key == "resin_volume"
             and self._model is not None
+            and self._model.resin_volume_scale is not None
             and not self._model.resin_volume_scale_confirmed
         ):
             attributes.update(
@@ -434,7 +435,7 @@ class YpsilonSensor(YpsilonEntity, SensorEntity):
             attributes.update(
                 interpretation="reference_f79d_pending_app_validation",
                 controller_model=self._model.code,
-                read_only=True,
+                read_only=bool(getattr(self.coordinator, "read_only", True)),
                 reference_value=(self.coordinator.data or {}).get(self.entity_description.field),
             )
             raw = (self.coordinator.data or {}).get("_rawFieldBytes", {})

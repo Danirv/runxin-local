@@ -30,7 +30,7 @@ The same rule applies to another transport: implement the raw-frame contract ind
 
 - Protocol modules do not import HA/BroadLink; transport base does not import model field definitions.
 - Field receipt, physical meaning, unit calibration, theoretical encoding and effective write permission are separate evidence levels.
-- `allowed_write_fields` defaults empty. Model 1 has no controls, admin writes or clock correction; the coordinator and adapter reject bypass attempts.
+- `allowed_write_fields` defaults empty. Model 1 starts read-only; opted-in manual tests use a separate field policy enforced by the coordinator and adapter. Automatic clock correction and field 7 remain blocked. Regeneration start has a separate opt-in; direct phase advancement is blocked.
 - Models 9/12 retain their original write surface and conversions, including explicitly documented pending actions.
 - Model 14 reuses the Midnight write surface based on issue #22; reported verification and pending fields are recorded separately.
 - Per-model byte-order/unit/enum changes require independent fixtures and regression coverage for all existing models.

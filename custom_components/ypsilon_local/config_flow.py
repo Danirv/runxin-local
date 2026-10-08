@@ -25,6 +25,8 @@ from .const import (
     CONF_AUTO_SYNC_CLOCK,
     CONF_CLOCK_TOLERANCE,
     CONF_CONTROLLER_MODEL,
+    CONF_MODEL1_TEST_WRITES,
+    CONF_MODEL1_TEST_REGENERATION,
     CONF_DIAGNOSTIC_ONLY,
     CONF_DIAGNOSTIC_REPORT_ID,
     CONF_SCAN_INTERVAL,
@@ -357,11 +359,26 @@ class YpsilonLocalOptionsFlow(config_entries.OptionsFlow):
     ) -> config_entries.ConfigFlowResult:
         if self.config_entry.data.get(CONF_DIAGNOSTIC_ONLY):
             return self.async_abort(reason="diagnostic_only")
-        model = controller_model(self.config_entry.data.get(CONF_CONTROLLER_MODEL))
+        runtime = getattr(self.config_entry, "runtime_data", None)
+        observed = (getattr(runtime, "data", None) or {}).get("deviceModel")
+        model = controller_model(self.config_entry.data.get(CONF_CONTROLLER_MODEL, observed))
         read_only = bool(model and model.read_only)
+        model1 = bool(model and model.code == 1)
         if user_input is not None:
             if read_only:
                 user_input = {**user_input, CONF_AUTO_SYNC_CLOCK: False}
+            if model1:
+                # A separate mechanical opt-in cannot grant configuration writes.
+                user_input = {
+                    **user_input,
+                    CONF_MODEL1_TEST_WRITES: user_input.get(CONF_MODEL1_TEST_WRITES) is True,
+                    CONF_MODEL1_TEST_REGENERATION:
+                        user_input.get(CONF_MODEL1_TEST_WRITES) is True
+                        and user_input.get(CONF_MODEL1_TEST_REGENERATION) is True,
+                }
+            else:
+                user_input = {key: value for key, value in user_input.items()
+                              if key not in (CONF_MODEL1_TEST_WRITES, CONF_MODEL1_TEST_REGENERATION)}
             return self.async_create_entry(title="", data=user_input)
         options = self.config_entry.options
         schema = vol.Schema(
@@ -408,4 +425,11 @@ class YpsilonLocalOptionsFlow(config_entries.OptionsFlow):
         if read_only:
             schema = vol.Schema({key: value for key, value in schema.schema.items()
                                  if key.schema not in (CONF_AUTO_SYNC_CLOCK, CONF_CLOCK_TOLERANCE)})
+        if model1:
+            schema = schema.extend({
+                vol.Required(CONF_MODEL1_TEST_WRITES,
+                             default=options.get(CONF_MODEL1_TEST_WRITES, False)): bool,
+                vol.Required(CONF_MODEL1_TEST_REGENERATION,
+                             default=options.get(CONF_MODEL1_TEST_REGENERATION, False)): bool,
+            })
         return self.async_show_form(step_id="init", data_schema=schema)

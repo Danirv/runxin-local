@@ -28,7 +28,7 @@ Un transport nou implementarà el contracte de trama crua i s'habilitarà només
 
 - El protocol no importa HA/BroadLink; el transport no interpreta camps.
 - Rebre camps, validar significat/unitats i permetre escriptures són decisions diferents.
-- `allowed_write_fields` és buit per defecte. El model 1 no té controls, escriptures administratives ni correcció del rellotge; coordinador i adaptador imposen el bloqueig.
+- `allowed_write_fields` és buit per defecte. El model 1 comença sense escriptures; les opcions de proves concedeixen permisos concrets al coordinador i l'adaptador. El rellotge automàtic i el camp 7 continuen bloquejats.
 - El G6 i Midnight conserven controls i conversions, amb les accions pendents documentades.
 - Particularitats futures d'unitats, bytes o enums requereixen fixtures i regressions per als models existents.
 - Un ACK no prova l'estat físic; no es reenvien cegament ordres amb resultat ambigu.
@@ -42,3 +42,5 @@ El protocol es manté preparat per extreure's a una llibreria quan un altre cons
 L’auditoria offline comprova imports relatius niats i dependències del transport. `write_policy` diferencia evidència del model i restriccions configurades/del coordinador/adaptador amb metadades en memòria cau. Consulta [CONTRIBUTING](../CONTRIBUTING.ca.md) per als entorns de proves i la cobertura de CI.
 
 El model 14 / F136 reutilitza el perfil i els controls Midnight, amb les verificacions aportades a la issue #22 i els camps pendents diferenciats. La release 2.9.0 és estable; Alpha s'aplica per model. Consulta la [guia del model 14](model-14-alpha.ca.md).
+
+El model 1 continua de només lectura per defecte. A la 2.9.1, les opcions de proves manuals concedeixen els camps 4/6/10/43/47; una segona opció permet només iniciar regeneració. Coordinador i adaptador apliquen els permisos efectius. Canviar-los substitueix i revoca la sessió anterior sense perdre la memòria cau. El rellotge automàtic, el camp 7 i l’avanç directe de fases continuen bloquejats.

@@ -16,7 +16,6 @@ from .api import YpsilonConnectionError
 from .const import DOMAIN, FIELD_CURRENT_TIME
 from .coordinator import YpsilonDataUpdateCoordinator
 from .entity import YpsilonEntity
-from .models import controller_model
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -27,8 +26,7 @@ async def async_setup_entry(
     coordinator = entry.runtime_data
     if coordinator.read_only:
         return
-    model = controller_model((coordinator.data or {}).get("deviceModel"))
-    allowed = model.allowed_write_fields if model is not None else frozenset()
+    allowed = coordinator.allowed_write_fields
     buttons = []
     if 34 in allowed:
         buttons.append(YpsilonRegenerationButton(coordinator, entry))

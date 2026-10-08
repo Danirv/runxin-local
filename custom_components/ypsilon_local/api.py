@@ -14,7 +14,7 @@ from typing import Any
 from .const import FIELD52_FAIL_BACKOFF, FIELD52_REFRESH, WRITE_SETTLE_DELAY
 from .runxin.client import F79DClient
 from .runxin.errors import RunxinError
-from .models import controller_model
+from .models import allowed_write_fields, controller_model
 from .transport.broadlink_bl3372 import (
     BroadlinkAuthenticationError,
     BroadlinkBL3372Transport,
@@ -37,7 +37,10 @@ class YpsilonWriteNotConfirmed(YpsilonConnectionError):
 class YpsilonLocalClient:
     """Blocking local client for the tested Ypsilon G6 / BL3372 combination."""
 
-    def __init__(self, host: str) -> None:
+    def __init__(
+        self, host: str, *, model1_test_writes: bool = False,
+        model1_test_regeneration: bool = False,
+    ) -> None:
         self.host = host
         self._transport = BroadlinkBL3372Transport(host)
         self._f79d = F79DClient(self._transport, capture_raw=True)
@@ -47,11 +50,27 @@ class YpsilonLocalClient:
         self._lock = threading.Lock()
         self._controller_model: object = None
         self._read_only_latched = False
+        self._model1_seen = False
+        self._model1_test_writes = model1_test_writes
+        self._model1_test_regeneration = model1_test_regeneration
+
+    def _allowed_fields(self) -> frozenset[int]:
+        fields = allowed_write_fields(
+            self._controller_model, model1_test_writes=self._model1_test_writes,
+            model1_test_regeneration=self._model1_test_regeneration,
+        )
+        if self._model1_seen:
+            fields &= allowed_write_fields(
+                1, model1_test_writes=self._model1_test_writes,
+                model1_test_regeneration=self._model1_test_regeneration,
+            )
+        return fields
 
     def _observe_model(self, data: dict[str, Any]) -> None:
         self._controller_model = data.get("deviceModel")
         model = controller_model(self._controller_model)
-        if model is not None and model.read_only:
+        self._model1_seen |= self._controller_model == 1
+        if model is not None and not self._allowed_fields():
             self._read_only_latched = True
 
     @property
@@ -80,16 +99,22 @@ class YpsilonLocalClient:
         """Describe cached adapter permissions without starting device I/O."""
         code = self._controller_model
         model = controller_model(code)
-        blocked = self._read_only_latched or model is None or model.read_only
+        fields = self._allowed_fields()
+        blocked = self._read_only_latched or model is None or not fields
         return {
             "controller_model": code if type(code) is int else None,
             "read_only": blocked,
-            "allowed_write_fields": [] if blocked else sorted(model.allowed_write_fields),
+            "allowed_write_fields": [] if blocked else sorted(fields),
         }
 
     def close(self) -> None:
         with self._lock:
             self._f79d.close()
+
+    def revoke_writes(self) -> None:
+        """Permanently stop queued writes before replacing this session."""
+        with self._lock:
+            self._read_only_latched = True
 
     def read_identity(self) -> dict[str, Any]:
         with self._lock:
@@ -131,7 +156,8 @@ class YpsilonLocalClient:
             if (
                 self._read_only_latched
                 or model is None
-                or not set(values).issubset(model.allowed_write_fields)
+                or not set(values).issubset(self._allowed_fields())
+                or (self._model1_seen and 34 in values and values != {34: 1})
             ):
                 raise YpsilonConnectionError("Controller policy does not permit this write")
             self._f79d.write_fields(values)

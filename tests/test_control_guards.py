@@ -22,10 +22,10 @@ button_mod = load("button")
 Coordinator = coordinator_mod.YpsilonDataUpdateCoordinator
 
 
-def _coordinator(hass, model=9, *, data=None):
+def _coordinator(hass, model=9, *, data=None, options=None):
     entry = config_entries.ConfigEntry(
         domain="ypsilon_local", unique_id="02:00:00:00:00:09", title="Test softener",
-        data=data or {}, options={"auto_sync_clock": False}, source=config_entries.SOURCE_USER,
+        data=data or {}, options=options if options is not None else {"auto_sync_clock": False}, source=config_entries.SOURCE_USER,
         version=2, minor_version=1, discovery_keys=MappingProxyType({}), subentries_data=[],
     )
     client = Mock()

@@ -1,6 +1,12 @@
-# Runxin Local 2.9.0
+# Runxin Local 2.9.1
 
 Local Home Assistant integration for compatible Runxin F79D / BroadLink BL3372 water softeners, tested with ATH/BWT Ypsilon G6 and Euro-Clear Midnight.
+
+## 2.9.1
+
+Normal stable release with **optional model-1 / F150 Alpha write tests**. Settings → Devices & services → Runxin Local → Configure enables manual tests for fields 4/6/10/43/47. A second option enables only regeneration start for a planned physical validation. Both are off by default; turning the settings mode off also disables regeneration tests.
+
+All model-1 write evidence remains pending. The adapter and coordinator enforce the same effective permissions, and turning tests off replaces/revokes the old session. Automatic clock correction, field 7, direct phase advancement and vacation writes stay blocked. Existing sensors, raw field bytes, unconfirmed resin/per-cycle units and entity identities are retained. See the [model-1 testing guide](docs/model-1-alpha.md).
 
 ## 2.9.0
 

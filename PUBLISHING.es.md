@@ -1,6 +1,6 @@
 [English](PUBLISHING.md) | [Español](PUBLISHING.es.md) | [Català](PUBLISHING.ca.md)
 
-**2.9.0** utiliza una etiqueta de release estable. Alpha es metadato de soporte por modelo (1/12/14), no un requisito de prerelease de la integración. Una versión normal actualiza el canal estable.
+**2.9.x** utiliza una etiqueta de release estable. Alpha es metadato de soporte por modelo (1/12/14), no un requisito de prerelease de la integración. Una versión normal actualiza el canal estable.
 
 # Publicar Runxin Local en GitHub y HACS
 
