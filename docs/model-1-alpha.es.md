@@ -2,9 +2,11 @@
 
 [English](model-1-alpha.md) | [Català](model-1-alpha.ca.md) | [Español](model-1-alpha.es.md)
 
-**2.9.0-alpha.1** admite el código **1** con sensores de lectura periódica. El fabricante llama a este código **F150**, pero la identidad comercial del equipo de la issue #17 no está confirmada. No es soporte general para cualquier producto F150.
+**2.9.0** admite el código **1** con sensores de lectura periódica. El fabricante llama a este código **F150**, pero la identidad comercial del equipo de la issue #17 no está confirmada. No es soporte general para cualquier producto F150.
 
-1. Instala la prerelease cuando se publique, o descarga el ZIP de la rama de la PR y copia solo `custom_components/ypsilon_local` a `/config/custom_components/ypsilon_local`. Conserva una copia de la carpeta anterior y reinicia HA. Esta Alpha conserva el dominio; no requiere migrar a `runxin_local`.
+La release de la integración es estable; Alpha describe solo el soporte de este modelo.
+
+1. Instala la versión 2.9.0 o posterior con HACS, o descarga el ZIP de la release y copia solo `custom_components/ypsilon_local` a `/config/custom_components/ypsilon_local`. Conserva una copia de la carpeta anterior y reinicia HA. Esta Alpha conserva el dominio; no requiere migrar a `runxin_local`.
 2. Si existe una entrada exclusivamente de diagnóstico del mismo dispositivo, descarga primero su informe y elimina esa entrada antes de añadir el equipo normalmente.
 3. Añade **Runxin Local**, introduce la IP y acepta la explicación **Alpha de solo lectura**. Consulta cada minuto por defecto, sin cadencia adaptativa. La corrección del reloj queda bloqueada aunque una opción antigua esté activada.
 4. Compara los sensores con la app. Puedes habilitar las entidades de diagnóstico que estén desactivadas por defecto. No cambies ajustes para tomar capturas.

@@ -92,7 +92,7 @@ def test_raw_capture_is_opt_in_and_does_not_change_query_bytes():
     assert '_rawFieldBytes' not in plain
 
 
-@pytest.mark.parametrize('code', [None, 1, 14, True])
+@pytest.mark.parametrize('code', [None, 1, 15, True])
 def test_composition_adapter_blocks_non_writable_or_unknown_models_before_transport(code):
     client = api.YpsilonLocalClient('192.0.2.1')
     client._f79d = Mock()
@@ -129,7 +129,7 @@ def test_adapter_policy_snapshot_keeps_latched_permissions_without_device_io():
     client.close()
 
 
-@pytest.mark.parametrize('code', [9, 12])
+@pytest.mark.parametrize('code', [9, 12, 14])
 def test_existing_controller_write_payload_and_settle_policy_are_unchanged(code, monkeypatch):
     client = api.YpsilonLocalClient('192.0.2.1')
     client._f79d = Mock()

@@ -5,6 +5,7 @@ Start with the [project README](../README.md), [Català](README.ca.md) or [Espa�
 | Purpose | Guide |
 |---|---|
 | Existing supported controller | [Support policy and evidence](model-support.md) |
+| Model 14 Midnight support | [F136 Alpha](model-14-alpha.md) · [CA](model-14-alpha.ca.md) · [ES](model-14-alpha.es.md) |
 | Model 1 app comparison | [Read-only Alpha](model-1-alpha.md) · [CA](model-1-alpha.ca.md) · [ES](model-1-alpha.es.md) |
 | Unknown model or failed setup | [Built-in compatibility report](compatibility-report.md) |
 | Connection failures | [Troubleshooting](troubleshooting.md) · [CA](troubleshooting.ca.md) · [ES](troubleshooting.es.md) |

@@ -1,5 +1,7 @@
 # Publishing Runxin Local on GitHub and HACS
 
+Version **2.9.0** uses a normal stable release tag. Alpha is per-model support metadata (models 1/12/14), not a prerelease requirement for the integration. A normal version updates the stable release channel.
+
 The source tree is prepared for the public `Danirv/runxin-local` repository and HACS distribution.
 
 ## 1. Repository metadata

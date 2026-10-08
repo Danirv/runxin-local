@@ -133,6 +133,10 @@ The Midnight manual, printed page 16, instructs users to multiply measured Germa
 
 Partial results are useful. Include the model, firmware, date, baseline/restore results and sanitized diagnostics; omit MAC addresses, IP addresses and credentials. None of these follow-up checks should be described as completed until a contributor reports them.
 
+## Euro-Clear Midnight / controller model 14 (F136)
+
+[Issue #22](https://github.com/Danirv/runxin-local/issues/22) reports working F79D reads after adding the model locally and verified writes to fields **4/6/10/43**. This is contributor-reported hardware evidence, distinct from the model-12 captures above. Fields **7/34/47** remain pending. Version 2.9.0 accepts this unit with Alpha model support and the existing Midnight controls. Resin scale 0.1 is adopted from the reported shared map, pending a direct raw/app comparison; its confirmation flag is exposed. See the [model-14 guide](model-14-alpha.md).
+
 ## Field 52 polling note
 
 Field 52 is intentionally not part of the normal 1..51 state block. The Ypsilon composition layer reads and caches it separately because it is a slow-changing service interval. This is a polling optimisation and does not weaken its observed-state evidence.

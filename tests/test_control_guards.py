@@ -36,7 +36,7 @@ def _coordinator(hass, model=9, *, data=None):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("model", [9, 12])
+@pytest.mark.parametrize("model", [9, 12, 14])
 async def test_regeneration_preserves_command_and_confirms_advanced_phase(hass, model):
     coordinator, client, entry = _coordinator(hass, model)
     coordinator.data["station"] = 1  # Cached state must not decide whether to send.
@@ -51,7 +51,7 @@ async def test_regeneration_preserves_command_and_confirms_advanced_phase(hass, 
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("model", [9, 12])
+@pytest.mark.parametrize("model", [9, 12, 14])
 @pytest.mark.parametrize("fresh", [
     {"station": 1, "vacationPattern": False},
     {"station": 5, "vacationPattern": False},
@@ -269,7 +269,7 @@ def test_clock_rollover_requires_valid_changed_prewrite_evidence(previous):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("model", [9, 12])
+@pytest.mark.parametrize("model", [9, 12, 14])
 @pytest.mark.parametrize("ambiguous", [False, True])
 @pytest.mark.parametrize("actual,confirmed", [("10:21:00", False), ("10:20:00", True)])
 async def test_manual_clock_does_not_confirm_unchanged_next_minute(

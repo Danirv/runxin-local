@@ -50,6 +50,8 @@ class ControllerModel:
     tested_hardware: str = ""
     hardware_verified_write_fields: tuple[int, ...] = ()
     pending_write_fields: tuple[int, ...] = ()
+    # False when a compatible-model scale is adopted pending a direct comparison.
+    resin_volume_scale_confirmed: bool = True
 
     @property
     def read_only(self) -> bool:
@@ -94,7 +96,7 @@ CONTROLLER_MODELS: dict[int, ControllerModel] = {
     12: ControllerModel(
         code=12,
         title="Euro-Clear Midnight",
-        model_name="Model 12 / Euro-Clear Midnight",
+        model_name="F105 / Model 12 / Euro-Clear Midnight",
         manufacturer="Euro-Clear / Runxin",
         allowed_write_fields=EXISTING_CONTROL_FIELDS,
         # A Midnight 25 (25 L resin) reports raw 250, i.e. tenths of a litre.
@@ -110,6 +112,26 @@ CONTROLLER_MODELS: dict[int, ControllerModel] = {
             "were hardware-verified (baseline, set, fresh read, restore, fresh read). Fields "
             "7 and 47 and forced regeneration use the same encodings with read-back "
             "reconciliation but are not yet hardware-verified on this model."
+        ),
+    ),
+    14: ControllerModel(
+        code=14,
+        title="Euro-Clear Midnight (F136)",
+        model_name="F136 / Model 14 / Euro-Clear Midnight",
+        manufacturer="Euro-Clear / Runxin",
+        allowed_write_fields=EXISTING_CONTROL_FIELDS,
+        resin_volume_scale=0.1,
+        resin_volume_scale_confirmed=False,
+        support_level="alpha",
+        tested_hardware="Euro-Clear Midnight 25 (Runxin F136 / ECOPRO+ head)",
+        hardware_verified_write_fields=(4, 6, 10, 43),
+        pending_write_fields=(7, 34, 47),
+        evidence=(
+            "Issue #22: contributor enabled model 14 locally and reports working "
+            "BL3372 discovery/authentication, F79D reads and the model-12 field map. "
+            "The contributor reports local writes verified for fields 4, 6, 10 and 43; "
+            "fields 7, 34 and 47 are not fully verified. The Midnight resin scale 0.1 "
+            "is adopted from the reported shared map pending a direct raw/app comparison."
         ),
     ),
 }
@@ -144,6 +166,7 @@ def model_support_details(code: object) -> dict[str, Any] | None:
         "hardware_verified_write_fields": list(model.hardware_verified_write_fields),
         "pending_write_fields": list(model.pending_write_fields),
         "resin_volume_scale": model.resin_volume_scale,
+        "resin_volume_scale_confirmed": model.resin_volume_scale_confirmed,
         "protocol_profile": model.protocol_profile,
         "read_only": model.read_only,
         "allowed_write_fields": sorted(model.allowed_write_fields),

@@ -4,6 +4,10 @@ Integració local per a descalcificadors compatibles amb **Runxin F79D + BroadLi
 
 El **model 1 / F150** té una Alpha específica de només lectura: sensors periòdics, sense controls, escriptures ni correcció del rellotge. Les lectures són provisionals, sense estadístiques de llarg termini; la resina i la quantitat per cicle no tenen unitat assumida. [Guia](model-1-alpha.ca.md).
 
+## Compatibilitat a la 2.9.0
+
+La **2.9.0 és una release estable**. Alpha s'aplica als models concrets: model 1 / F150 només de lectura, model 12 / F105 i model 14 / F136 amb controls. Per al model 14, l'usuari de la issue #22 declara verificats els camps 4, 6, 10 i 43; 7, 34 i 47 continuen pendents. Es reutilitza el mapa Midnight i l'escala de resina 0,1, marcada pendent de comparació directa als diagnòstics i al sensor. [Guia del model 14](model-14-alpha.ca.md).
+
 ## Autodiagnòstic i canvi de nom: 2.8.0
 
 El projecte passa de Ypsilon a **Runxin Local**, amb repositori `Danirv/runxin-local`. Es conserven el domini, la carpeta, els serveis i els identificadors `ypsilon_local`; el canvi de nom no requereix tornar a afegir els dispositius ni modificar automatitzacions.

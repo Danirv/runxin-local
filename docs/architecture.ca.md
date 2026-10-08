@@ -40,3 +40,5 @@ Un transport nou implementarà el contracte de trama crua i s'habilitarà només
 El protocol es manté preparat per extreure's a una llibreria quan un altre consumidor real ho justifiqui. La [matriu de suport](model-support.md), la [guia d'Alpha](model-1-alpha.ca.md) concreten l'estat actual.
 
 L’auditoria offline comprova imports relatius niats i dependències del transport. `write_policy` diferencia evidència del model i restriccions configurades/del coordinador/adaptador amb metadades en memòria cau. Consulta [CONTRIBUTING](../CONTRIBUTING.ca.md) per als entorns de proves i la cobertura de CI.
+
+El model 14 / F136 reutilitza el perfil i els controls Midnight, amb les verificacions aportades a la issue #22 i els camps pendents diferenciats. La release 2.9.0 és estable; Alpha s'aplica per model. Consulta la [guia del model 14](model-14-alpha.ca.md).

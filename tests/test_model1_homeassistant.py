@@ -80,7 +80,7 @@ async def test_model1_poll_retains_complete_state_and_sends_no_clock_write(hass,
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize('code', [9, 12])
+@pytest.mark.parametrize('code', [9, 12, 14])
 async def test_existing_models_keep_first_refresh_clock_sync(hass, monkeypatch, code):
     coordinator, client, _ = _coordinator(hass, code)
     coordinator.data = None  # HA has not published the first successful poll yet.

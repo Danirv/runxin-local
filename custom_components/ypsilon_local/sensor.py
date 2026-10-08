@@ -420,6 +420,16 @@ class YpsilonSensor(YpsilonEntity, SensorEntity):
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
         attributes: dict[str, Any] = {"origin": self.entity_description.source}
+        if (
+            self.entity_description.key == "resin_volume"
+            and self._model is not None
+            and not self._model.resin_volume_scale_confirmed
+        ):
+            attributes.update(
+                resin_volume_scale=self._model.resin_volume_scale,
+                resin_volume_scale_confirmed=False,
+                interpretation="midnight_scale_pending_direct_comparison",
+            )
         if self._model is not None and self._model.provisional_readings:
             attributes.update(
                 interpretation="reference_f79d_pending_app_validation",
