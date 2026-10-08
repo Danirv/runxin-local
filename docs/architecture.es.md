@@ -21,7 +21,7 @@ La estructura sirve para los modelos observados: reutilizar un mapa compatible y
 Reglas:
 
 - Recibir campos, validar significado/unidades y permitir escrituras son decisiones distintas. Los 52 campos no son un límite universal.
-- Los modelos nuevos tienen `allowed_write_fields` vacío por defecto. El modelo 1 no permite controles, servicios de escritura ni corrección de reloj; coordinador y adaptador bloquean los intentos.
+- Los modelos nuevos tienen `allowed_write_fields` vacío por defecto. El modelo 1 empieza sin escrituras; las opciones de pruebas conceden permisos concretos al coordinador y al adaptador. El reloj automático y el campo 7 siguen bloqueados.
 - G6/Midnight conservan controles y conversiones, con las acciones pendientes documentadas. Cambios específicos necesitan fixtures y regresiones para modelos existentes.
 - Un ACK no demuestra estado físico; no hay reenvío ciego ante resultados ambiguos.
 - Los códigos desconocidos y bytes originales se conservan; los campos ausentes no se inventan. Las lecturas provisionales no generan estadísticas a largo plazo.
@@ -33,3 +33,5 @@ El protocolo seguirá dentro del repositorio hasta que otro consumidor real just
 La auditoría offline comprueba imports relativos anidados y dependencias del transporte. `write_policy` distingue evidencia del modelo y restricciones configuradas/del coordinador/adaptador con metadatos en caché. Consulta [CONTRIBUTING](../CONTRIBUTING.es.md) para los entornos de pruebas y la cobertura de CI.
 
 El modelo 14 / F136 reutiliza el perfil y los controles Midnight, con las verificaciones aportadas en la issue #22 y los campos pendientes diferenciados. La release 2.9.0 es estable; Alpha se aplica por modelo. Consulta la [guía del modelo 14](model-14-alpha.es.md).
+
+El modelo 1 sigue siendo de solo lectura por defecto. En 2.9.1, las opciones de pruebas manuales conceden los campos 4/6/10/43/47; una segunda opción permite solo iniciar regeneración. Coordinador y adaptador aplican los permisos efectivos. Cambiarlos sustituye y revoca la sesión anterior sin perder la caché. El reloj automático, el campo 7 y el avance directo de fases siguen bloqueados.

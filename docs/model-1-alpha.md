@@ -1,4 +1,4 @@
-# Controller model 1 / F150: read-only Alpha
+# Controller model 1 / F150: Alpha, read-only by default
 
 [English](model-1-alpha.md) | [Català](model-1-alpha.ca.md) | [Español](model-1-alpha.es.md)
 
@@ -23,9 +23,31 @@ The domain, config-entry version and G6/Midnight entity identities stay unchange
 - The original two bytes of received fields in diagnostics (`state._rawFieldBytes`), plus raw bytes/reference markers on entities. No raw network packets, encryption keys or session IDs are included.
 - Model/evidence/write-permission metadata. Zero/false readings are retained, but receipt alone does not prove a field is applicable.
 
-There are **no number, time or button controls**, no clock corrections and no configuration/mechanical commands. Advanced admin services also reject this model. The coordinator and composition adapter enforce the policy independently of the UI. The integration has no model-1 write opt-in.
+By default there are **no number, time or button controls**, clock corrections or configuration/mechanical commands. Advanced admin services reject this default mode. The coordinator and composition adapter enforce the policy independently of the UI. From 2.9.1, optional manual test permissions can be enabled as described below; no model-1 write is yet hardware-verified.
 
 All model-1 readings are provisional: numeric entities have **no long-term statistics state class**. Ordinary recorder history can still be retained. Known enum labels are reference labels; unmapped values retain their numeric codes.
+
+## Optional manual write tests (2.9.1)
+
+Open **Settings → Devices & services → Runxin Local → Configure** for the operational model-1 entry. Enable **experimental model-1 settings** and save. The integration reloads automatically and adds controls for:
+
+| Field | Manual test | Reference baseline in issue #17 |
+|---|---|---|
+| 4 | Device clock or manual sync button | Read the current clock; it naturally advances |
+| 6 | Continuous-flow timeout | 50 (reference minutes) |
+| 10 | Regeneration schedule | 00:00 |
+| 43 | Added-salt bookkeeping | 25 (reference kg) |
+| 47 | Hardness | 280 (reference mg/L) |
+
+These are reference interpretations and **all model-1 writes remain pending hardware verification**. Use the actual fresh baseline, not these historical numbers. Change one setting by a small valid amount, wait for fresh read-back, compare with the app/controller where visible, restore the original value and confirm restoration. Record field, baseline, requested value, read-back, display/units and restored value. Partial results are useful; do not repeat writes if their delivery is ambiguous. The integration reconciles once without blindly resending.
+
+**Regeneration start** has a second, separate option and also requires the settings mode enabled. Use it only for a normally planned physical cycle. The button checks a fresh in-service/vacation-off state, sends the existing field-34 value-1 command once and confirms the phase transition. Direct phase advancement remains blocked, including through administrator services; the option does not grant arbitrary field-34 commands.
+
+**Automatic clock correction stays off**, even if an old option says otherwise. **Field 7 / flow cutoff stays blocked**, even if the unit changes: this unit reported code 1, while the established writable cutoff is calibrated for code 2. Vacation writes and resin/capacity writes are not enabled.
+
+Turn the settings option off to return to read-only mode; this also disables regeneration tests, revokes the old write session and removes operational controls on reload. The existing reference sensors, unique IDs, raw bytes, unconfirmed units and absence of provisional long-term statistics are preserved. Read-only defaults also survive upgrades/restarts.
+
+Diagnostics report model-default evidence separately from the effective `write_policy` (enabled test options, permitted fields, adapter restrictions and automatic-clock permission). Download them after each completed test sequence; exporting diagnostics does not query or write the device. G6/model-12/model-14 policy and conversions are unaffected.
 
 ## Priority comparisons from issue #17
 
@@ -46,4 +68,4 @@ Resin and per-cycle capacity are uncalibrated. Other displayed units/scales are 
 
 [Issue #17](https://github.com/Danirv/runxin-local/issues/17#issuecomment-6044822202) supplied BL3372 devtype `0x520F`, firmware 62016, standard authentication with the app closed, stable code 1 and all 52 requested fields in two successful queries. The fixture in `tests/fixtures/model1_fields.json` preserves published field pairs; reconstructed test frames are **synthetic**, not network captures. Software tests cannot confirm physical units or mechanical actions.
 
-A later model-1 calibration should change only its model policy/presentation or proven codec overrides. It must not change G6/Midnight interpretation to accommodate this device. Reads beyond 52 and model-1 writes are not tested or enabled by this Alpha.
+A later model-1 calibration should change only its model policy/presentation or proven codec overrides. It must not change G6/Midnight interpretation to accommodate this device. Reads beyond 52 remain disabled. Model-1 manual writes are experimental and only available after the explicit opt-ins below; software tests do not validate physical acceptance.

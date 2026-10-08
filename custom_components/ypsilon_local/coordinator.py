@@ -28,6 +28,8 @@ from .const import (
     CONF_AUTO_SYNC_CLOCK,
     CONF_CLOCK_TOLERANCE,
     CONF_CONTROLLER_MODEL,
+    CONF_MODEL1_TEST_WRITES,
+    CONF_MODEL1_TEST_REGENERATION,
     CONF_SCAN_INTERVAL,
     DEFAULT_ACTIVE_SCAN_INTERVAL,
     DEFAULT_ADAPTIVE_POLLING,
@@ -45,7 +47,7 @@ from .const import (
 )
 from .protocol import BOOL_FIELDS, CLOCK_FIELDS, FIELD_NAMES
 from .runxin.semantics import vacation_status
-from .models import controller_model
+from .models import allowed_write_fields, controller_model
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -65,6 +67,11 @@ class YpsilonDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self._read_only_latched = False
         self._field52_cache = field52_cache
         options = entry.options
+        self.model1_test_writes = options.get(CONF_MODEL1_TEST_WRITES) is True
+        self.model1_test_regeneration = (
+            self.model1_test_writes and options.get(CONF_MODEL1_TEST_REGENERATION) is True
+        )
+        self._model1_seen = self._configured_model == 1
         self.scan_interval = int(options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL))
         self.active_scan_interval = int(
             options.get(CONF_ACTIVE_SCAN_INTERVAL, DEFAULT_ACTIVE_SCAN_INTERVAL)
@@ -102,20 +109,59 @@ class YpsilonDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
     @property
     def read_only(self) -> bool:
         for code in (self._configured_model, (self.data or {}).get("deviceModel")):
+            self._model1_seen |= code == 1
             model = controller_model(code)
-            if model is not None and model.read_only:
+            if model is not None and not self._policy_fields(code):
                 self._read_only_latched = True
         return self._read_only_latched
 
-    def _require_write_permission(
-        self, fields: dict[int, Any], observed: dict[str, Any] | None = None
-    ) -> None:
-        model = controller_model(
-            (observed or {}).get("deviceModel", (self.data or {}).get("deviceModel"))
+    def _policy_fields(self, code: object) -> frozenset[int]:
+        fields = allowed_write_fields(
+            code, model1_test_writes=self.model1_test_writes,
+            model1_test_regeneration=self.model1_test_regeneration,
         )
-        if model is not None and model.read_only:
+        if self._model1_seen:
+            fields &= allowed_write_fields(
+                1, model1_test_writes=self.model1_test_writes,
+                model1_test_regeneration=self.model1_test_regeneration,
+            )
+        configured = controller_model(self._configured_model)
+        if configured is not None:
+            fields &= allowed_write_fields(
+                configured.code, model1_test_writes=self.model1_test_writes,
+                model1_test_regeneration=self.model1_test_regeneration,
+            )
+        return fields
+
+    @property
+    def allowed_write_fields(self) -> frozenset[int]:
+        if self.read_only:
+            return frozenset()
+        return self._policy_fields((self.data or {}).get("deviceModel"))
+
+    @property
+    def automatic_clock_allowed(self) -> bool:
+        fields = self.allowed_write_fields
+        return not self._model1_seen and FIELD_CURRENT_TIME in fields
+
+    def _observe_write_policy(self, data: dict[str, Any]) -> None:
+        code = data.get("deviceModel")
+        self._model1_seen |= code == 1
+        if controller_model(code) is not None and not self._policy_fields(code):
             self._read_only_latched = True
-        if self.read_only or model is None or not set(fields).issubset(model.allowed_write_fields):
+
+    def _require_write_permission(
+        self, fields: dict[int, Any], observed: dict[str, Any] | None = None,
+        *, regeneration_start: bool = False,
+    ) -> None:
+        code = (observed or {}).get("deviceModel", (self.data or {}).get("deviceModel"))
+        self._observe_write_policy({"deviceModel": code})
+        if (
+            self.read_only or controller_model(code) is None
+            or not set(fields).issubset(self._policy_fields(code))
+            or (self._model1_seen and FIELD_SYSTEM_MODE in fields
+                and (not regeneration_start or fields != {FIELD_SYSTEM_MODE: 1}))
+        ):
             raise ServiceValidationError(
                 translation_domain=DOMAIN, translation_key="model_write_not_allowed"
             )
@@ -202,11 +248,10 @@ class YpsilonDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         drift = self._clock_drift(data.get("currentTime"))
         data["_clockDriftMinutes"] = drift
         data["_clockSyncs"] = self._clock_syncs
-        model = controller_model(data.get("deviceModel", (self.data or {}).get("deviceModel")))
-        if model is not None and model.read_only:
-            self._read_only_latched = True
+        code = data.get("deviceModel", (self.data or {}).get("deviceModel"))
+        self._observe_write_policy({"deviceModel": code})
         if (
-            self.read_only or model is None or FIELD_CURRENT_TIME not in model.allowed_write_fields
+            self.read_only or self._model1_seen or FIELD_CURRENT_TIME not in self._policy_fields(code)
             or drift is None or not self.auto_sync_clock or abs(drift) <= self.clock_tolerance
         ):
             return
@@ -230,6 +275,8 @@ class YpsilonDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             try:
                 self._require_write_permission({FIELD_CURRENT_TIME: (0, 0)}, before_write)
             except ServiceValidationError:
+                return
+            if self._model1_seen:
                 return
             local = dt_util.now()
             expected_time = f"{local.hour:02d}:{local.minute:02d}:00"
@@ -278,9 +325,7 @@ class YpsilonDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self, data: dict[str, Any], started: float
     ) -> dict[str, Any]:
         self._consecutive_failures = 0
-        model = controller_model(data.get("deviceModel"))
-        if model is not None and model.read_only:
-            self._read_only_latched = True
+        self._observe_write_policy(data)
         self._decorate_semantics(data)
         self._apply_interval(data)
         data.update(
@@ -469,11 +514,14 @@ class YpsilonDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         require_in_service: bool = False,
     ) -> None:
         """Write once, then reconcile the controller through strict read-back."""
-        self._require_write_permission(values)
+        regeneration_start = (
+            values == {FIELD_SYSTEM_MODE: 1} and require_in_service and accept_station_active
+        )
+        self._require_write_permission(values, regeneration_start=regeneration_start)
         expected = self._expected_readback(values)
 
         async with self._mutation_lock:
-            self._require_write_permission(values)
+            self._require_write_permission(values, regeneration_start=regeneration_start)
             # Include the baseline GET in the clock window: an ignored write
             # must not look applied merely because two natural minutes passed.
             clock_check_started = time.monotonic()
@@ -481,7 +529,7 @@ class YpsilonDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             if require_in_service or "currentTime" in expected:
                 fresh = await self._async_strict_read()
                 self.async_set_updated_data(fresh)
-                self._require_write_permission(values, fresh)
+                self._require_write_permission(values, fresh, regeneration_start=regeneration_start)
                 clock_before_write = fresh.get("currentTime")
                 if require_in_service and (
                     fresh.get("station") != 0

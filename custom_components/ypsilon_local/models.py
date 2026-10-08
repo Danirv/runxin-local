@@ -61,15 +61,17 @@ class ControllerModel:
 # Preserve exactly the existing G6/Midnight integration write surface. These
 # pending actions are not promoted to hardware-verified evidence by this policy.
 EXISTING_CONTROL_FIELDS = frozenset({4, 6, 7, 10, 34, 43, 47})
+MODEL1_TEST_FIELDS = frozenset({4, 6, 10, 43, 47})
 
 
 CONTROLLER_MODELS: dict[int, ControllerModel] = {
     1: ControllerModel(
         code=1,
-        title="Runxin F150 · Read-only Alpha",
-        model_name="F150 / model 1 (read-only Alpha)",
+        title="Runxin F150 · Alpha",
+        model_name="F150 / model 1 (Alpha)",
         manufacturer="Runxin",
         resin_volume_scale=None,
+        resin_volume_scale_confirmed=False,
         support_level="alpha",
         provisional_readings=True,
         unconfirmed_unit_fields=frozenset({"resinVolume", "periodicWaterProduction"}),
@@ -80,6 +82,8 @@ CONTROLLER_MODELS: dict[int, ControllerModel] = {
             "F150 is the manufacturer's API enum name, not a confirmed product "
             "identity. App comparisons and field applicability are pending; "
             "resin raw 240 and periodic-water reference 15 have no confirmed units."
+            " Optional manual tests of fields 4/6/10/43/47 and separate regeneration "
+            "start are unverified; field 7 and automatic clock correction stay blocked."
         ),
     ),
     9: ControllerModel(
@@ -149,6 +153,19 @@ def is_supported_model(code: object) -> bool:
     return controller_model(code) is not None
 
 
+def allowed_write_fields(
+    code: object, *, model1_test_writes: bool = False,
+    model1_test_regeneration: bool = False,
+) -> frozenset[int]:
+    """Resolve opted-in permissions independently from hardware evidence."""
+    model = controller_model(code)
+    if model is None:
+        return frozenset()
+    if model.code == 1 and model1_test_writes:
+        return MODEL1_TEST_FIELDS | ({34} if model1_test_regeneration else set())
+    return model.allowed_write_fields
+
+
 def model_support_details(code: object) -> dict[str, Any] | None:
     """Return per-model evidence and effective integration capabilities.
 
@@ -169,9 +186,13 @@ def model_support_details(code: object) -> dict[str, Any] | None:
         "resin_volume_scale_confirmed": model.resin_volume_scale_confirmed,
         "protocol_profile": model.protocol_profile,
         "read_only": model.read_only,
+        "default_read_only": model.read_only,
         "allowed_write_fields": sorted(model.allowed_write_fields),
         "provisional_readings": model.provisional_readings,
         "unconfirmed_unit_fields": sorted(model.unconfirmed_unit_fields),
+        **({"experimental_write_fields": sorted(MODEL1_TEST_FIELDS),
+            "experimental_regeneration_field": 34,
+            "experimental_writes_verified": False} if model.code == 1 else {}),
         "evidence": model.evidence,
     }
 

@@ -13,7 +13,10 @@ from homeassistant.helpers import device_registry as dr, entity_registry as er
 from homeassistant.helpers.device_registry import format_mac
 
 from .api import YpsilonLocalClient
-from .const import DOMAIN, CONF_DIAGNOSTIC_ONLY, CONF_DIAGNOSTIC_REPORT_ID
+from .const import (
+    DOMAIN, CONF_DIAGNOSTIC_ONLY, CONF_DIAGNOSTIC_REPORT_ID,
+    CONF_MODEL1_TEST_WRITES, CONF_MODEL1_TEST_REGENERATION,
+)
 from .diagnostic_report import DiagnosticReport, report_store
 from .coordinator import YpsilonDataUpdateCoordinator
 from .services import async_setup_services
@@ -38,6 +41,7 @@ class YpsilonStore:
 
     client: YpsilonLocalClient
     field52_cache: dict[str, Any] = field(default_factory=dict)
+    write_options: tuple[bool, bool] = (False, False)
 
 
 async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
@@ -50,12 +54,26 @@ def _get_store(hass: HomeAssistant, entry: ConfigEntry) -> YpsilonStore:
     domain_store: dict[str, YpsilonStore] = hass.data.setdefault(DOMAIN, {})
     store = domain_store.get(entry.entry_id)
     host = entry.data[CONF_HOST]
+    write_options = (
+        entry.options.get(CONF_MODEL1_TEST_WRITES) is True,
+        entry.options.get(CONF_MODEL1_TEST_WRITES) is True
+        and entry.options.get(CONF_MODEL1_TEST_REGENERATION) is True,
+    )
+
+    def new_client() -> YpsilonLocalClient:
+        return YpsilonLocalClient(
+            host, model1_test_writes=write_options[0],
+            model1_test_regeneration=write_options[1],
+        )
+
     if store is None:
-        store = YpsilonStore(client=YpsilonLocalClient(host))
+        store = YpsilonStore(client=new_client(), write_options=write_options)
         domain_store[entry.entry_id] = store
-    elif store.client.host != host:
+    elif store.client.host != host or store.write_options != write_options:
+        store.client.revoke_writes()
         store.client.close()
-        store.client = YpsilonLocalClient(host)
+        store.client = new_client()
+        store.write_options = write_options
     return store
 
 

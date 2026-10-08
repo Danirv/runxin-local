@@ -29,7 +29,9 @@ def _write_policy_summary(entry: ConfigEntry, coordinator: Any) -> dict[str, Any
     code = (coordinator.data or {}).get("deviceModel")
     model = controller_model(code)
     coordinator_blocked = bool(getattr(coordinator, "read_only", False)) or model is None
-    fields = set() if coordinator_blocked else set(model.allowed_write_fields)
+    fields = set() if coordinator_blocked else set(getattr(
+        coordinator, "allowed_write_fields", model.allowed_write_fields,
+    ))
     adapter = getattr(coordinator.client, "write_policy", None)
     if isinstance(adapter, dict):
         if adapter.get("read_only", True):
@@ -49,8 +51,11 @@ def _write_policy_summary(entry: ConfigEntry, coordinator: Any) -> dict[str, Any
         "adapter": adapter,
         "read_only": not fields,
         "allowed_write_fields": sorted(fields),
+        "model1_test_writes": bool(getattr(coordinator, "model1_test_writes", False)),
+        "model1_test_regeneration": bool(getattr(coordinator, "model1_test_regeneration", False)),
         "auto_clock_sync_requested": clock_requested,
-        "auto_clock_sync_permitted": clock_requested and FIELD_CURRENT_TIME in fields,
+        "auto_clock_sync_permitted": clock_requested and FIELD_CURRENT_TIME in fields
+        and bool(getattr(coordinator, "automatic_clock_allowed", code != 1)),
     }
 
 

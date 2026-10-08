@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented here.
 
+## [2.9.1] - 2026-10-08
+
+- Add explicit, default-off model-1 Alpha options for manual tests of clock (4), continuous-flow time (6), regeneration schedule (10), added salt (43) and hardness (47). All model-1 writes remain hardware-unverified; existing readings, raw bytes, unconfirmed units and disabled provisional statistics are retained.
+- Add a separate default-off regeneration-start opt-in requiring the settings test mode. Keep the fresh service/vacation checks, single command and phase confirmation; block direct phase advancement, field 7, vacation writes and automatic clock correction.
+- Apply opted-in permissions to entities, coordinator, administrator services and adapter. Revoke and replace sessions when test permissions change, preserving the field-52 cache and entity identities. Diagnostics distinguish default model policy from effective test permissions.
+- Add EN/CA/ES options and validation instructions. G6 and Midnight control sets, codecs, conversions and identities are retained.
+
 ## [2.9.0] - 2026-10-08
 
 - Publish a normal stable integration version; Alpha status remains scoped to models 1, 12 and 14.

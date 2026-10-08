@@ -2,7 +2,10 @@
 
 Integració local per a descalcificadors compatibles amb **Runxin F79D + BroadLink BL3372**, amb el Ypsilon G6 com a maquinari de referència i suport experimental per al Euro-Clear Midnight.
 
-El **model 1 / F150** té una Alpha específica de només lectura: sensors periòdics, sense controls, escriptures ni correcció del rellotge. Les lectures són provisionals, sense estadístiques de llarg termini; la resina i la quantitat per cicle no tenen unitat assumida. [Guia](model-1-alpha.ca.md).
+El **model 1 / F150** té una Alpha de només lectura per defecte: sensors periòdics, sense escriptures automàtiques, amb proves manuals opcionals a la 2.9.1. Les lectures són provisionals, sense estadístiques de llarg termini; la resina i la quantitat per cicle no tenen unitat assumida. [Guia](model-1-alpha.ca.md).
+
+
+A la **2.9.1**, el model 1 té opcions desactivades per defecte per provar els ajustos 4/6/10/43/47 i una segona opció per iniciar una regeneració prevista. Cap escriptura del model 1 es considera verificada encara. El rellotge automàtic, el camp 7 i l’avanç de fases continuen bloquejats. [Instruccions](model-1-alpha.ca.md).
 
 ## Compatibilitat a la 2.9.0
 
