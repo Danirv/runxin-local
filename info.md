@@ -1,6 +1,12 @@
-# Runxin Local 2.9.1
+# Runxin Local 2.9.2
 
 Local Home Assistant integration for compatible Runxin F79D / BroadLink BL3372 water softeners, tested with ATH/BWT Ypsilon G6 and Euro-Clear Midnight.
+
+## 2.9.2
+
+Promotes **F136 / model 14 to Beta**, based on the working v2.9.1 installation, manufacturer-app comparisons and controller resin photo in issue #22. Fixes its resin reading from 4.4 L to **30.0 L**: field 26 `[44, 1]` is U16 little-endian 300, scaled by 0.1. This is the controller's configured value, distinct from the unit's nominal 25 L resin capacity.
+
+Readings for fields 4/6/7/10/43/47 match the app. Writes to 4/6/10/43 are contributor-verified; writes to 7/47 and mechanical actions on 34 remain pending. Existing commands, fresh read-back and entity identities are retained. G6/model-12 resin decoding and model-1 policy stay unchanged. See the [model-14 guide](docs/model-14-alpha.md).
 
 ## 2.9.1
 

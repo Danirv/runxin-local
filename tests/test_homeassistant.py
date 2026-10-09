@@ -377,7 +377,7 @@ async def test_device_identity_uses_model_metadata_and_keeps_mac_identifier(hass
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("model", [12, 14])
-async def test_alpha_model_controls_remain_available_with_same_commands(hass, model):
+async def test_midnight_model_controls_remain_available_with_same_commands(hass, model):
     state = codec.decode_frame(STATE_FRAME)
     state["deviceModel"] = model  # Model 14 is synthetic; fixture is model 12.
     coordinator, entry = _entity_context(hass, state)
@@ -406,8 +406,36 @@ async def test_midnight_resin_scale_confidence_is_visible_without_changing_units
     state = await _add_sensor(hass, sensor, "sensor.test_resin_volume")
     assert state.state == expected
     assert state.attributes["unit_of_measurement"] == "L"
-    assert (state.attributes.get("resin_volume_scale_confirmed") is False) == (model == 14)
+    assert state.attributes.get("resin_volume_scale_confirmed") is not False
     assert sensor.unique_id == f"{TEST_MAC}_resin_volume"
+
+
+@pytest.mark.asyncio
+async def test_model14_resin_photo_regression_reaches_ha_and_diagnostics(hass):
+    coordinator, entry = _entity_context(hass, codec.decode_tlvs({1: (14, 0), 26: (44, 1)}))
+    description = next(d for d in sensor_mod.SENSORS if d.key == "resin_volume")
+    sensor = sensor_mod.YpsilonSensor(coordinator, entry, description)
+    state = await _add_sensor(hass, sensor, "sensor.test_model14_resin")
+    assert float(state.state) == 30.0
+    assert state.attributes["unit_of_measurement"] == "L"
+    assert state.attributes["raw_bytes"] == [44, 1]
+    assert "interpretation" not in state.attributes
+    assert sensor.unique_id == f"{TEST_MAC}_resin_volume"
+    coordinator.scan_interval = 60
+    coordinator.client.transient_retries = 0
+    coordinator.client.reauth_count = 0
+    coordinator.client.connection_diagnostics = {}
+    entry.version = 2
+    entry.options = {}
+    entry.data = {"host": TEST_HOST}
+    entry.runtime_data = coordinator
+    diagnostics = await diagnostics_mod.async_get_config_entry_diagnostics(hass, entry)
+    support = diagnostics["protocol"]["model_support"]
+    assert support["support_level"] == "beta"
+    assert support["resin_volume_scale_confirmed"] is True
+    assert support["pending_write_fields"] == [7, 34, 47]
+    assert diagnostics["state"]["resinVolume"] == 300
+    assert diagnostics["state"]["_raw_resinVolumeBytes"] == (44, 1)
 
 
 @pytest.mark.asyncio

@@ -135,7 +135,9 @@ Partial results are useful. Include the model, firmware, date, baseline/restore 
 
 ## Euro-Clear Midnight / controller model 14 (F136)
 
-[Issue #22](https://github.com/Danirv/runxin-local/issues/22) reports working F79D reads after adding the model locally and verified writes to fields **4/6/10/43**. This is contributor-reported hardware evidence, distinct from the model-12 captures above. Fields **7/34/47** remain pending. Version 2.9.0 accepts this unit with Alpha model support and the existing Midnight controls. Resin scale 0.1 is adopted from the reported shared map, pending a direct raw/app comparison; its confirmation flag is exposed. See the [model-14 guide](model-14-alpha.md).
+**Beta in 2.9.2**, scoped to Euro-Clear Midnight 25 Plug&Play / F136 / ECOPRO+, BL3372 `0x520F`, firmware **62016**. [Issue #22](https://github.com/Danirv/runxin-local/issues/22) confirms v2.9.1 works after update/restart without local model edits. App comparisons confirm readings for **4/6/7/10/43/47** (field 7: 3.5 m³/h; field 47: 260 mg/L). Contributor-verified writes are **4/6/10/43**; **writes 7/47 and mechanical field 34 remain pending**.
+
+Field 26 `[44, 1]` appears identically in HA diagnostics and the independent read-only report. The [controller photo](https://github.com/Danirv/runxin-local/issues/22#issuecomment-6084624961) shows **30.0 L** configured. U16 little-endian gives `0x012C = 300`, scaled by 0.1 to 30.0 L. Version 2.9.2 applies this model-14-only read override and sets `resin_volume_scale_confirmed=true`; reference G6/model-12 decoding stays unchanged. Nominal physical capacity 25 L is distinct from the configured parameter; no setting is changed. This evidence is a reported byte-pair/controller comparison, not a captured full raw frame or a new maintainer write test. No further resin comparison or repeated report is needed. See the [model-14 guide](model-14-alpha.md).
 
 ## Field 52 polling note
 

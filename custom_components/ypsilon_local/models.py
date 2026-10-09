@@ -125,17 +125,19 @@ CONTROLLER_MODELS: dict[int, ControllerModel] = {
         manufacturer="Euro-Clear / Runxin",
         allowed_write_fields=EXISTING_CONTROL_FIELDS,
         resin_volume_scale=0.1,
-        resin_volume_scale_confirmed=False,
-        support_level="alpha",
-        tested_hardware="Euro-Clear Midnight 25 (Runxin F136 / ECOPRO+ head)",
+        resin_volume_scale_confirmed=True,
+        support_level="beta",
+        tested_hardware="Euro-Clear Midnight 25 (Runxin F136 / ECOPRO+ head; BL3372 0x520F, firmware 62016)",
         hardware_verified_write_fields=(4, 6, 10, 43),
         pending_write_fields=(7, 34, 47),
         evidence=(
             "Issue #22: contributor enabled model 14 locally and reports working "
             "BL3372 discovery/authentication, F79D reads and the model-12 field map. "
-            "The contributor reports local writes verified for fields 4, 6, 10 and 43; "
-            "fields 7, 34 and 47 are not fully verified. The Midnight resin scale 0.1 "
-            "is adopted from the reported shared map pending a direct raw/app comparison."
+            "The contributor reports local writes verified for fields 4, 6, 10 and 43. "
+            "App comparisons confirm readings for fields 4, 6, 7, 10, 43 and 47; "
+            "writes to fields 7, 34 and 47 remain unverified. On v2.9.1, field 26 "
+            "bytes [44, 1] and a controller photo showing 30.0 L confirm U16 "
+            "little-endian tenths of a litre, despite the unit's nominal 25 L capacity."
         ),
     ),
 }
