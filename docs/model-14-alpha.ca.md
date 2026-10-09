@@ -1,15 +1,29 @@
-# Model 14 / Runxin F136: suport Midnight Alpha
+# Model 14 / Runxin F136: suport Midnight Beta
 
 [English](model-14-alpha.md) | [Català](model-14-alpha.ca.md) | [Español](model-14-alpha.es.md)
 
-Runxin Local **2.9.0** admet el model **14 / F136** amb BL3372 (`0x520F`) i el protocol compatible F79D existent. La release és estable; **Alpha** descriu el suport d’aquest controlador, inicialment el Euro-Clear Midnight 25 / ECOPRO+ de la [issue #22](https://github.com/Danirv/runxin-local/issues/22).
+Runxin Local **2.9.2** passa el **model 14 / F136 a Beta** i corregeix la lectura de resina. Maquinari contrastat a la [issue #22](https://github.com/Danirv/runxin-local/issues/22): Euro-Clear Midnight 25 Plug&Play / ECOPRO+, BroadLink BL3372 (`0x520F`), firmware **62016**. La release és estable; els models 1 i 12 continuen Alpha.
 
-L’usuari va afegir el model localment i declara que funcionen descoberta, autenticació, lectures i el mapa del model 12. Acceptem com a evidència aportada les escriptures que declara verificades: **4 (rellotge), 6 (límit de temps de cabal), 10 (hora de regeneració) i 43 (sal afegida)**. **7 (llindar de cabal), 34 (accions mecàniques) i 47 (duresa)** continuen pendents.
+## Evidència confirmada
 
-Instal·la 2.9.0 o posterior, reinicia HA i afegeix Runxin Local. No cal editar el registre. Una entrada operativa que ja funcionava amb la modificació local es pot actualitzar conservant domini i identificadors MAC; revisa qualsevol altra modificació local abans de substituir la carpeta. Una entrada de només diagnòstic no es transforma: descarrega l’informe i elimina-la abans d’afegir el dispositiu operatiu.
+L’usuari confirma que **2.9.1 funciona sense modificacions locals**, després d’actualitzar i reiniciar HA. Els diagnòstics i l’informe independent de lectura coincideixen en els bytes de resina. Les lectures **4/6/7/10/43/47** coincideixen amb l’app; el camp 7 mostra **3,5 m³/h** i el 47 **260 mg/L**.
 
-S’ofereixen els sensors i controls Midnight, inclosa la correcció automàtica del rellotge, els ajustos, el botó de regeneració i els serveis validats. Es mantenen codificacions, rangs, comprovacions d’estat i lectura posterior estricta. Els controls pendents continuen disponibles per validar-los; vacances segueix de només lectura.
+Les escriptures **4/6/10/43** estan verificades per l’usuari. Les **escriptures de 7/47 i les accions mecàniques de 34 continuen pendents**: comparar lectures no valida escriptures. Beta no certifica aquestes accions ni totes les variants F136.
 
-La resina utilitza **primer byte cru × 0,1 L**, com el model 12, a partir del mapa compartit declarat. Falta la comparació directa entre bytes del model 14 i pantalla/app: el sensor i els diagnòstics mostren `resin_volume_scale_confirmed=false` i conserven els dos bytes. Els enums no reconeguts continuen visibles.
+## Resina
 
-Són útils els diagnòstics guardats de HA, l’entrada exacta que va afegir i els valors/unitats de resina i altres lectures de l’app o pantalla. No cal repetir proves completades; es poden aportar els resultats inicials/canvi/lectura/restauració ja disponibles. No cal iniciar una acció mecànica només per fer l’informe. [Verificació física](hardware-verification.ca.md).
+La [foto i confirmació del controlador](https://github.com/Danirv/runxin-local/issues/22#issuecomment-6084624961) mostren **H1-1 / Set Resin Volume = 30,0 L**. `[44, 1]` són bytes decimals: `0x012C = 300` en U16 little-endian; dividit per 10 dona **30,0 L**. La 2.9.1 descartava el segon byte i mostrava 4,4 L. La **2.9.2 corregeix el model 14** i marca `resin_volume_scale_confirmed=true` als diagnòstics. Es conserven els bytes originals al sensor i als diagnòstics.
+
+És el **valor configurat**, no una mesura física de la resina. Els 25 L nominals del fabricant són una dada diferent: mostrem els 30 L configurats sense canviar-los. No calen més informes ni canviar cap ajust per resoldre aquest punt.
+
+L’excepció U16 només s’aplica al model 14. El G6/model 9 conserva U8 en litres; el model 12 conserva U8 × 0,1, perquè `FA 00` no determina independentment el significat del segon byte. Els enums desconeguts continuen visibles com a codis decimals.
+
+## Instal·lació i controls
+
+Instal·la **2.9.2 o posterior** per corregir la resina i reinicia HA. Les entrades operatives s’actualitzen conservant domini `ypsilon_local`, identitats MAC, unique IDs i controls: no cal editar el registre ni tornar a afegir el dispositiu. Les entrades de només diagnòstic continuen sent de diagnòstic.
+
+Els controls Midnight mantenen codificacions, rangs, comprovacions d’estat i lectura posterior estricta. Els controls pendents segueixen disponibles; vacances és només de lectura. No s’afegeixen consultes ni escriptures. Les lectures parcials del camp 26 reutilitzen la identitat validada.
+
+## Validació pendent
+
+No cal repetir proves completades ni enviar un altre diagnòstic ara. Quan sigui convenient, una prova adequada d’escriptura de 7 o 47 pot fer: lectura inicial → canvi des de HA → lectura nova i comparació amb app/controlador → restauració → lectura nova. No cal superar el llindar de cabal ni provocar regeneració per validar un ajust. La prova mecànica del camp 34 és independent i no es demana només per completar l’informe. [Verificació física](hardware-verification.ca.md).

@@ -41,6 +41,6 @@ El protocol es manté preparat per extreure's a una llibreria quan un altre cons
 
 L’auditoria offline comprova imports relatius niats i dependències del transport. `write_policy` diferencia evidència del model i restriccions configurades/del coordinador/adaptador amb metadades en memòria cau. Consulta [CONTRIBUTING](../CONTRIBUTING.ca.md) per als entorns de proves i la cobertura de CI.
 
-El model 14 / F136 reutilitza el perfil i els controls Midnight, amb les verificacions aportades a la issue #22 i els camps pendents diferenciats. La release 2.9.0 és estable; Alpha s'aplica per model. Consulta la [guia del model 14](model-14-alpha.ca.md).
+El model 14 / F136 reutilitza el perfil i els controls Midnight, amb les verificacions aportades a la issue #22 i els camps pendents diferenciats. A la 2.9.2, el model 14 és Beta: el camp 26 té una excepció de lectura U16 LE a `runxin/fields.py` i escala 0,1, confirmada amb la pantalla. El client conserva la identitat validada per a lectures parcials, sense consultes addicionals. Els models 1 i 12 continuen Alpha i les conversions G6/model 12 es mantenen. Consulta la [guia del model 14](model-14-alpha.ca.md).
 
 El model 1 continua de només lectura per defecte. A la 2.9.1, les opcions de proves manuals concedeixen els camps 4/6/10/43/47; una segona opció permet només iniciar regeneració. Coordinador i adaptador apliquen els permisos efectius. Canviar-los substitueix i revoca la sessió anterior sense perdre la memòria cau. El rellotge automàtic, el camp 7 i l’avanç directe de fases continuen bloquejats.

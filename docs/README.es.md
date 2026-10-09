@@ -7,9 +7,9 @@ El **modelo 1 / F150** tiene una Alpha de solo lectura por defecto: sensores per
 
 En **2.9.1**, el modelo 1 tiene opciones desactivadas por defecto para probar ajustes 4/6/10/43/47 y una segunda opción para iniciar una regeneración prevista. Ninguna escritura del modelo 1 se considera verificada aún. El reloj automático, el campo 7 y el avance de fases siguen bloqueados. [Instrucciones](model-1-alpha.es.md).
 
-## Compatibilidad en 2.9.0
+## Compatibilidad en 2.9.2
 
-**2.9.0 es una release estable**. Alpha se aplica a modelos concretos: modelo 1 / F150 solo lectura, modelo 12 / F105 y modelo 14 / F136 con controles. Para el modelo 14, el usuario de la issue #22 declara verificados los campos 4, 6, 10 y 43; 7, 34 y 47 siguen pendientes. Se reutiliza el mapa Midnight y la escala de resina 0,1, marcada pendiente de comparación directa en diagnósticos y sensor. [Guía del modelo 14](model-14-alpha.es.md).
+La **2.9.2 es una release estable**. Los modelos 1 / F150 y 12 / F105 siguen Alpha; el **modelo 14 / F136 pasa a Beta**. La issue #22 confirma funcionamiento con 2.9.1, lecturas 4/6/7/10/43/47 coincidentes con la app y resina configurada de **30,0 L** en el controlador: `[44, 1]` son 300 en U16 little-endian, divididos entre 10. La 2.9.2 corrige los 4,4 L mostrados antes. Las escrituras 4/6/10/43 están verificadas; las de 7/47 y las acciones mecánicas de 34 siguen pendientes. Se mantienen el comportamiento G6/modelo 12 y las identidades existentes. [Guía del modelo 14](model-14-alpha.es.md).
 
 ## Autodiagnóstico y cambio de nombre: 2.8.0
 

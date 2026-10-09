@@ -33,6 +33,7 @@ class F79DClient:
     def __init__(self, transport: TransactionTransport, *, capture_raw: bool = False) -> None:
         self.transport = transport
         self.capture_raw = capture_raw
+        self._device_model: int | None = None
         self._lock = threading.Lock()
 
     def close(self) -> None:
@@ -48,9 +49,11 @@ class F79DClient:
 
     def _decode_response(self, response: bytes, expected_opcode: int) -> dict[str, Any]:
         try:
-            decoded = decode_frame(response)
+            decoded = decode_frame(response, device_model=self._device_model)
             if inner_frame(response)[3] != expected_opcode:
                 raise RunxinProtocolError("response opcode does not match the request")
+            if "deviceModel" in decoded:
+                self._device_model = decoded["deviceModel"]
             if self.capture_raw:
                 decoded["_rawFieldBytes"] = {
                     field: list(pair) for field, pair in extract_tlvs(response).items()

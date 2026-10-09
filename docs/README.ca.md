@@ -7,9 +7,9 @@ El **model 1 / F150** té una Alpha de només lectura per defecte: sensors peri�
 
 A la **2.9.1**, el model 1 té opcions desactivades per defecte per provar els ajustos 4/6/10/43/47 i una segona opció per iniciar una regeneració prevista. Cap escriptura del model 1 es considera verificada encara. El rellotge automàtic, el camp 7 i l’avanç de fases continuen bloquejats. [Instruccions](model-1-alpha.ca.md).
 
-## Compatibilitat a la 2.9.0
+## Compatibilitat a la 2.9.2
 
-La **2.9.0 és una release estable**. Alpha s'aplica als models concrets: model 1 / F150 només de lectura, model 12 / F105 i model 14 / F136 amb controls. Per al model 14, l'usuari de la issue #22 declara verificats els camps 4, 6, 10 i 43; 7, 34 i 47 continuen pendents. Es reutilitza el mapa Midnight i l'escala de resina 0,1, marcada pendent de comparació directa als diagnòstics i al sensor. [Guia del model 14](model-14-alpha.ca.md).
+La **2.9.2 és una release estable**. Els models 1 / F150 i 12 / F105 continuen Alpha; el **model 14 / F136 passa a Beta**. La issue #22 confirma funcionament amb 2.9.1, lectures 4/6/7/10/43/47 coincidents amb l’app i resina configurada de **30,0 L** al controlador: `[44, 1]` són 300 en U16 little-endian, dividits per 10. La 2.9.2 corregeix els 4,4 L que es mostraven abans. Les escriptures 4/6/10/43 estan verificades; les de 7/47 i les accions mecàniques de 34 continuen pendents. Es mantenen el comportament G6/model 12 i les identitats existents. [Guia del model 14](model-14-alpha.ca.md).
 
 ## Autodiagnòstic i canvi de nom: 2.8.0
 

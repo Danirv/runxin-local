@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented here.
 
+## [2.9.2] - 2026-10-09
+
+- Fix model-14/F136 resin volume by reading both field-26 bytes as U16 little-endian tenths of a litre. Issue #22's `[44, 1]` now displays 30.0 L instead of 4.4 L, matching the controller photo. Preserve original byte pairs and reference G6/model-12 decoding.
+- Promote model 14 from Alpha to Beta and mark its resin conversion confirmed on the reported BL3372 0x520F / firmware 62016 unit. Record app-matched readings for 4/6/7/10/43/47 separately from contributor-verified writes to 4/6/10/43; writes to 7/47 and mechanical actions on 34 remain pending.
+- Apply the model-specific read override to partial reads after identity discovery without adding device queries, writes or controls. Add regression coverage for the reported bytes, Home Assistant sensor/diagnostics and existing model behavior.
+- Update English/Catalan/Spanish support, protocol and hardware-evidence documentation. Domain, config entries, entity IDs, write permissions and model-1/model-12 Alpha status remain unchanged.
+
 ## [2.9.1] - 2026-10-08
 
 - Add explicit, default-off model-1 Alpha options for manual tests of clock (4), continuous-flow time (6), regeneration schedule (10), added salt (43) and hardness (47). All model-1 writes remain hardware-unverified; existing readings, raw bytes, unconfirmed units and disabled provisional statistics are retained.
