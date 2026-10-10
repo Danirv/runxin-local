@@ -74,7 +74,7 @@
       "resin_volume": {"name": "Volum de resina"},
       "filter_work_days": {"name": "Interval de manteniment del material filtrant"},
       "device_model": {"name": "Model"},
-      "language_code": {"name": "Idioma del dispositiu", "state": {"chinese": "Xinès", "english": "Anglès", "spanish": "Espanyol", "french": "Francès", "russian": "Rus", "italian": "Italià", "german": "Alemany", "polish": "Polonès"}},
+      "language_code": {"name": "Idioma del dispositiu", "state": {"chinese": "Xinès", "english": "Anglès", "spanish": "Espanyol", "french": "Francès", "russian": "Rus", "italian": "Italià", "german": "Alemany", "polish": "Polonès", "dutch": "Neerlandès"}},
       "device_time_scheme": {"name": "Format horari", "state": {"12_hour": "12 hores", "24_hour": "24 hores"}},
       "washing_increase_number": {"name": "Freqüència de rentat"},
       "backwash_interval_number": {"name": "Interval entre contrarentats"},

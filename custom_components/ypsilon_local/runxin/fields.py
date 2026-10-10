@@ -74,7 +74,7 @@ SALT_HW_CLOUD_WRITE = (
 F79D_FIELD_SPECS: tuple[FieldSpec, ...] = (
     FieldSpec(1, "deviceModel", evidence=OBSERVED),
     FieldSpec(2, "language", write_codec=FieldCodec.U8, evidence=OBSERVED,
-              notes="WaterDevice enum 0..7: Chinese, English, Spanish, French, Russian, Italian, German, Polish."),
+              notes="Reference WaterDevice enum 0..7; confirmed language-label overrides live in semantics.py (model 1/code 7 Dutch; model 9/code 3 Spanish)."),
     FieldSpec(3, "deviceTimeScheme", evidence=OBSERVED,
               notes="WaterDevice enum: 0=12-hour, 1=24-hour."),
     FieldSpec(4, "currentTime", FieldCodec.TIME_HM, FieldCodec.TIME_HM, evidence=HW_WRITE),

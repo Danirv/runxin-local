@@ -23,6 +23,7 @@ from .models import CONTROLLER_MODELS, ControllerModel, controller_model, resin_
 from .runxin.semantics import (
     BRINE_DRAW_MODE_KEYS,
     DEVICE_LANGUAGE_KEYS,
+    DEVICE_LANGUAGE_OVERRIDES,
     DEVICE_TIME_SCHEME_KEYS,
     OUTPUT_RELAY_MODE_KEYS,
     REGENERATION_PATTERN_KEYS,
@@ -30,6 +31,7 @@ from .runxin.semantics import (
     VACATION_STATUS_KEYS,
     VOLUME_UNIT_KEYS,
     WORK_PATTERN_KEYS,
+    device_language_keys,
 )
 
 SOURCE_DEVICE = "Runxin F79D"
@@ -362,6 +364,9 @@ class YpsilonSensor(YpsilonEntity, SensorEntity):
 
     @property
     def _value_map(self) -> dict[int, str] | None:
+        if self.entity_description.key == "language_code":
+            model = self._model
+            return device_language_keys(model.code if model is not None else None)
         return {
             "station": STATION_KEYS,
             "volume_unit": VOLUME_UNIT_KEYS,
@@ -373,6 +378,8 @@ class YpsilonSensor(YpsilonEntity, SensorEntity):
     def options(self) -> list[str] | None:
         """Keep known enum keys and admit the current unmapped device code."""
         options = self.entity_description.options
+        if self.entity_description.key == "language_code":
+            options = list(dict.fromkeys(self._value_map.values()))
         if options is None:
             return None
         result = list(options)
@@ -460,6 +467,15 @@ class YpsilonSensor(YpsilonEntity, SensorEntity):
             raw = self.coordinator.data.get(self.entity_description.field)
             if raw is not None:
                 attributes["raw_code"] = raw
+                if self.entity_description.key == "language_code":
+                    model = self._model
+                    confirmed = model is not None and raw in DEVICE_LANGUAGE_OVERRIDES.get(model.code, {})
+                    attributes["interpretation"] = (
+                        "controller_display_confirmed" if confirmed
+                        else "reference_device_language_enum"
+                    )
+                    if model is not None:
+                        attributes["controller_model"] = model.code
         if self.entity_description.key == "active_alerts" and self.coordinator.data:
             attributes["alerts"] = self.coordinator.data.get("_activeAlerts", [])
         if self.entity_description.key == "flow_rate" and self.coordinator.data:

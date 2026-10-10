@@ -133,6 +133,14 @@ The Midnight manual, printed page 16, instructs users to multiply measured Germa
 
 Partial results are useful. Include the model, firmware, date, baseline/restore results and sanitized diagnostics; omit MAC addresses, IP addresses and credentials. None of these follow-up checks should be described as completed until a contributor reports them.
 
+## Unbranded controller model 1 / F150: confirmed clock tests
+
+The [2026-10-10 issue #17 reply](https://github.com/Danirv/runxin-local/issues/17#issuecomment-6096161743) reports baseline 11:23, manual HA writes to 11:24 and 11:26, and restoration through manual clock sync. The physical display and Water Device app matched each step. Record **field 4 manual clock writes/sync verified** on this unit (BL3372 firmware 62016); fields 6/10/34/43/47 remain pending. Version 2.9.3 updates evidence only: default read-only mode, opt-ins and blocked automatic clock correction remain.
+
+Language code 7 is Dutch on the controller. The project's model-9 G6 reports code 3 with Spanish menus; see [the scoped language mappings](f79d-settings.md#controller-language-evidence-293). These are controller-display observations, not app/account language settings or a complete enum calibration.
+
+Raw resin 240 and per-cycle reference 15 remain distinct, uncalibrated readings. The contributor changed 24 → 15 under the old Runxin app's Water treatment capacity label; its unit and exact local-field path are still pending. Nominal 24 L resin makes a 0.1 scale plausible but does not confirm the configured parameter. No repeated clock test, diagnostic scan or model-14 codec generalisation is required. See [the model-1 guide](model-1-alpha.md).
+
 ## Euro-Clear Midnight / controller model 14 (F136)
 
 **Beta in 2.9.2**, scoped to Euro-Clear Midnight 25 Plug&Play / F136 / ECOPRO+, BL3372 `0x520F`, firmware **62016**. [Issue #22](https://github.com/Danirv/runxin-local/issues/22) confirms v2.9.1 works after update/restart without local model edits. App comparisons confirm readings for **4/6/7/10/43/47** (field 7: 3.5 m³/h; field 47: 260 mg/L). Contributor-verified writes are **4/6/10/43**; **writes 7/47 and mechanical field 34 remain pending**.

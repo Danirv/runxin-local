@@ -1,6 +1,12 @@
-# Runxin Local 2.9.2
+# Runxin Local 2.9.3
 
 Local Home Assistant integration for compatible Runxin F79D / BroadLink BL3372 water softeners, tested with ATH/BWT Ypsilon G6 and Euro-Clear Midnight.
+
+## 2.9.3
+
+Corrects the device-language labels confirmed on physical controllers: **model 1/code 7 → Dutch** and **Ypsilon G6 model 9/code 3 → Spanish**. Other model/code pairs retain the reference mapping; raw codes and entity identities are preserved.
+
+Records model-1 manual clock writes and manual sync restoration as verified in issue #17. Default read-only mode and manual opt-ins remain; other writes are pending and automatic clock correction stays blocked. Resin 240 and treatment-capacity reference 15 remain separate, uncalibrated parameters. Models 1/12 stay Alpha and model 14 stays Beta. See the [model-1 guide](docs/model-1-alpha.md) and [language evidence](docs/f79d-settings.md#controller-language-evidence-293).
 
 ## 2.9.2
 
@@ -12,7 +18,7 @@ Readings for fields 4/6/7/10/43/47 match the app. Writes to 4/6/10/43 are contri
 
 Normal stable release with **optional model-1 / F150 Alpha write tests**. Settings → Devices & services → Runxin Local → Configure enables manual tests for fields 4/6/10/43/47. A second option enables only regeneration start for a planned physical validation. Both are off by default; turning the settings mode off also disables regeneration tests.
 
-All model-1 write evidence remains pending. The adapter and coordinator enforce the same effective permissions, and turning tests off replaces/revokes the old session. Automatic clock correction, field 7, direct phase advancement and vacation writes stay blocked. Existing sensors, raw field bytes, unconfirmed resin/per-cycle units and entity identities are retained. See the [model-1 testing guide](docs/model-1-alpha.md).
+At introduction in 2.9.1, all model-1 write evidence was pending; 2.9.3 records the subsequent field-4 confirmation. The adapter and coordinator enforce the same effective permissions, and turning tests off replaces/revokes the old session. Automatic clock correction, field 7, direct phase advancement and vacation writes stay blocked. Existing sensors, raw field bytes, unconfirmed resin/per-cycle units and entity identities are retained. See the [model-1 testing guide](docs/model-1-alpha.md).
 
 ## 2.9.0
 

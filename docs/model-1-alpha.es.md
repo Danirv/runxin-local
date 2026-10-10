@@ -14,14 +14,14 @@ La release de la integración es estable; Alpha describe solo el soporte de este
 
 Por defecto no hay controles **number, time o button**, ni ajustes de reloj, configuración o acciones mecánicas. Los servicios administrativos también rechazan escrituras. La política se aplica en el coordinador y el adaptador del cliente, independientemente de la interfaz; 2.9.1 permite activar las pruebas manuales descritas a continuación.
 
-Todas las lecturas usan interpretaciones **F79D de referencia pendientes de validación con la app**. No generan estadísticas de largo plazo; el historial ordinario puede conservarse. Los atributos y diagnósticos incluyen los dos bytes recibidos por campo (`state._rawFieldBytes`), sin paquetes completos, claves ni sesiones. Recibir zero/false no demuestra aplicabilidad.
+Las lecturas numéricas usan interpretaciones **F79D de referencia pendientes de validación con la app**. No generan estadísticas de largo plazo; el historial ordinario puede conservarse. Los atributos y diagnósticos incluyen los dos bytes recibidos por campo (`state._rawFieldBytes`), sin paquetes completos, claves ni sesiones. Recibir zero/false no demuestra aplicabilidad.
 
 Comparaciones prioritarias:
 
 | Campo | Referencia del informe | Pendiente |
 |---|---|---|
 | 26, resina | `F0 00`, primer byte 240 | HA muestra 240 sin L ni multiplicador asumido. Confirmar valor/unidad reales. |
-| 41–42, cantidad por ciclo | 15 | Se muestra sin L. Confirmar nombre, significado y unidad. |
+| 41–42, cantidad por ciclo | 15 | El usuario cambió 24 → 15 en Runxin Advanced → Water treatment capacity. Confirmar unidad y correspondencia con este campo; HA mantiene 15 sin unidad asumida. |
 | 35–36, restante | 1304 L | Capacidad restante y unidad, cerca de la hora de lectura. |
 | 37–40, diario/media semanal | 215 / 192 L | No confundir media del controlador con total histórico semanal. |
 | 47, dureza | 280 mg/L | Etiqueta, valor y escala de dureza. |
@@ -30,13 +30,23 @@ Comparaciones prioritarias:
 
 El segundo byte de resina se conserva sin deducir un códec U16. El campo 52 se guarda en una caché independiente y puede ser anterior al resto de la instantánea. Si app y HA interfieren, pausa la consulta o desactiva temporalmente la entrada; no hace falta volver a emparejar.
 
-La [issue #17](https://github.com/Danirv/runxin-local/issues/17#issuecomment-6044822202) confirma módulo `0x520F`, firmware 62016, autenticación con la app cerrada, código 1 estable y los 52 campos recibidos en dos consultas sin errores. Las tramas de prueba reconstruidas son sintéticas. No se han validado campos superiores al 52 ni escrituras; las futuras conversiones específicas no deben modificar G6/Midnight.
+La [issue #17](https://github.com/Danirv/runxin-local/issues/17#issuecomment-6044822202) confirma módulo `0x520F`, firmware 62016, autenticación con la app cerrada, código 1 estable y los 52 campos recibidos en dos consultas sin errores. Las tramas de prueba reconstruidas son sintéticas. No se han validado campos superiores al 52; el reloj manual (campo 4) está verificado en la unidad reportada y las demás escrituras siguen pendientes; las futuras conversiones específicas no deben modificar G6/Midnight.
+
+## Confirmaciones incorporadas en 2.9.3
+
+La [respuesta del 10-10-2026](https://github.com/Danirv/runxin-local/issues/17#issuecomment-6096161743) confirma reloj inicial 11:23, escrituras a 11:24 y 11:26 y restauración con el botón de sincronización manual. La pantalla del controlador y Water Device coinciden tras cada acción. Solo se probó el campo 4 y después se desactivó la opción experimental. No valida la corrección automática ni otras escrituras.
+
+La pantalla física está en neerlandés con código de idioma 7. HA corrige únicamente esa correspondencia del modelo 1, sin escribir el idioma ni cambiar el de la app; los demás códigos conservan las etiquetas de referencia.
+
+El equipo tiene 24 L nominales de resina, pero el campo 26 sigue `F0 00` (referencia 240) y los campos 41–42 siguen en 15. En el frontend del fabricante, `resinVolume` es Resin volume y `periodicWaterProduction` es Water treatment capacity. No hemos confirmado independientemente qué campo local modificaba esa pantalla de la antigua app Runxin. `240 / 10 = 24 L` es plausible, pero aún no es una comparación con el valor configurado. Se conservan ambas lecturas sin unidad asumida y no se aplica el códec U16 del modelo 14.
+
+El volumen de resina debe describir la carga real, no adaptarse al número de personas. La capacidad de tratamiento es otro parámetro que depende de resina, dureza y ajustes de regeneración; reducirla manteniendo los ciclos puede hacer regenerar más a menudo en lugar de ahorrar. Hay que aclarar etiqueta/unidad y seguir las instrucciones del equipo antes de proponer un cambio. No hace falta volver a emparejar, recuperar la app antigua, repetir diagnósticos ni modificar ajustes para aclarar las lecturas.
 
 ## Pruebas manuales opcionales (2.9.1)
 
-En la entrada operativa del modelo 1, abre **Ajustes → Dispositivos y servicios → Runxin Local → Configurar**. Activa **los ajustes experimentales del modelo 1** y guarda. La recarga añade controles manuales para reloj (4), límite de tiempo de caudal (6), hora de regeneración (10), sal añadida (43) y dureza (47). **Todas las escrituras siguen pendientes de verificación física**.
+En la entrada operativa del modelo 1, abre **Ajustes → Dispositivos y servicios → Runxin Local → Configurar**. Activa **los ajustes experimentales del modelo 1** y guarda. La recarga añade controles manuales para reloj (4), límite de tiempo de caudal (6), hora de regeneración (10), sal añadida (43) y dureza (47). **El campo 4 está verificado: escrituras manuales del reloj y restauración mediante sincronización manual. Los campos 6/10/43/47 y la regeneración (34) siguen pendientes.** No hace falta repetir la prueba del reloj ya completada.
 
-Anota una lectura inicial nueva, cambia un solo ajuste una cantidad pequeña dentro del rango, comprueba la lectura posterior y pantalla/app si es visible, restaura el valor original y confírmalo. Aporta campo, valor inicial, solicitado, leído, unidad/pantalla y restauración. No repitas una orden con resultado ambiguo: la integración comprueba el estado sin reenviarla a ciegas.
+Para una prueba nueva, anota una lectura inicial nueva, cambia un solo ajuste una cantidad pequeña dentro del rango, comprueba la lectura posterior y pantalla/app si es visible, restaura el valor original y confírmalo. Aporta campo, valor inicial, solicitado, leído, unidad/pantalla y restauración. No repitas una orden con resultado ambiguo: la integración comprueba el estado sin reenviarla a ciegas.
 
 Una **segunda opción** permite iniciar una regeneración prevista y requiere también el modo de ajustes. El botón comprueba servicio y vacaciones desactivadas con una lectura nueva, envía campo 34 = 1 una sola vez y comprueba la fase. El avance directo de fases sigue bloqueado, también en los servicios administrativos.
 

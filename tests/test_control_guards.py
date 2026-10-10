@@ -236,14 +236,20 @@ async def test_auto_clock_samples_target_after_wait_and_confirms_rollover(hass, 
     ("device_time_scheme", "deviceTimeScheme", 0, "12_hour"),
     ("brine_draw_mode", "absorbSaltMode", 0, "reverse"),
 ])
-async def test_known_enum_keys_and_shared_options_are_unchanged(hass, key, field, raw, expected):
+async def test_known_enum_keys_and_model_options_survive_unknown_readings(hass, key, field, raw, expected):
     from dataclasses import replace
     coordinator, entry = _entity_context(hass, {"deviceModel": 9, field: raw})
     desc = next(desc for desc in sensor_mod.SENSORS if desc.key == key)
     desc = replace(desc, entity_registry_enabled_default=True)
     sensor = sensor_mod.YpsilonSensor(coordinator, entry, desc)
     assert sensor.native_value == expected
-    assert sensor.options == desc.options
+    # Model 9/code 3 is Spanish, already present at code 2. Its effective
+    # options omit French and the duplicate; the shared reference stays intact.
+    expected_options = (
+        [option for option in desc.options if option != "french"]
+        if key == "language_code" else desc.options
+    )
+    assert sensor.options == expected_options
     state = await _add_sensor(hass, sensor, f"sensor.test_{key}")
     assert state.state == expected
     coordinator.data[field] = 253
@@ -254,7 +260,7 @@ async def test_known_enum_keys_and_shared_options_are_unchanged(hass, key, field
     coordinator.data[field] = raw
     sensor.async_write_ha_state()
     assert hass.states.get(sensor.entity_id).state == expected
-    assert sensor.options == desc.options
+    assert sensor.options == expected_options
     # Device communication loss retains HA's normal unavailable semantics.
     coordinator.last_update_success = False
     sensor.async_write_ha_state()
