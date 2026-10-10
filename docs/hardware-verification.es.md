@@ -119,6 +119,12 @@ El código de idioma 7 es neerlandés en pantalla. El G6 modelo 9 del proyecto d
 
 Resina raw 240 y referencia por ciclo 15 son lecturas diferentes sin conversión confirmada. El usuario modificó 24 → 15 bajo la etiqueta Water treatment capacity de la app antigua; faltan unidad y correspondencia exacta con el campo local. Los 24 L nominales hacen plausible una escala 0,1 pero no confirman el parámetro configurado. No hace falta repetir reloj/diagnósticos ni aplicar el códec del modelo 14. [Guía del modelo 1](model-1-alpha.es.md).
 
+### Funcionamiento del modelo 1 y observación de una fase con 2.9.3
+
+La [respuesta posterior de la issue #17](https://github.com/Danirv/runxin-local/issues/17#issuecomment-6101162421) confirma consultas periódicas normales, recuperación tras reiniciar HA y coincidencia con la pantalla en aspiración de salmuera / enjuague lento ascendente. No valida todas las fases ni las duraciones configuradas: se excluyen los intentos abortados y la observación aproximada del llenado se hizo con consultas cada 60 segundos. La opción de regeneración de HA estaba desactivada; la escritura del campo 34 sigue pendiente.
+
+HA mostró capacidad restante 3429 L tras el ciclo, manteniendo resina cruda 240 y referencia por ciclo 15. Son lecturas reportadas y una comprobación de coherencia, no una confirmación independiente de la escala de resina o las unidades de capacidad. La etiqueta L del ajuste antiguo se recuerda con incertidumbre. Alpha y escrituras pendientes se mantienen; no se piden más pruebas ni informes al contribuyente. La incidencia original de conexión/alta puede cerrarse independientemente. [Registro detallado](model-1-alpha.es.md#funcionamiento-reportado-después-de-regenerar-con-293).
+
 ## Euro-Clear Midnight / controlador modelo 14 (F136)
 
 **Beta en 2.9.2**, contrastada en Euro-Clear Midnight 25 Plug&Play / F136 / ECOPRO+, BL3372 `0x520F`, firmware **62016**. La [issue #22](https://github.com/Danirv/runxin-local/issues/22) confirma funcionamiento con 2.9.1 tras actualizar/reiniciar, sin modificar modelos localmente. Las lecturas **4/6/7/10/43/47** coinciden con la app (campo 7: 3,5 m³/h; campo 47: 260 mg/L). Las escrituras **4/6/10/43** están verificadas por el usuario; **las escrituras 7/47 y las acciones mecánicas de 34 siguen pendientes**.

@@ -6,7 +6,7 @@ This is the current model policy for **2.9.3**. A commercial brand, valve refere
 |---|---|---|---|---|
 | 9 | F79D | Reference ATH/BWT Ypsilon G6 | Reference hardware and per-field checks | Existing fields 4/6/7/10/34/43/47; field 34 remains pending physical verification |
 | 12 | F105 | Alpha Euro-Clear Midnight 25 | Captured state/app comparison; resin scale 0.1 | Existing fields 4/6/7/10/34/43/47; 4/6/10/43 hardware-verified, 7/34/47 pending |
-| 1 | F150 | Alpha readings, validated manual clock, issue #17 | All 52 requested field IDs received; reference semantics/applicability pending | Manual clock/sync (4) verified and available by default; opt-in tests 6/10/43/47 and separate start 34; 6/10/34/43/47 pending. Field 7, auto clock, phase advancement and vacation blocked |
+| 1 | F150 | Alpha readings, validated manual clock, issue #17 | All 52 requested field IDs received; v2.9.3 polling/restart recovery and one phase/display comparison confirmed; remaining semantics/applicability pending | Manual clock/sync (4) verified and available by default; opt-in tests 6/10/43/47 and separate start 34; 6/10/34/43/47 pending. Field 7, auto clock, phase advancement and vacation blocked |
 | 14 | F136 | Beta Euro-Clear Midnight 25 | Working v2.9.1; app comparisons for 4/6/7/10/43/47; field 26 U16 LE tenths matches controller 30.0 L | Existing fields 4/6/7/10/34/43/47; contributor reports writes 4/6/10/43 verified, writes 7/34/47 pending |
 | Other codes | Descriptive API names, where known | One-time diagnostic report only | No automatic support from the name table | None through a diagnostic entry |
 
@@ -23,6 +23,8 @@ Models 1/9/12/14 currently use the F79D-compatible frame and field-map path. Tha
 The catalogue's hardware-write evidence is reference G6 evidence, not a blanket claim for every model. Future differences in byte order, enums, units or applicability require model/profile-specific evidence and regression fixtures; do not change the shared G6 definition to fit another controller.
 
 Field-2 labels have two physical-display exceptions: model 1/code 7 → Dutch and reference G6 model 9/code 3 → Spanish. Every other pair retains the reference DeviceLanguage table, including models 12/14. This table is distinct from app/account language preferences; no complete local/cloud enum equivalence is inferred. BroadLink firmware 62016 identifies the Wi-Fi module, not the valve firmware. See [language evidence](f79d-settings.md#controller-language-evidence-293).
+
+The [model-1 operation report on 2.9.3](https://github.com/Danirv/runxin-local/issues/17#issuecomment-6101162421) confirms polling, recovery after HA restarts and the brine draw / slow up-flow rinse reading against the controller. It does not validate the HA regeneration-start command, all phases/durations or resin/capacity conversions. Remaining model calibration is independent of closing the resolved connection/setup issue; no further tests or reports are requested from this contributor. See [the detailed operation record](model-1-alpha.md#operation-reported-after-regeneration-on-293).
 
 ## Beyond field 52
 
