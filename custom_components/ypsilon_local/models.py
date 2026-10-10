@@ -61,7 +61,7 @@ class ControllerModel:
 # Preserve exactly the existing G6/Midnight integration write surface. These
 # pending actions are not promoted to hardware-verified evidence by this policy.
 EXISTING_CONTROL_FIELDS = frozenset({4, 6, 7, 10, 34, 43, 47})
-MODEL1_TEST_FIELDS = frozenset({4, 6, 10, 43, 47})
+MODEL1_TEST_FIELDS = frozenset({6, 10, 43, 47})
 
 
 CONTROLLER_MODELS: dict[int, ControllerModel] = {
@@ -70,6 +70,9 @@ CONTROLLER_MODELS: dict[int, ControllerModel] = {
         title="Runxin F150 · Alpha",
         model_name="F150 / model 1 (Alpha)",
         manufacturer="Runxin",
+        # Manual clock controls are independently hardware-verified. Automatic
+        # correction remains a separate coordinator policy and stays blocked.
+        allowed_write_fields=frozenset({4}),
         resin_volume_scale=None,
         resin_volume_scale_confirmed=False,
         support_level="alpha",
@@ -171,7 +174,7 @@ def allowed_write_fields(
     if model is None:
         return frozenset()
     if model.code == 1 and model1_test_writes:
-        return MODEL1_TEST_FIELDS | ({34} if model1_test_regeneration else set())
+        return model.allowed_write_fields | MODEL1_TEST_FIELDS | ({34} if model1_test_regeneration else set())
     return model.allowed_write_fields
 
 

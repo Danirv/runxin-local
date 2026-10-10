@@ -6,7 +6,7 @@ Local Home Assistant integration for compatible Runxin F79D / BroadLink BL3372 w
 
 Corrects the device-language labels confirmed on physical controllers: **model 1/code 7 → Dutch** and **Ypsilon G6 model 9/code 3 → Spanish**. Other model/code pairs retain the reference mapping; raw codes and entity identities are preserved.
 
-Records model-1 manual clock writes and manual sync restoration as verified in issue #17. Default read-only mode and manual opt-ins remain; other writes are pending and automatic clock correction stays blocked. Resin 240 and treatment-capacity reference 15 remain separate, uncalibrated parameters. Models 1/12 stay Alpha and model 14 stays Beta. See the [model-1 guide](docs/model-1-alpha.md) and [language evidence](docs/f79d-settings.md#controller-language-evidence-293).
+Records model-1 manual clock writes and manual sync restoration as verified in issue #17. Device clock and manual Sync clock are available without enabling experimental settings. Other writes remain pending and require opt-ins; automatic clock correction stays blocked. Reference sensor identities are retained. Resin 240 and treatment-capacity reference 15 remain separate, uncalibrated parameters. Models 1/12 stay Alpha and model 14 stays Beta. See the [model-1 guide](docs/model-1-alpha.md) and [language evidence](docs/f79d-settings.md#controller-language-evidence-293).
 
 ## 2.9.2
 

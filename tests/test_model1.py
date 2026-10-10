@@ -71,8 +71,8 @@ def test_models_default_to_read_only_and_evidence_does_not_enable_writes():
                                       hardware_verified_write_fields=(4,))
     assert new_model.read_only
     assert new_model.allowed_write_fields == frozenset()
-    assert models.model_support_details(1)['read_only']
-    assert models.model_support_details(1)['allowed_write_fields'] == []
+    assert not models.model_support_details(1)['read_only']
+    assert models.model_support_details(1)['allowed_write_fields'] == [4]
     for code in (9, 12):
         assert models.controller_model(code).allowed_write_fields == frozenset({4, 6, 7, 10, 34, 43, 47})
         assert not models.controller_model(code).read_only
@@ -103,13 +103,13 @@ def test_composition_adapter_blocks_non_writable_or_unknown_models_before_transp
     client.close()
 
 
-def test_model1_write_block_is_latched_across_missing_or_changed_identity():
+def test_model1_pending_write_restriction_survives_missing_or_changed_identity():
     client = api.YpsilonLocalClient('192.0.2.1')
     client._f79d = Mock()
     for state in ({'deviceModel': 1}, {}, {'deviceModel': 9}):
         client._observe_model(state)
         with pytest.raises(api.YpsilonConnectionError):
-            client.write_fields({4: (20, 38)})
+            client.write_fields({43: 25})
     client._f79d.write_fields.assert_not_called()
     client.close()
 
@@ -122,7 +122,7 @@ def test_adapter_policy_snapshot_keeps_latched_permissions_without_device_io():
     assert client.write_policy['allowed_write_fields'] == [4, 6, 7, 10, 34, 43, 47]
     client._observe_model({'deviceModel': 1})
     client._observe_model({'deviceModel': 9})
-    assert client.write_policy == {'controller_model': 9, 'read_only': True, 'allowed_write_fields': []}
+    assert client.write_policy == {'controller_model': 9, 'read_only': False, 'allowed_write_fields': [4]}
     client._f79d.assert_not_called()
     client._f79d.read_state.assert_not_called()
     client._f79d.write_fields.assert_not_called()

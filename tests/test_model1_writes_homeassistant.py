@@ -1,6 +1,6 @@
 """Real HA regressions for manual F150 write tests; all device I/O is mocked."""
 from types import SimpleNamespace
-from datetime import datetime
+from datetime import datetime, time
 from unittest.mock import AsyncMock, Mock, call
 
 import pytest
@@ -43,6 +43,44 @@ async def test_manual_setting_sends_once_and_requires_fresh_readback(hass, field
     await coordinator.async_write_and_verify({field: value})
     client.write_fields.assert_called_once_with({field: value})
     assert coordinator.async_set_updated_data.call_args.args[0][key] == expected
+
+
+@pytest.mark.asyncio
+async def test_default_clock_entities_write_and_restore_without_experimental_settings(hass, monkeypatch):
+    coordinator, client, entry = context(hass, writes=False)
+    entities = []
+    for platform in ("time", "button"):
+        await load(platform).async_setup_entry(hass, entry, lambda group: entities.extend(group))
+    clock, sync = entities
+    assert coordinator.allowed_write_fields == {4}
+    clock.async_write_ha_state = Mock()
+    changed = {**reported_state(), "currentTime": "20:39:00"}
+    coordinator._async_strict_read = AsyncMock(side_effect=[reported_state(), changed])
+    await clock.async_set_value(time(20, 39))
+    client.write_fields.assert_called_once_with({4: (20, 39)})
+    assert coordinator.async_set_updated_data.call_args.args[0]["currentTime"] == "20:39:00"
+    assert clock._pending_value is None
+    client.write_fields.reset_mock()
+    monkeypatch.setattr(load("button").dt_util, "now", Mock(return_value=datetime(2026, 10, 10, 20, 38)))
+    coordinator._async_strict_read = AsyncMock(side_effect=[changed, reported_state()])
+    await sync.async_press()
+    client.write_fields.assert_called_once_with({4: (20, 38)})
+    assert coordinator.async_set_updated_data.call_args.args[0]["currentTime"] == "20:38:00"
+    assert not coordinator.automatic_clock_allowed
+
+
+@pytest.mark.asyncio
+async def test_default_clock_permission_rejects_ignored_ack_and_mixed_pending_settings(hass, monkeypatch):
+    coordinator, client, entry = context(hass, writes=False)
+    coordinator._async_strict_read = AsyncMock(return_value=reported_state())
+    with pytest.raises(ServiceValidationError):
+        await coordinator.async_write_and_verify({4: (20, 39), 43: 26})
+    client.write_fields.assert_not_called()
+    coordinator._async_strict_read.assert_not_awaited()
+    monkeypatch.setattr(coordinator_mod, "WRITE_VERIFY_TIMEOUT", 0)
+    with pytest.raises(coordinator_mod.YpsilonWriteNotConfirmed):
+        await coordinator.async_write_and_verify({4: (20, 39)})
+    client.write_fields.assert_called_once_with({4: (20, 39)})
 
 
 @pytest.mark.asyncio
@@ -158,6 +196,8 @@ async def test_disabling_tests_replaces_and_revokes_old_session_without_losing_c
     assert old.method_calls == [call.revoke_writes(), call.close()]
     replacement = coordinator_mod.YpsilonDataUpdateCoordinator(hass, entry, updated.client, updated.field52_cache)
     replacement.data = reported_state()
+    assert replacement.allowed_write_fields == {4}
+    assert not replacement.automatic_clock_allowed
     with pytest.raises(ServiceValidationError):
         await replacement.async_write_and_verify({43: 26})
     updated.client.write_fields.assert_not_called()

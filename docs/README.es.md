@@ -2,14 +2,14 @@
 
 Integración local para descalcificadores compatibles con **Runxin F79D + BroadLink BL3372**, con el Ypsilon G6 como hardware de referencia y soporte experimental para Euro-Clear Midnight.
 
-El **modelo 1 / F150** tiene una Alpha de solo lectura por defecto: sensores periódicos, sin escrituras automáticas, con pruebas manuales opcionales en 2.9.1. Las lecturas son provisionales, sin estadísticas a largo plazo; la resina y la cantidad por ciclo no tienen unidad asumida. [Guia](model-1-alpha.es.md).
+El **modelo 1 / F150** tiene una Alpha de lecturas con reloj manual validado en 2.9.3: sensores periódicos, sin escrituras automáticas, con pruebas manuales opcionales en 2.9.1. Las lecturas son provisionales, sin estadísticas a largo plazo; la resina y la cantidad por ciclo no tienen unidad asumida. [Guia](model-1-alpha.es.md).
 
 
-En **2.9.1**, el modelo 1 tiene opciones desactivadas por defecto para probar ajustes 4/6/10/43/47 y una segunda opción para iniciar una regeneración prevista. En 2.9.3, las escrituras manuales del reloj y la restauración mediante sincronización manual (campo 4) están verificadas; las demás siguen pendientes. El reloj automático, el campo 7 y el avance de fases siguen bloqueados. [Instrucciones](model-1-alpha.es.md).
+En **2.9.3**, el modelo 1 tiene opciones desactivadas por defecto para probar ajustes adicionales 6/10/43/47 y una segunda opción para iniciar una regeneración prevista. Las escrituras manuales del reloj y la restauración mediante sincronización manual (campo 4) están verificadas; las demás siguen pendientes. El reloj automático, el campo 7 y el avance de fases siguen bloqueados. [Instrucciones](model-1-alpha.es.md).
 
 ## Correcciones en 2.9.3
 
-Release estable con etiquetas de idioma confirmadas en pantalla: modelo 1/código 7 → neerlandés y G6 modelo 9/código 3 → español. Se conserva la tabla de referencia para los demás códigos/modelos y el código original. El modelo 1 mantiene Alpha y solo lectura por defecto; resina 240 y capacidad de tratamiento 15 siguen siendo parámetros distintos con conversión pendiente. [Evidencia de idioma](f79d-settings.es.md).
+Release estable con etiquetas de idioma confirmadas en pantalla: modelo 1/código 7 → neerlandés y G6 modelo 9/código 3 → español. Se conserva la tabla de referencia para los demás códigos/modelos y el código original. El modelo 1 mantiene lecturas Alpha, con reloj y sincronización manuales disponibles sin opción experimental; resina 240 y capacidad de tratamiento 15 siguen siendo parámetros distintos con conversión pendiente. [Evidencia de idioma](f79d-settings.es.md).
 
 ## Compatibilidad en 2.9.2
 

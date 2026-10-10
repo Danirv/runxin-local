@@ -1,4 +1,4 @@
-# Controlador modelo 1 / F150: Alpha, solo lectura por defecto
+# Controlador modelo 1 / F150: lecturas Alpha y reloj manual validado
 
 [English](model-1-alpha.md) | [Català](model-1-alpha.ca.md) | [Español](model-1-alpha.es.md)
 
@@ -6,13 +6,13 @@
 
 La release de la integración es estable; Alpha describe solo el soporte de este modelo.
 
-1. Instala la versión 2.9.0 o posterior con HACS, o descarga el ZIP de la release y copia solo `custom_components/ypsilon_local` a `/config/custom_components/ypsilon_local`. Conserva una copia de la carpeta anterior y reinicia HA. Esta Alpha conserva el dominio; no requiere migrar a `runxin_local`.
+1. Instala la versión 2.9.3 o posterior con HACS, o descarga el ZIP de la release y copia solo `custom_components/ypsilon_local` a `/config/custom_components/ypsilon_local`. Conserva una copia de la carpeta anterior y reinicia HA. Esta Alpha conserva el dominio; no requiere migrar a `runxin_local`.
 2. Si existe una entrada exclusivamente de diagnóstico del mismo dispositivo, descarga primero su informe y elimina esa entrada antes de añadir el equipo normalmente.
-3. Añade **Runxin Local**, introduce la IP y acepta la explicación **Alpha de solo lectura**. Consulta cada minuto por defecto, sin cadencia adaptativa. La corrección del reloj queda bloqueada aunque una opción antigua esté activada.
+3. Añade **Runxin Local**, introduce la IP y acepta la explicación **Alpha con controles manuales del reloj validados**. Consulta cada minuto por defecto, sin cadencia adaptativa. La corrección automática del reloj queda bloqueada aunque una opción antigua esté activada.
 4. Compara los sensores con la app. Puedes habilitar las entidades de diagnóstico que estén desactivadas por defecto. No cambies ajustes para tomar capturas.
 5. Descarga los diagnósticos desde el menú de la entrada y adjunta el JSON a la issue existente con algunos valores/capturas, unidades y hora aproximada. La descarga exporta el estado guardado y no inicia otra exploración. Oculta identificadores en las capturas.
 
-Por defecto no hay controles **number, time o button**, ni ajustes de reloj, configuración o acciones mecánicas. Los servicios administrativos también rechazan escrituras. La política se aplica en el coordinador y el adaptador del cliente, independientemente de la interfaz; 2.9.1 permite activar las pruebas manuales descritas a continuación.
+En **2.9.3**, el **reloj del dispositivo** y el **botón de sincronización manual** son controles validados disponibles sin activar ajustes experimentales. Conservan sus identificadores y la comprobación con lectura nueva. El alta, las consultas y las recargas no inician escrituras del reloj. Los demás ajustes requieren el modo experimental y la regeneración tiene una segunda opción. Servicios administrativos, coordinador y adaptador imponen los mismos permisos por campo; habilitar el campo 4 no permite otras escrituras ni corrección automática.
 
 Las lecturas numéricas usan interpretaciones **F79D de referencia pendientes de validación con la app**. No generan estadísticas de largo plazo; el historial ordinario puede conservarse. Los atributos y diagnósticos incluyen los dos bytes recibidos por campo (`state._rawFieldBytes`), sin paquetes completos, claves ni sesiones. Recibir zero/false no demuestra aplicabilidad.
 
@@ -42,9 +42,9 @@ El equipo tiene 24 L nominales de resina, pero el campo 26 sigue `F0 00` (refere
 
 El volumen de resina debe describir la carga real, no adaptarse al número de personas. La capacidad de tratamiento es otro parámetro que depende de resina, dureza y ajustes de regeneración; reducirla manteniendo los ciclos puede hacer regenerar más a menudo en lugar de ahorrar. Hay que aclarar etiqueta/unidad y seguir las instrucciones del equipo antes de proponer un cambio. No hace falta volver a emparejar, recuperar la app antigua, repetir diagnósticos ni modificar ajustes para aclarar las lecturas.
 
-## Pruebas manuales opcionales (2.9.1)
+## Ajustes experimentales opcionales
 
-En la entrada operativa del modelo 1, abre **Ajustes → Dispositivos y servicios → Runxin Local → Configurar**. Activa **los ajustes experimentales del modelo 1** y guarda. La recarga añade controles manuales para reloj (4), límite de tiempo de caudal (6), hora de regeneración (10), sal añadida (43) y dureza (47). **El campo 4 está verificado: escrituras manuales del reloj y restauración mediante sincronización manual. Los campos 6/10/43/47 y la regeneración (34) siguen pendientes.** No hace falta repetir la prueba del reloj ya completada.
+En la entrada operativa del modelo 1, abre **Ajustes → Dispositivos y servicios → Runxin Local → Configurar**. Activa **los ajustes experimentales del modelo 1** y guarda. La recarga añade controles adicionales para límite de tiempo de caudal (6), hora de regeneración (10), sal añadida (43) y dureza (47). **El campo 4 está verificado: escrituras manuales del reloj y restauración mediante sincronización manual. Los campos 6/10/43/47 y la regeneración (34) siguen pendientes.** No hace falta repetir la prueba del reloj ya completada.
 
 Para una prueba nueva, anota una lectura inicial nueva, cambia un solo ajuste una cantidad pequeña dentro del rango, comprueba la lectura posterior y pantalla/app si es visible, restaura el valor original y confírmalo. Aporta campo, valor inicial, solicitado, leído, unidad/pantalla y restauración. No repitas una orden con resultado ambiguo: la integración comprueba el estado sin reenviarla a ciegas.
 
@@ -52,4 +52,4 @@ Una **segunda opción** permite iniciar una regeneración prevista y requiere ta
 
 El **reloj automático**, el **campo 7**, vacaciones y escrituras de resina/capacidad siguen bloqueados. El dispositivo devolvió unidad 1; el control del umbral de caudal está calibrado para unidad 2. Las lecturas de resina y capacidad siguen siendo provisionales.
 
-Desactivar los ajustes vuelve a solo lectura y desactiva también la prueba de regeneración. Se revoca y sustituye la sesión anterior; se conservan sensores, identificadores, bytes y ausencia de estadísticas provisionales. Los diagnósticos separan evidencia del modelo y `write_policy` efectivo. Exportarlos no inicia lecturas ni escrituras. G6 y modelos 12/14 mantienen su política.
+Desactivar los ajustes experimentales elimina solo los controles adicionales y desactiva también la prueba de regeneración. El reloj y la sincronización manuales siguen disponibles. Se revoca y sustituye la sesión anterior; se conservan sensores de referencia, identificadores, bytes y ausencia de estadísticas provisionales, también tras actualizar o reiniciar. Los diagnósticos separan evidencia del modelo y permisos efectivos. Exportarlos no inicia lecturas ni escrituras. G6 y modelos 12/14 mantienen su política.

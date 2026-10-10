@@ -312,7 +312,7 @@ async def async_setup_entry(
     coordinator = entry.runtime_data
     async_add_entities(YpsilonSensor(coordinator, entry, desc) for desc in SENSORS)
     model = controller_model((coordinator.data or {}).get("deviceModel"))
-    if model is not None and model.read_only:
+    if model is not None and (model.read_only or model.provisional_readings):
         async_add_entities(YpsilonSensor(coordinator, entry, desc) for desc in READ_ONLY_SETTINGS)
 
 
