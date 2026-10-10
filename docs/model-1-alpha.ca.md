@@ -1,4 +1,4 @@
-# Controlador model 1 / F150: Alpha, només lectura per defecte
+# Controlador model 1 / F150: lectures Alpha i rellotge manual validat
 
 [English](model-1-alpha.md) | [Català](model-1-alpha.ca.md) | [Español](model-1-alpha.es.md)
 
@@ -8,9 +8,9 @@ La release de la integració és estable; Alpha descriu només el suport d’aqu
 
 ## Instal·lació i comparació
 
-1. Instal·la la versió 2.9.0 o posterior amb HACS, o descarrega el ZIP de la release i copia només `custom_components/ypsilon_local` a `/config/custom_components/ypsilon_local`. Desa una còpia de la carpeta anterior i reinicia HA. Aquesta Alpha conserva `ypsilon_local`; no necessita la migració a `runxin_local`.
+1. Instal·la la versió 2.9.3 o posterior amb HACS, o descarrega el ZIP de la release i copia només `custom_components/ypsilon_local` a `/config/custom_components/ypsilon_local`. Desa una còpia de la carpeta anterior i reinicia HA. Aquesta Alpha conserva `ypsilon_local`; no necessita la migració a `runxin_local`.
 2. Si tens una entrada de només diagnòstic del mateix dispositiu, descarrega primer el seu informe i elimina aquesta entrada abans de donar d'alta el dispositiu normalment. No es transforma automàticament en una entrada amb sensors.
-3. Afegeix **Runxin Local**, indica la IP local i accepta l'explicació **Alpha de només lectura**. Per defecte llegeix cada minut, sense cadència adaptativa. La correcció del rellotge està bloquejada encara que hi hagi una opció antiga activada.
+3. Afegeix **Runxin Local**, indica la IP local i accepta l'explicació **Alpha amb controls manuals del rellotge validats**. Per defecte llegeix cada minut, sense cadència adaptativa. La correcció automàtica del rellotge està bloquejada encara que hi hagi una opció antiga activada.
 4. Compara els sensors amb l'app que funciona. Algunes entitats de diagnòstic estan desactivades per defecte; activa les que necessitis des de la llista d'entitats. No cal canviar ajustos per comparar-los.
 5. Des del menú de l'entrada de la integració, **Descarrega els diagnòstics** i adjunta el JSON a la issue existent, juntament amb uns valors o captures de l'app, les unitats i l'hora aproximada. Exportar el diagnòstic no inicia una altra exploració. Oculta dades identificatives a les captures.
 
@@ -23,7 +23,7 @@ L'entrada normal autentica i fa lectures LAN periòdiques; no és una captura pa
 - Dos bytes originals per camp rebut a `state._rawFieldBytes`, i atributs de referència a les entitats. No s'exporten paquets complets, claus ni sessions.
 - Metadades de model, evidència i permisos. Rebre zero o false no demostra que una funció sigui aplicable.
 
-**Per defecte no hi ha controls number, time ni button**, ni correcció del rellotge ni ordres de configuració o mecàniques. Els serveis administratius també rebutgen escriptures. El coordinador i l'adaptador del client imposen la política independentment de la interfície; a la 2.9.1 es poden activar les proves manuals opcionals descrites a continuació.
+A la **2.9.3**, el **rellotge del dispositiu** i el **botó de sincronització manual** són controls validats disponibles sense activar ajustos experimentals. Conserven els identificadors i la comprovació amb lectura nova. L’alta, les lectures i les recàrregues no inicien escriptures del rellotge. Els altres ajustos requereixen el mode experimental i la regeneració té una segona opció. Serveis administratius, coordinador i adaptador imposen els mateixos permisos per camp; habilitar el camp 4 no permet altres escriptures ni correcció automàtica.
 
 Les lectures numèriques són provisionals i no generen **estadístiques de llarg termini**. HA encara pot desar l'historial ordinari. Les etiquetes enum són de referència, excepte l’idioma confirmat codi 7 → neerlandès; els codis desconeguts es mantenen visibles.
 
@@ -56,9 +56,9 @@ L’equip té 24 L nominals de resina, però el camp 26 continua `F0 00` (refer�
 
 El volum de resina ha de descriure la càrrega real, no ajustar-se al nombre de persones. La capacitat de tractament és un altre paràmetre que depèn de resina, duresa i ajustos de regeneració; reduir-la mantenint els cicles pot fer regenerar més sovint en lloc d’estalviar. Cal aclarir l’etiqueta/unitat i seguir les instruccions de l’equip abans de proposar un canvi. No cal tornar a aparellar, recuperar l’app antiga, repetir diagnòstics ni modificar ajustos per aclarir les lectures.
 
-## Proves manuals opcionals (2.9.1)
+## Ajustos experimentals opcionals
 
-A l’entrada operativa del model 1, obre **Configuració → Dispositius i serveis → Runxin Local → Configura**. Activa **els ajustos experimentals del model 1** i desa. La recàrrega afegeix controls manuals per a rellotge (4), límit de temps de cabal (6), hora de regeneració (10), sal afegida (43) i duresa (47). **El camp 4 està verificat: escriptures manuals del rellotge i restauració amb sincronització manual. Els camps 6/10/43/47 i la regeneració (34) continuen pendents.** No cal repetir la prova del rellotge ja completada.
+A l’entrada operativa del model 1, obre **Configuració → Dispositius i serveis → Runxin Local → Configura**. Activa **els ajustos experimentals del model 1** i desa. La recàrrega afegeix controls addicionals per a límit de temps de cabal (6), hora de regeneració (10), sal afegida (43) i duresa (47). **El camp 4 està verificat: escriptures manuals del rellotge i restauració amb sincronització manual. Els camps 6/10/43/47 i la regeneració (34) continuen pendents.** No cal repetir la prova del rellotge ja completada.
 
 Per a una prova nova, anota una lectura inicial nova, canvia un sol ajust una quantitat petita dins del rang, comprova la lectura posterior i la pantalla/app si és visible, restaura el valor original i confirma’l. Aporta camp, valor inicial, sol·licitat, llegit, unitat/pantalla i restauració. No repeteixis una ordre amb resultat ambigu: la integració comprova l’estat sense reenviar-la a cegues.
 
@@ -66,4 +66,4 @@ Una **segona opció** permet iniciar una regeneració prevista i requereix tamb�
 
 El **rellotge automàtic**, el **camp 7**, vacances i escriptures de resina/capacitat continuen bloquejats. El dispositiu va retornar unitat 1; el control de llindar de cabal està calibrat per a unitat 2. Les lectures de resina i capacitat encara són provisionals.
 
-Desactivar els ajustos torna a només lectura i desactiva també la prova de regeneració. Es revoca i substitueix la sessió anterior; es conserven sensors, identificadors, bytes crus i absència d’estadístiques provisionals. Els diagnòstics separen evidència del model i `write_policy` efectiu. Exportar-los no inicia lectures ni escriptures. El G6 i els models 12/14 mantenen la seva política.
+Desactivar els ajustos experimentals elimina només els controls addicionals i desactiva també la prova de regeneració. El rellotge i la sincronització manuals continuen disponibles. Es revoca i substitueix la sessió anterior; es conserven sensors de referència, identificadors, bytes crus i absència d’estadístiques provisionals, també després d’actualitzar o reiniciar. Els diagnòstics separen evidència del model i permisos efectius. Exportar-los no inicia lectures ni escriptures. G6 i models 12/14 mantenen la política.

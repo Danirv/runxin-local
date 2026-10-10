@@ -28,7 +28,7 @@ Un transport nou implementarà el contracte de trama crua i s'habilitarà només
 
 - El protocol no importa HA/BroadLink; el transport no interpreta camps.
 - Rebre camps, validar significat/unitats i permetre escriptures són decisions diferents.
-- `allowed_write_fields` és buit per defecte. El model 1 comença sense escriptures; les opcions de proves concedeixen permisos concrets al coordinador i l'adaptador. El rellotge automàtic i el camp 7 continuen bloquejats.
+- `allowed_write_fields` és buit per defecte. El model 1 permet el camp 4 manual verificat; les opcions de proves concedeixen permisos addicionals concrets al coordinador i l'adaptador. El rellotge automàtic i el camp 7 continuen bloquejats.
 - El G6 i Midnight conserven controls i conversions, amb les accions pendents documentades.
 - Particularitats futures d'unitats, bytes o enums requereixen fixtures i regressions per als models existents.
 - Un ACK no prova l'estat físic; no es reenvien cegament ordres amb resultat ambigu.
@@ -43,4 +43,4 @@ L’auditoria offline comprova imports relatius niats i dependències del transp
 
 El model 14 / F136 reutilitza el perfil i els controls Midnight, amb les verificacions aportades a la issue #22 i els camps pendents diferenciats. A la 2.9.2, el model 14 és Beta: el camp 26 té una excepció de lectura U16 LE a `runxin/fields.py` i escala 0,1, confirmada amb la pantalla. El client conserva la identitat validada per a lectures parcials, sense consultes addicionals. Els models 1 i 12 continuen Alpha i les conversions G6/model 12 es mantenen. Consulta la [guia del model 14](model-14-alpha.ca.md).
 
-El model 1 continua de només lectura per defecte. A la 2.9.1, les opcions de proves manuals concedeixen els camps 4/6/10/43/47; una segona opció permet només iniciar regeneració. Coordinador i adaptador apliquen els permisos efectius. Canviar-los substitueix i revoca la sessió anterior sense perdre la memòria cau. El rellotge automàtic, el camp 7 i l’avanç directe de fases continuen bloquejats.
+El model 1 conserva les lectures Alpha, però a la 2.9.3 permet el rellotge i la sincronització manuals (camp 4) sense opció experimental. Les opcions de proves concedeixen els camps 6/10/43/47; una segona opció permet només iniciar regeneració. Coordinador i adaptador apliquen els permisos efectius. Canviar-los substitueix i revoca la sessió anterior sense perdre la memòria cau ni els sensors de referència. El rellotge automàtic, el camp 7 i l’avanç directe de fases continuen bloquejats.

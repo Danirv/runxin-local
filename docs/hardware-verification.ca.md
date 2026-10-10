@@ -113,7 +113,7 @@ Consulta també [`waterdevice-audit.ca.md`](waterdevice-audit.ca.md).
 
 ## Controlador sense marca model 1 / F150: rellotge confirmat
 
-La [resposta del 10-10-2026 a la issue #17](https://github.com/Danirv/runxin-local/issues/17#issuecomment-6096161743) informa valor inicial 11:23, escriptures manuals des de HA a 11:24 i 11:26 i restauració amb sincronització manual. Pantalla i Water Device coincideixen a cada pas. Es registra **camp 4, rellotge/sincronització manuals verificats** en aquest equip (firmware BL3372 62016); els camps 6/10/34/43/47 continuen pendents. La 2.9.3 actualitza l’evidència: només lectura per defecte, opcions explícites i correcció automàtica bloquejada es conserven.
+La [resposta del 10-10-2026 a la issue #17](https://github.com/Danirv/runxin-local/issues/17#issuecomment-6096161743) informa valor inicial 11:23, escriptures manuals des de HA a 11:24 i 11:26 i restauració amb sincronització manual. Pantalla i Water Device coincideixen a cada pas. Es registra **camp 4, rellotge/sincronització manuals verificats** en aquest equip (firmware BL3372 62016); els camps 6/10/34/43/47 continuen pendents. La 2.9.3 habilita només els controls manuals verificats del camp 4 per defecte. La resta conserva les opcions explícites; es mantenen els sensors de referència i la correcció automàtica bloquejada.
 
 El codi d’idioma 7 és neerlandès a la pantalla. El G6 model 9 del projecte retorna codi 3 amb menús en castellà; consulta [les correspondències limitades per model](f79d-settings.ca.md). No és una validació de tot l’enum ni de l’idioma de l’app/compte.
 

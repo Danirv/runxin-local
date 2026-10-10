@@ -5,9 +5,10 @@ All notable changes to this project are documented here.
 ## [2.9.3] - 2026-10-10
 
 - Correct only physically confirmed field-2 language labels: model 1/code 7 is Dutch and reference G6 model 9/code 3 is Spanish. Retain the reference enum for other model/code pairs, raw codes, disabled-by-default diagnostic entities and existing unique IDs. Add Dutch translations and model-aware enum options.
-- Record issue #17's two manual clock writes and restoration through manual clock sync as contributor-verified field-4 evidence for model 1. Other optional settings and regeneration start remain pending; default read-only mode, explicit opt-ins and blocked automatic clock correction are retained.
+- Enable model-1 Device clock and manual Sync clock as ordinary validated controls, without experimental settings. Keep all reference sensor identities, default-off experimental fields 6/10/43/47, separate regeneration opt-in and blocked automatic correction. Update setup/options explanations and cached permission diagnostics.
+- Record issue #17's two manual clock writes and restoration through manual clock sync as contributor-verified field-4 evidence for model 1. Other optional settings and regeneration start remain pending; only manual field-4 clock controls are enabled by default, with explicit opt-ins for the remaining tests and blocked automatic correction.
 - Clarify the distinction between field-26 resin and fields 41–42 treatment capacity. Model-1 raw resin 240 and treatment-capacity reference 15 remain unscaled without assumed units; the nominal 24 L unit alone does not confirm the configured resin conversion. Update English/Catalan/Spanish evidence and comparison guides.
-- Add per-model language and partial-write-evidence regressions. Preserve all wire codecs, queries, controls, resin conversions, domain/config entries and model support levels (1/12 Alpha, 14 Beta).
+- Add per-model language and partial-write-evidence regressions. Preserve all wire codecs, queries, G6/Midnight controls, resin conversions, domain/config entries and model support levels (1/12 Alpha, 14 Beta).
 
 ## [2.9.2] - 2026-10-09
 

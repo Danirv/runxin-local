@@ -135,7 +135,7 @@ Partial results are useful. Include the model, firmware, date, baseline/restore 
 
 ## Unbranded controller model 1 / F150: confirmed clock tests
 
-The [2026-10-10 issue #17 reply](https://github.com/Danirv/runxin-local/issues/17#issuecomment-6096161743) reports baseline 11:23, manual HA writes to 11:24 and 11:26, and restoration through manual clock sync. The physical display and Water Device app matched each step. Record **field 4 manual clock writes/sync verified** on this unit (BL3372 firmware 62016); fields 6/10/34/43/47 remain pending. Version 2.9.3 updates evidence only: default read-only mode, opt-ins and blocked automatic clock correction remain.
+The [2026-10-10 issue #17 reply](https://github.com/Danirv/runxin-local/issues/17#issuecomment-6096161743) reports baseline 11:23, manual HA writes to 11:24 and 11:26, and restoration through manual clock sync. The physical display and Water Device app matched each step. Record **field 4 manual clock writes/sync verified** on this unit (BL3372 firmware 62016); fields 6/10/34/43/47 remain pending. Version 2.9.3 exposes only the validated manual field-4 controls by default. Other settings retain their opt-ins, reference sensors remain and automatic clock correction stays blocked.
 
 Language code 7 is Dutch on the controller. The project's model-9 G6 reports code 3 with Spanish menus; see [the scoped language mappings](f79d-settings.md#controller-language-evidence-293). These are controller-display observations, not app/account language settings or a complete enum calibration.
 

@@ -9,7 +9,7 @@ api = load("api")
 
 
 @pytest.mark.parametrize("writes,regen,fields", [
-    (False, False, set()), (False, True, set()),
+    (False, False, {4}), (False, True, {4}),
     (True, False, {4, 6, 10, 43, 47}), (True, True, {4, 6, 10, 34, 43, 47}),
 ])
 def test_opt_in_permissions_do_not_claim_verification_or_change_other_models(writes, regen, fields):
@@ -18,7 +18,9 @@ def test_opt_in_permissions_do_not_claim_verification_or_change_other_models(wri
     assert models.model_support_details(1)["hardware_verified_write_fields"] == [4]
     assert models.model_support_details(1)["pending_write_fields"] == [6, 10, 34, 43, 47]
     assert not models.model_support_details(1)["experimental_writes_verified"]
-    assert models.model_support_details(1)["read_only"]
+    assert not models.model_support_details(1)["read_only"]
+    assert models.model_support_details(1)["allowed_write_fields"] == [4]
+    assert models.model_support_details(1)["experimental_write_fields"] == [6, 10, 43, 47]
     for code in (9, 12, 14):
         assert models.allowed_write_fields(code, model1_test_writes=writes,
                                            model1_test_regeneration=regen) == models.EXISTING_CONTROL_FIELDS
@@ -42,6 +44,30 @@ def test_adapter_requires_each_opt_in_and_never_grants_flow_cutoff_or_vacation(m
     client.revoke_writes()
     with pytest.raises(api.YpsilonConnectionError):
         client.write_fields({43: 25})
+    client._f79d.write_fields.assert_called_once()
+    client.close()
+
+
+def test_default_adapter_allows_only_clock_and_preserves_revocation(monkeypatch):
+    monkeypatch.setattr(api.time, "sleep", Mock())
+    client = api.YpsilonLocalClient("192.0.2.1")
+    client._f79d = Mock()
+    client._observe_model({"deviceModel": 1})
+    assert client.write_policy["allowed_write_fields"] == [4]
+    client.write_fields({4: (11, 24)})
+    client._f79d.write_fields.assert_called_once_with({4: (11, 24)})
+    for fields in ({4: (11, 26), 43: 25}, {6: 51}, {10: (1, 0)},
+                   {34: 1}, {47: 290}, {7: 100}, {49: 1}):
+        with pytest.raises(api.YpsilonConnectionError):
+            client.write_fields(fields)
+    client._observe_model({})
+    with pytest.raises(api.YpsilonConnectionError):
+        client.write_fields({4: (11, 26)})
+    client._observe_model({"deviceModel": 9})
+    assert client.write_policy["allowed_write_fields"] == [4]
+    client.revoke_writes()
+    with pytest.raises(api.YpsilonConnectionError):
+        client.write_fields({4: (11, 26)})
     client._f79d.write_fields.assert_called_once()
     client.close()
 

@@ -1,4 +1,4 @@
-"""Exercise read-only model-1 setup, entities and blocked mutation routes in HA."""
+"""Exercise model-1 manual clock support and blocked experimental routes in HA."""
 from datetime import datetime, time
 from types import MappingProxyType, SimpleNamespace
 from unittest.mock import AsyncMock, Mock
@@ -22,7 +22,7 @@ diagnostics_mod = load('diagnostics')
 
 
 @pytest.mark.asyncio
-async def test_model1_flow_explains_alpha_and_persists_read_only_policy(hass):
+async def test_model1_flow_explains_alpha_and_persists_blocked_automatic_clock(hass):
     flow = _flow(hass)
     flow._async_probe = AsyncMock(return_value=({'deviceModel': 1}, '02:00:00:00:00:01'))
     result = await flow.async_step_user({'host': '192.0.2.1'})
@@ -34,8 +34,8 @@ async def test_model1_flow_explains_alpha_and_persists_read_only_policy(hass):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize('field,value', [(4, (12, 0)), (6, 50), (7, 100), (10, (0, 0)), (34, 1), (43, 25), (47, 280)])
-async def test_model1_rejects_all_existing_control_fields_before_any_io(hass, field, value):
+@pytest.mark.parametrize('field,value', [(6, 50), (7, 100), (10, (0, 0)), (34, 1), (43, 25), (47, 280)])
+async def test_model1_rejects_pending_control_fields_before_any_io(hass, field, value):
     coordinator, client, _ = _coordinator(hass, 1)
     coordinator._async_strict_read = AsyncMock()
     with pytest.raises(ServiceValidationError) as err:
@@ -57,7 +57,8 @@ async def test_auto_clock_and_reload_cannot_override_configured_model1_policy(ha
     coordinator._async_strict_read = AsyncMock()
     monkeypatch.setattr(coordinator_mod.dt_util, 'now', Mock(return_value=datetime(2026, 10, 7, 20, 0)))
     await coordinator._async_sync_clock_if_needed(coordinator.data)
-    assert coordinator.read_only
+    assert not coordinator.read_only
+    assert coordinator.allowed_write_fields == {4}
     assert coordinator.data['_clockSyncs'] == 0
     client.write_fields.assert_not_called()
     coordinator._async_strict_read.assert_not_awaited()
@@ -95,23 +96,20 @@ async def test_existing_models_keep_first_refresh_clock_sync(hass, monkeypatch, 
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize('automatic', [False, True])
-async def test_fresh_model1_identity_blocks_pending_clock_write(hass, monkeypatch, automatic):
+async def test_fresh_model1_identity_blocks_automatic_clock_but_retains_manual_permission(hass, monkeypatch):
     coordinator, client, _ = _coordinator(hass, 9)
     coordinator._async_strict_read = AsyncMock(return_value={'deviceModel': 1, 'currentTime': '00:00:00'})
     monkeypatch.setattr(coordinator_mod.dt_util, 'now', Mock(return_value=datetime(2026, 10, 7, 12, 0)))
-    if automatic:
-        coordinator.auto_sync_clock = True
-        await coordinator._async_sync_clock_if_needed({'deviceModel': 9, 'currentTime': '00:00:00'})
-    else:
-        with pytest.raises(ServiceValidationError):
-            await coordinator.async_write_and_verify({4: (12, 0)})
-    assert coordinator.read_only
+    coordinator.auto_sync_clock = True
+    await coordinator._async_sync_clock_if_needed({'deviceModel': 9, 'currentTime': '00:00:00'})
+    assert not coordinator.read_only
+    assert coordinator.allowed_write_fields == {4}
+    assert not coordinator.automatic_clock_allowed
     client.write_fields.assert_not_called()
 
 
 @pytest.mark.asyncio
-async def test_model1_startup_and_unload_forward_only_read_platforms(hass, monkeypatch):
+async def test_model1_startup_and_unload_forward_clock_platforms_without_writes(hass, monkeypatch):
     coordinator, client, entry = _coordinator(hass, 1)
     client.read_state.return_value = reported_state()
     forward = AsyncMock()
@@ -122,22 +120,28 @@ async def test_model1_startup_and_unload_forward_only_read_platforms(hass, monke
     for _ in range(2):
         entry._async_set_state(hass, config_entries.ConfigEntryState.SETUP_IN_PROGRESS, None)
         assert await init_mod.async_setup_entry(hass, entry)
-        assert entry.runtime_data.read_only
+        assert not entry.runtime_data.read_only
+        assert entry.runtime_data.allowed_write_fields == {4}
         assert await init_mod.async_unload_entry(hass, entry)
         await entry.runtime_data.async_shutdown()
-    assert forward.call_args.args[1] == [Platform.BINARY_SENSOR, Platform.SENSOR]
-    assert unload.call_args.args[1] == [Platform.BINARY_SENSOR, Platform.SENSOR]
+    assert forward.call_args.args[1] == init_mod.PLATFORMS
+    assert unload.call_args.args[1] == init_mod.PLATFORMS
     client.write_fields.assert_not_called()
 
 
 @pytest.mark.asyncio
-async def test_manual_platform_setup_does_not_create_controls(hass):
+async def test_default_model1_setup_creates_only_validated_manual_clock_controls(hass):
     coordinator, client, entry = _coordinator(hass, 1)
     entry.runtime_data = coordinator
-    add = Mock()
+    entities = []
     for platform in ('number', 'time', 'button'):
-        await load(platform).async_setup_entry(hass, entry, add)
-    add.assert_not_called()
+        await load(platform).async_setup_entry(hass, entry, lambda group: entities.extend(group))
+    assert len(entities) == 2
+    assert isinstance(entities[0], load('time').YpsilonTime)
+    assert entities[0].entity_description.field_id == 4
+    assert isinstance(entities[1], load('button').YpsilonSyncClockButton)
+    base = entry.unique_id or entry.entry_id
+    assert {e.unique_id for e in entities} == {f'{base}_device_clock', f'{base}_sync_clock'}
     client.write_fields.assert_not_called()
 
 
@@ -175,7 +179,7 @@ async def test_model1_sensor_states_keep_uncertainty_and_disable_statistics(hass
 
 
 @pytest.mark.asyncio
-async def test_reference_settings_exist_only_for_read_only_models(hass):
+async def test_model1_reference_settings_survive_manual_clock_permission(hass):
     for code in (1, 9, 12):
         coordinator, entry = _entity_context(hass, {**reported_state(), 'deviceModel': code})
         entry.runtime_data = coordinator
@@ -196,7 +200,8 @@ async def test_model1_diagnostics_include_raw_pairs_and_permissions_without_iden
     entry.runtime_data = coordinator
     diagnostics = await diagnostics_mod.async_get_config_entry_diagnostics(hass, entry)
     assert diagnostics['state']['_rawFieldBytes'][26] == [240, 0]
-    assert diagnostics['protocol']['model_support']['read_only']
+    assert not diagnostics['protocol']['model_support']['read_only']
+    assert diagnostics['protocol']['model_support']['allowed_write_fields'] == [4]
     assert diagnostics['protocol']['model_support']['resin_volume_scale'] is None
     assert '192.0.2.1' not in str(diagnostics)
     assert '02:00:00:00:00:01' not in str(diagnostics)
@@ -204,7 +209,7 @@ async def test_model1_diagnostics_include_raw_pairs_and_permissions_without_iden
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('configured,observed,adapter_blocked,expected_blocked', [
-    (1, 9, False, True), (None, 9, True, True),
+    (1, 9, False, False), (None, 9, True, True),
     (None, 9, False, False), (None, None, False, True),
 ])
 async def test_exported_permissions_reflect_configured_and_adapter_guards(
@@ -223,14 +228,16 @@ async def test_exported_permissions_reflect_configured_and_adapter_guards(
     assert policy['read_only'] is expected_blocked
     assert bool(policy['allowed_write_fields']) is not expected_blocked
     assert policy['auto_clock_sync_requested']
-    assert policy['auto_clock_sync_permitted'] is not expected_blocked
+    assert policy['auto_clock_sync_permitted'] is (not expected_blocked and configured != 1)
+    if configured == 1:
+        assert policy['allowed_write_fields'] == [4]
     assert policy['configured_model'] == configured
     assert policy['observed_model'] == observed
     assert not client.method_calls  # Export uses cached metadata, with no new read/write.
 
 
 @pytest.mark.asyncio
-async def test_read_only_options_hide_clock_and_ignore_attempt_to_enable_it(hass):
+async def test_model1_options_hide_automatic_clock_and_ignore_attempt_to_enable_it(hass):
     coordinator, client, entry = _coordinator(hass, 1, data={'controller_model': 1})
     options = flow_mod.YpsilonLocalOptionsFlow()
     options.hass = hass

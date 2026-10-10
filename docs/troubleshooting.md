@@ -87,4 +87,4 @@ One contributor using iOS Runxin/润新 2.0.0 reported an advertised lock and re
 
 This is one documented result, not a rule for every app version or firmware. Re-pairing can replace the existing app binding; do not describe it as merely adding a second client. No cloud-issued key or automatic unlock command is implemented. There is no need to repeat this procedure or re-lock a working device for evidence.
 
-The resulting device reports controller code 1; successful authentication does not imply G6/model-9 identity. See [issue #17](https://github.com/Danirv/runxin-local/issues/17) and [read-only model-1 Alpha](model-1-alpha.md).
+The resulting device reports controller code 1; successful authentication does not imply G6/model-9 identity. See [issue #17](https://github.com/Danirv/runxin-local/issues/17) and [model-1 Alpha and validated manual clock](model-1-alpha.md).

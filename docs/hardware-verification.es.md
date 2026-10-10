@@ -113,7 +113,7 @@ Consulta también [`waterdevice-audit.es.md`](waterdevice-audit.es.md).
 
 ## Controlador sin marca modelo 1 / F150: reloj confirmado
 
-La [respuesta del 10-10-2026 en la issue #17](https://github.com/Danirv/runxin-local/issues/17#issuecomment-6096161743) informa valor inicial 11:23, escrituras manuales desde HA a 11:24 y 11:26 y restauración mediante sincronización manual. Pantalla y Water Device coinciden en cada paso. Se registra **campo 4, reloj/sincronización manuales verificados** en esa unidad (firmware BL3372 62016); los campos 6/10/34/43/47 siguen pendientes. La 2.9.3 actualiza la evidencia: se conservan solo lectura por defecto, opciones explícitas y corrección automática bloqueada.
+La [respuesta del 10-10-2026 en la issue #17](https://github.com/Danirv/runxin-local/issues/17#issuecomment-6096161743) informa valor inicial 11:23, escrituras manuales desde HA a 11:24 y 11:26 y restauración mediante sincronización manual. Pantalla y Water Device coinciden en cada paso. Se registra **campo 4, reloj/sincronización manuales verificados** en esa unidad (firmware BL3372 62016); los campos 6/10/34/43/47 siguen pendientes. La 2.9.3 habilita únicamente los controles manuales verificados del campo 4 por defecto. Los demás conservan las opciones explícitas; se mantienen sensores de referencia y corrección automática bloqueada.
 
 El código de idioma 7 es neerlandés en pantalla. El G6 modelo 9 del proyecto devuelve código 3 con menús en español; consulta [las correspondencias limitadas por modelo](f79d-settings.es.md). No valida todo el enum ni el idioma de app/cuenta.
 

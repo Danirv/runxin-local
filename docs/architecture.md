@@ -30,7 +30,7 @@ The same rule applies to another transport: implement the raw-frame contract ind
 
 - Protocol modules do not import HA/BroadLink; transport base does not import model field definitions.
 - Field receipt, physical meaning, unit calibration, theoretical encoding and effective write permission are separate evidence levels.
-- `allowed_write_fields` defaults empty. Model 1 starts read-only; opted-in manual tests use a separate field policy enforced by the coordinator and adapter. Automatic clock correction and field 7 remain blocked. Regeneration start has a separate opt-in; direct phase advancement is blocked.
+- `allowed_write_fields` defaults empty. Model 1 explicitly allows verified manual field 4; opted-in tests of remaining settings use a separate field policy enforced by the coordinator and adapter. Automatic clock correction and field 7 remain blocked. Regeneration start has a separate opt-in; direct phase advancement is blocked.
 - Models 9/12 retain their original write surface and conversions, including explicitly documented pending actions.
 - Model 14 has Beta support and reuses the Midnight write surface based on issue #22; reported reads, verified writes and pending writes are recorded separately. Its field-26 U16 LE read override lives in `runxin/fields.py`; the client reuses a validated identity for partial reads, without extra I/O. G6/model-12 defaults remain unchanged.
 - Per-model byte-order/unit/enum changes require independent fixtures and regression coverage for all existing models.

@@ -2,7 +2,7 @@
   "title": "Runxin Local",
   "config": {
     "step": {
-      "readonly_alpha": {"title": "Read-only Alpha", "description": "This controller has experimental read-only support. No settings, clock correction or mechanical commands will be sent. It polls once per minute by default. Readings use the reference F79D interpretation and still need comparison with your app; resin and per-cycle capacity have no confirmed units. No long-term statistics are created for these provisional readings. You can download diagnostics from the entry menu to share raw field bytes. Optional manual write tests can be enabled later from the integration options; they are disabled by default."},
+      "readonly_alpha": {"title": "Alpha with validated manual clock controls", "description": "This controller has experimental readings. Device clock and the manual Sync clock button are validated and available without enabling experimental settings. The integration polls once per minute by default and never corrects this model’s clock automatically. Other settings and regeneration tests require explicit options. Resin and per-cycle capacity have unconfirmed units; provisional numeric readings do not generate long-term statistics. Download diagnostics from the entry menu to share received field bytes."},
       "user": {"title": "Connect a Runxin softener", "description": "Enter the BL3372 local IP address.", "data": {"host": "IP Address", "diagnostic_only": "Prepare a read-only diagnostic report only"}, "data_description": {"diagnostic_only": "Enable this to collect a one-time report without adding controls. Useful for unlisted models or connection problems."}},
       "discovery_confirm": {"title": "Runxin-compatible device discovered", "description": "A device was discovered at {host}. Do you want to configure it?"},
       "reconfigure": {"title": "Change IP address", "data": {"host": "Host"}},
@@ -35,7 +35,7 @@
   },
   "options": {
     "step": {
-      "init": {"title": "Runxin Local options", "data": {"scan_interval": "Polling interval (s)", "adaptive_polling": "Adaptive polling", "active_scan_interval": "Interval while active (s)", "auto_sync_clock": "Sync clock automatically", "clock_tolerance_minutes": "Clock tolerance (min)", "model1_test_writes": "Enable experimental model-1 settings", "model1_test_regeneration": "Enable experimental model-1 regeneration start"}, "data_description": {"adaptive_polling": "Poll more often while water is flowing or the valve is in a regeneration or vacation transition detected from read-back state.", "active_scan_interval": "Only used when adaptive polling is enabled.", "auto_sync_clock": "Corrects the valve clock when it drifts, including the seasonal daylight saving change, which the softener does not apply itself.", "clock_tolerance_minutes": "Maximum drift tolerated before correcting.", "model1_test_writes": "Allows manual clock, continuous-flow time, regeneration schedule, added salt and hardness tests. These writes are not hardware-verified on model 1. Record the baseline, confirm in the app/controller and restore it. Automatic clock correction stays off; flow-cutoff writes stay blocked.", "model1_test_regeneration": "Also requires experimental settings enabled. Adds the regeneration-start button for a planned physical test. Moves the valve and uses water/salt. Phase advancement and vacation writes remain blocked."}}
+      "init": {"title": "Runxin Local options", "data": {"scan_interval": "Polling interval (s)", "adaptive_polling": "Adaptive polling", "active_scan_interval": "Interval while active (s)", "auto_sync_clock": "Sync clock automatically", "clock_tolerance_minutes": "Clock tolerance (min)", "model1_test_writes": "Enable experimental model-1 settings", "model1_test_regeneration": "Enable experimental model-1 regeneration start"}, "data_description": {"adaptive_polling": "Poll more often while water is flowing or the valve is in a regeneration or vacation transition detected from read-back state.", "active_scan_interval": "Only used when adaptive polling is enabled.", "auto_sync_clock": "Corrects the valve clock when it drifts, including the seasonal daylight saving change, which the softener does not apply itself.", "clock_tolerance_minutes": "Maximum drift tolerated before correcting.", "model1_test_writes": "Allows experimental tests of continuous-flow time, regeneration schedule, added salt and hardness. Device clock and manual Sync clock are already available without this option. These additional writes are not hardware-verified on model 1. Record the baseline, confirm in the app/controller and restore it. Automatic clock correction and flow-cutoff writes stay blocked.", "model1_test_regeneration": "Also requires experimental settings enabled. Adds the regeneration-start button for a planned physical test. Moves the valve and uses water/salt. Phase advancement and vacation writes remain blocked."}}
     },
     "abort": {
       "diagnostic_only": "This entry holds a saved diagnostic report only. Download diagnostics from its menu. Delete it before adding the device normally or collecting a new report."
@@ -43,7 +43,7 @@
   },
   "entity": {
     "sensor": {
-      "reference_clock": {"name": "Device clock · Reference"},
+      "reference_clock": {"name": "Device clock · Reading"},
       "reference_schedule": {"name": "Regeneration schedule · Reference"},
       "reference_salt": {"name": "Added salt · Reference"},
       "reference_hardness": {"name": "Hardness · Reference"},
@@ -137,7 +137,7 @@
     }
   },
   "exceptions": {
-    "model_write_not_allowed": {"message": "This controller policy does not allow writes. Read-only Alpha support cannot change settings or start mechanical operations."},
+    "model_write_not_allowed": {"message": "This controller does not permit the requested setting or action. Check its supported controls and any required experimental options."},
     "regeneration_busy": {
       "message": "A regeneration request is already being processed. Wait for it to finish."
     },

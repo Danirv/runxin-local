@@ -41,4 +41,4 @@ The integration's report excludes IP/MAC, names, serial numbers, keys, session I
 
 If Home Assistant cannot run the report, the separate [connection diagnostic](../scripts/debug_connection.py) remains available. Contact us with the displayed error and your environment; there is no need to alter Home Assistant's managed dependencies.
 
-A periodic **model-1 read-only Alpha** is a separate operational mode: it creates reference sensors and polls, while still blocking writes and clock correction. See [its comparison guide](model-1-alpha.md). Downloading diagnostics from a normal entry exports cached state, including raw field pairs; it does not run the one-time collector.
+A periodic **model-1 Alpha** is a separate operational mode: it creates reference sensors and polls, with validated manual clock controls available from 2.9.3. Other writes require explicit test options and automatic clock correction stays blocked. See [its comparison guide](model-1-alpha.md). Downloading diagnostics from a normal entry exports cached state, including raw field pairs; it does not run the one-time collector.

@@ -2,7 +2,7 @@
   "title": "Runxin Local",
   "config": {
     "step": {
-      "readonly_alpha": {"title": "Alpha de només lectura", "description": "Aquest controlador té suport experimental de només lectura. No s’enviaran ajustos, correccions del rellotge ni ordres mecàniques. Per defecte es llegeix una vegada per minut. Les lectures fan servir la interpretació F79D de referència i encara cal contrastar-les amb l’app; la resina i la capacitat per cicle no tenen unitats confirmades. Aquestes lectures provisionals no generen estadístiques de llarg termini. Pots descarregar el diagnòstic des del menú de l’entrada per compartir els bytes dels camps. Més endavant pots activar proves manuals d’escriptura des de les opcions; per defecte estan desactivades."},
+      "readonly_alpha": {"title": "Alpha amb controls manuals del rellotge validats", "description": "Aquest controlador té lectures experimentals. El rellotge del dispositiu i el botó de sincronització manual estan validats i disponibles sense activar els ajustos experimentals. Per defecte es llegeix cada minut i la integració no corregeix automàticament el rellotge d’aquest model. Els altres ajustos i les proves de regeneració requereixen opcions explícites. La resina i la capacitat per cicle no tenen unitats confirmades; les lectures numèriques provisionals no generen estadístiques de llarg termini. Descarrega els diagnòstics des del menú de l’entrada per compartir els bytes rebuts."},
       "user": {"title": "Connecta un descalcificador Runxin", "description": "Introdueix l'adreça IP local del BL3372.", "data": {"host": "Adreça IP", "diagnostic_only": "Preparar només un informe de diagnòstic de lectura"}, "data_description": {"diagnostic_only": "Activa-ho per recollir un informe puntual sense afegir controls. Útil per a models no admesos o problemes de connexió."}},
       "discovery_confirm": {"title": "Dispositiu compatible amb Runxin descobert", "description": "S'ha detectat un dispositiu a la xarxa ({host}). Vols configurar-lo?"},
       "reconfigure": {"title": "Canvia l'adreça IP", "data": {"host": "Amfitrió"}},
@@ -35,7 +35,7 @@
   },
   "options": {
     "step": {
-      "init": {"title": "Opcions de Runxin Local", "data": {"scan_interval": "Interval de consulta (s)", "adaptive_polling": "Sondeig adaptatiu", "active_scan_interval": "Interval quan hi ha activitat (s)", "auto_sync_clock": "Sincronitza el rellotge automàticament", "clock_tolerance_minutes": "Tolerància del rellotge (min)", "model1_test_writes": "Activa els ajustos experimentals del model 1", "model1_test_regeneration": "Activa l’inici experimental de regeneració del model 1"}, "data_description": {"adaptive_polling": "Consulta més sovint mentre passa aigua o la vàlvula està en una transició mecànica de regeneració o de vacances detectada en lectura.", "active_scan_interval": "Només s'aplica amb el sondeig adaptatiu actiu.", "auto_sync_clock": "Corregeix l'hora de la vàlvula quan es desvia. Cobreix també el canvi d'hora estacional, que el descalcificador no aplica per si mateix.", "clock_tolerance_minutes": "Desviació màxima que es tolera abans de corregir.", "model1_test_writes": "Permet provar manualment rellotge, límit de temps de cabal, hora de regeneració, sal afegida i duresa. Les escriptures encara no estan verificades físicament al model 1. Anota el valor inicial, confirma’l a l’app/controlador i restaura’l. La correcció automàtica del rellotge i les escriptures del llindar de cabal continuen bloquejades.", "model1_test_regeneration": "També requereix activar els ajustos experimentals. Afegeix el botó d’inici per a una prova física de regeneració prevista. Mou la vàlvula i consumeix aigua/sal. L’avanç de fases i les escriptures de vacances continuen bloquejats."}}
+      "init": {"title": "Opcions de Runxin Local", "data": {"scan_interval": "Interval de consulta (s)", "adaptive_polling": "Sondeig adaptatiu", "active_scan_interval": "Interval quan hi ha activitat (s)", "auto_sync_clock": "Sincronitza el rellotge automàticament", "clock_tolerance_minutes": "Tolerància del rellotge (min)", "model1_test_writes": "Activa els ajustos experimentals del model 1", "model1_test_regeneration": "Activa l’inici experimental de regeneració del model 1"}, "data_description": {"adaptive_polling": "Consulta més sovint mentre passa aigua o la vàlvula està en una transició mecànica de regeneració o de vacances detectada en lectura.", "active_scan_interval": "Només s'aplica amb el sondeig adaptatiu actiu.", "auto_sync_clock": "Corregeix l'hora de la vàlvula quan es desvia. Cobreix també el canvi d'hora estacional, que el descalcificador no aplica per si mateix.", "clock_tolerance_minutes": "Desviació màxima que es tolera abans de corregir.", "model1_test_writes": "Permet provar el temps de cabal continu, l’horari de regeneració, la sal afegida i la duresa. El rellotge i la sincronització manual ja estan disponibles sense aquesta opció. Aquestes escriptures addicionals no estan verificades físicament al model 1. Anota el valor inicial, contrasta’l amb l’app/controlador i restaura’l. La correcció automàtica del rellotge i el tall per cabal continuen bloquejats.", "model1_test_regeneration": "També requereix activar els ajustos experimentals. Afegeix el botó d’inici per a una prova física de regeneració prevista. Mou la vàlvula i consumeix aigua/sal. L’avanç de fases i les escriptures de vacances continuen bloquejats."}}
     },
     "abort": {
       "diagnostic_only": "Aquesta entrada només conserva un informe de diagnòstic desat. Descarrega’l des del seu menú. Elimina-la abans d’afegir el dispositiu normalment o recollir un informe nou."
@@ -43,7 +43,7 @@
   },
   "entity": {
     "sensor": {
-      "reference_clock": {"name": "Rellotge del dispositiu · Referència"},
+      "reference_clock": {"name": "Rellotge del dispositiu · Lectura"},
       "reference_schedule": {"name": "Horari de regeneració · Referència"},
       "reference_salt": {"name": "Sal afegida · Referència"},
       "reference_hardness": {"name": "Duresa · Referència"},
@@ -137,7 +137,7 @@
     }
   },
   "exceptions": {
-    "model_write_not_allowed": {"message": "La política d’aquest controlador no permet escriptures. El suport Alpha de només lectura no pot canviar ajustos ni iniciar operacions mecàniques."},
+    "model_write_not_allowed": {"message": "Aquest controlador no permet l’ajust o l’acció sol·licitats. Comprova els controls admesos i les opcions experimentals necessàries."},
     "regeneration_busy": {
       "message": "Ja s’està processant una petició de regeneració. Espera que acabi."
     },

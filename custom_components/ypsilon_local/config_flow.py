@@ -92,7 +92,7 @@ class YpsilonLocalConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self, host: str, identity: dict[str, Any]
     ) -> config_entries.ConfigFlowResult:
         model = controller_model(identity.get("deviceModel"))
-        if model is not None and model.read_only:
+        if model is not None and (model.read_only or model.provisional_readings):
             self._alpha_host = host
             self._alpha_identity = identity
             return await self.async_step_readonly_alpha()
@@ -101,7 +101,7 @@ class YpsilonLocalConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_readonly_alpha(
         self, user_input: dict[str, Any] | None = None
     ) -> config_entries.ConfigFlowResult:
-        """Explain provisional readings before enabling continuous read-only polling."""
+        """Explain provisional readings and the scoped manual-clock permission."""
         if user_input is not None:
             return self.async_create_entry(
                 title=_entry_title(self._alpha_identity),
@@ -365,7 +365,7 @@ class YpsilonLocalOptionsFlow(config_entries.OptionsFlow):
         read_only = bool(model and model.read_only)
         model1 = bool(model and model.code == 1)
         if user_input is not None:
-            if read_only:
+            if read_only or model1:
                 user_input = {**user_input, CONF_AUTO_SYNC_CLOCK: False}
             if model1:
                 # A separate mechanical opt-in cannot grant configuration writes.
@@ -422,7 +422,7 @@ class YpsilonLocalOptionsFlow(config_entries.OptionsFlow):
                 ),
             }
         )
-        if read_only:
+        if read_only or model1:
             schema = vol.Schema({key: value for key, value in schema.schema.items()
                                  if key.schema not in (CONF_AUTO_SYNC_CLOCK, CONF_CLOCK_TOLERANCE)})
         if model1:
