@@ -56,6 +56,16 @@ L’equip té 24 L nominals de resina, però el camp 26 continua `F0 00` (refer�
 
 El volum de resina ha de descriure la càrrega real, no ajustar-se al nombre de persones. La capacitat de tractament és un altre paràmetre que depèn de resina, duresa i ajustos de regeneració; reduir-la mantenint els cicles pot fer regenerar més sovint en lloc d’estalviar. Cal aclarir l’etiqueta/unitat i seguir les instruccions de l’equip abans de proposar un canvi. No cal tornar a aparellar, recuperar l’app antiga, repetir diagnòstics ni modificar ajustos per aclarir les lectures.
 
+## Funcionament reportat després de regenerar amb la 2.9.3
+
+La [resposta posterior del 10-10-2026](https://github.com/Danirv/runxin-local/issues/17#issuecomment-6101162421) confirma lectures periòdiques normals i recuperació dels valors després dels reinicis de HA en actualitzar. L’equip reporta model 1, firmware BL3372 62016 i integració 2.9.3.
+
+A les 19:41:45, hora local, HA mostrava aspiració de salmorra i esbandida lenta mentre el controlador indicava **“pekel-spoel traag up-flow”**. Això contrasta aquella fase concreta. HA havia indicat ompliment de salmorra a les 19:35:34, uns sis minuts abans. Amb lectures cada 60 segons, aquesta observació no valida independentment la durada configurada ni demostra un error respecte dels set minuts de la lectura anterior. Els intents avortats anteriors s’exclouen de la validació de seqüència i durades. L’opció de regeneració de HA estava desactivada: no valida l’ordre d’inici del camp 34.
+
+Després del cicle, HA mostrava capacitat restant **3429 L**, davant dels **1267 L** reportats el 8 d’octubre. Es registra una recuperació de capacitat després de regenerar, sense calibració independent de la unitat. Es mantenen duresa 280 mg/L, resina `F0 00` / referència 240 i referència per cicle 15. Si la duresa és expressada com CaCO₃, `3,429 m³ × 28 °f ≈ 96 °f·m³`, uns `4 °f·m³/L` per als 24 L nominals de resina. És una comprovació de coherència, no un contrast amb la resina configurada ni una prova de l’escala 0,1. L’usuari recorda una etiqueta L al costat de l’ajust antic, però no n’està segur; la unitat i la correspondència exacta amb el camp local continuen pendents.
+
+S’incorpora evidència de funcionament i d’una fase, sense canviar Alpha, còdecs, permisos ni unitats provisionals. Les comparacions anteriors són punts de calibració pendents: no es demanen més proves, captures ni diagnòstics a aquest contribuent. La incidència original de connexió/alta es pot tancar independentment d’aquestes validacions.
+
 ## Ajustos experimentals opcionals
 
 A l’entrada operativa del model 1, obre **Configuració → Dispositius i serveis → Runxin Local → Configura**. Activa **els ajustos experimentals del model 1** i desa. La recàrrega afegeix controls addicionals per a límit de temps de cabal (6), hora de regeneració (10), sal afegida (43) i duresa (47). **El camp 4 està verificat: escriptures manuals del rellotge i restauració amb sincronització manual. Els camps 6/10/43/47 i la regeneració (34) continuen pendents.** No cal repetir la prova del rellotge ja completada.

@@ -73,6 +73,16 @@ The reported unit has nominal 24 L resin. Field 26 remains `F0 00` (reference 24
 
 Do not reduce a resin-volume setting to match household size: it should describe the actual resin charge. Treatment capacity is a different parameter based on resin, hardness and regeneration settings; a lower programmed capacity with unchanged cycles can cause more frequent regeneration rather than savings. Confirm the label/unit and follow the unit's instructions before suggesting an adjustment. No re-pairing, old-app access, repeated diagnostics or setting changes are needed just to clarify these readings.
 
+## Operation reported after regeneration on 2.9.3
+
+The [later 2026-10-10 report](https://github.com/Danirv/runxin-local/issues/17#issuecomment-6101162421) confirms normal polling and recovery of readings after HA restarts following updates on the reported model-1 unit, with BL3372 firmware 62016 and integration 2.9.3.
+
+At 19:41:45 local time, HA reported brine draw and slow rinse while the controller displayed **“pekel-spoel traag up-flow”**. This independently supports that specific phase label. HA had reported brine refill at 19:35:34, approximately six minutes earlier. With 60-second polling, this observation does not independently validate the configured refill duration or establish a timing error against the earlier seven-minute reading. Earlier aborted attempts are excluded from sequence and duration validation. The HA regeneration option remained off, so these observations do not validate the field-34 start command.
+
+After the cycle, HA showed remaining capacity **3429 L**, compared with **1267 L** reported on 8 October. This records a capacity recovery after regeneration; it is not an independent calibration of its units. Reported hardness remained 280 mg/L, resin `F0 00` / reference 240 and per-cycle reference 15. Assuming hardness expressed as CaCO₃, `3.429 m³ × 28 °f ≈ 96 °f·m³`, or about `4 °f·m³/L` for nominal 24 L resin. This is a consistency check, not a configured-resin comparison or proof of the 0.1 conversion. The contributor recalls an L label beside the old setting but is unsure; its unit and exact local-field correspondence remain pending.
+
+These observations add operational and phase-reading evidence without changing the model's Alpha status, codecs, permissions or provisional units. The remaining comparisons above are a calibration backlog; no further tests, screenshots or diagnostic reports are requested from this contributor. The original connection/setup issue can be closed independently of those pending validations.
+
 ## Evidence and next steps
 
 [Issue #17](https://github.com/Danirv/runxin-local/issues/17#issuecomment-6044822202) supplied BL3372 devtype `0x520F`, firmware 62016, standard authentication with the app closed, stable code 1 and all 52 requested fields in two successful queries. The fixture in `tests/fixtures/model1_fields.json` preserves published field pairs; reconstructed test frames are **synthetic**, not network captures. Software tests cannot confirm physical units or mechanical actions.

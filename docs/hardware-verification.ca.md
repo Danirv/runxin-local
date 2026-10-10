@@ -119,6 +119,12 @@ El codi d’idioma 7 és neerlandès a la pantalla. El G6 model 9 del projecte r
 
 Resina crua 240 i referència per cicle 15 són lectures diferents sense conversió confirmada. L’usuari va modificar 24 → 15 sota l’etiqueta Water treatment capacity de l’app antiga; falten unitat i correspondència exacta amb el camp local. Els 24 L nominals fan plausible una escala 0,1 però no confirmen el paràmetre configurat. No cal repetir rellotge/diagnòstics ni aplicar el còdec del model 14. [Guia del model 1](model-1-alpha.ca.md).
 
+### Funcionament del model 1 i observació d’una fase amb la 2.9.3
+
+La [resposta posterior de la issue #17](https://github.com/Danirv/runxin-local/issues/17#issuecomment-6101162421) confirma lectures periòdiques normals, recuperació després dels reinicis de HA i coincidència amb la pantalla en aspiració de salmorra / esbandida lenta ascendent. No valida totes les fases ni les durades configurades: s’exclouen els intents avortats i l’observació aproximada de l’ompliment es va fer amb lectures cada 60 segons. L’opció de regeneració de HA estava desactivada; l’escriptura del camp 34 continua pendent.
+
+HA va mostrar capacitat restant 3429 L després del cicle, mantenint resina crua 240 i referència per cicle 15. Són lectures reportades i una comprovació de coherència, no una confirmació independent de l’escala de resina o les unitats de capacitat. L’etiqueta L de l’ajust antic es recorda amb incertesa. Alpha i escriptures pendents es mantenen; no es demanen més proves ni informes al contribuent. La incidència original de connexió/alta es pot tancar independentment. [Registre detallat](model-1-alpha.ca.md#funcionament-reportat-després-de-regenerar-amb-la-293).
+
 ## Euro-Clear Midnight / controlador model 14 (F136)
 
 **Beta a la 2.9.2**, contrastada al Euro-Clear Midnight 25 Plug&Play / F136 / ECOPRO+, BL3372 `0x520F`, firmware **62016**. La [issue #22](https://github.com/Danirv/runxin-local/issues/22) confirma funcionament amb 2.9.1 després d’actualitzar/reiniciar, sense modificar models localment. Les lectures **4/6/7/10/43/47** coincideixen amb l’app (camp 7: 3,5 m³/h; camp 47: 260 mg/L). Les escriptures **4/6/10/43** estan verificades per l’usuari; **les escriptures 7/47 i les accions mecàniques de 34 continuen pendents**.

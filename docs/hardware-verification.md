@@ -141,6 +141,12 @@ Language code 7 is Dutch on the controller. The project's model-9 G6 reports cod
 
 Raw resin 240 and per-cycle reference 15 remain distinct, uncalibrated readings. The contributor changed 24 → 15 under the old Runxin app's Water treatment capacity label; its unit and exact local-field path are still pending. Nominal 24 L resin makes a 0.1 scale plausible but does not confirm the configured parameter. No repeated clock test, diagnostic scan or model-14 codec generalisation is required. See [the model-1 guide](model-1-alpha.md).
 
+### Model-1 operation and phase observation on 2.9.3
+
+The [later issue #17 report](https://github.com/Danirv/runxin-local/issues/17#issuecomment-6101162421) confirms normal polling and reading recovery after HA restarts, plus agreement with the physical display for brine draw / slow up-flow rinse. It does not validate all regeneration phases or configured durations: earlier aborted attempts are excluded, and the approximate refill observation used 60-second polling. The HA regeneration option stayed off, so field-34 write verification remains pending.
+
+HA reported remaining capacity 3429 L after the cycle, with resin raw 240 and per-cycle reference 15 unchanged. These are reported readings and a consistency check, not an independent confirmation of resin scaling or capacity units. The old setting's L label is recalled with uncertainty. Alpha and pending writes remain unchanged; no additional contributor tests or reports are requested. The original connection/setup issue may be closed independently. See [the detailed operation record](model-1-alpha.md#operation-reported-after-regeneration-on-293).
+
 ## Euro-Clear Midnight / controller model 14 (F136)
 
 **Beta in 2.9.2**, scoped to Euro-Clear Midnight 25 Plug&Play / F136 / ECOPRO+, BL3372 `0x520F`, firmware **62016**. [Issue #22](https://github.com/Danirv/runxin-local/issues/22) confirms v2.9.1 works after update/restart without local model edits. App comparisons confirm readings for **4/6/7/10/43/47** (field 7: 3.5 m³/h; field 47: 260 mg/L). Contributor-verified writes are **4/6/10/43**; **writes 7/47 and mechanical field 34 remain pending**.
