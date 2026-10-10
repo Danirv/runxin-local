@@ -25,14 +25,14 @@ L'entrada normal autentica i fa lectures LAN periòdiques; no és una captura pa
 
 **Per defecte no hi ha controls number, time ni button**, ni correcció del rellotge ni ordres de configuració o mecàniques. Els serveis administratius també rebutgen escriptures. El coordinador i l'adaptador del client imposen la política independentment de la interfície; a la 2.9.1 es poden activar les proves manuals opcionals descrites a continuació.
 
-Les lectures són provisionals i no generen **estadístiques de llarg termini**. HA encara pot desar l'historial ordinari. Les etiquetes enum són de referència i els codis desconeguts es mantenen visibles.
+Les lectures numèriques són provisionals i no generen **estadístiques de llarg termini**. HA encara pot desar l'historial ordinari. Les etiquetes enum són de referència, excepte l’idioma confirmat codi 7 → neerlandès; els codis desconeguts es mantenen visibles.
 
 ## Comparacions prioritàries
 
 | Camp | Referència del JSON | Què falta confirmar |
 |---|---|---|
 | 26, resina | `F0 00`, primer byte 240 | Valor, nom i unitat de l'app. HA mostra 240 sense litres ni multiplicador assumit. |
-| 41–42, quantitat per cicle | 15 | Nom i unitat reals. HA mostra 15 sense litres; potser no representa capacitat d'aigua tractada. |
+| 41–42, quantitat per cicle | 15 | L’usuari va canviar 24 → 15 a Runxin Advanced → Water treatment capacity. Cal confirmar la unitat i la correspondència amb aquest camp; HA manté 15 sense unitat assumida. |
 | 35–36, restant | 1304 L | Capacitat restant amb la seva unitat, prop de l'hora de lectura. |
 | 37–40, consum diari/mitjana | 215 / 192 L | Consum del dia i mitjana del controlador; no confondre-la amb un total de l'historial setmanal. |
 | 47, duresa | 280 mg/L | Nom exacte i escala de duresa. |
@@ -44,13 +44,23 @@ Totes les unitats són interpretacions de referència pendents de contrast. La r
 
 La [issue #17](https://github.com/Danirv/runxin-local/issues/17#issuecomment-6044822202) confirma BL3372 `0x520F`, firmware 62016, autenticació amb l'app tancada, model 1 estable i resposta dels 52 camps en dues consultes sense errors. La fixture conserva només els parells publicats: les trames reconstruïdes són sintètiques. Les proves de programari no validen conversions físiques.
 
-Una calibració futura es farà al model 1, sense canviar les conversions del G6/Midnight. Aquesta Alpha no explora camps superiors al 52; les escriptures manuals opcionals encara no estan verificades físicament.
+Una calibració futura es farà al model 1, sense canviar les conversions del G6/Midnight. Aquesta Alpha no explora camps superiors al 52; el rellotge manual (camp 4) està verificat a l’equip reportat; la resta d’escriptures opcionals continuen pendents.
+
+## Confirmacions incorporades a la 2.9.3
+
+La [resposta del 10-10-2026](https://github.com/Danirv/runxin-local/issues/17#issuecomment-6096161743) confirma rellotge inicial 11:23, escriptures a 11:24 i 11:26 i restauració amb el botó de sincronització manual. La pantalla del controlador i Water Device coincideixen després de cada acció. Només es va provar el camp 4 i després es va desactivar l’opció experimental. No valida la correcció automàtica ni altres escriptures.
+
+La pantalla física és en neerlandès amb codi d’idioma 7. HA corregeix només aquesta correspondència del model 1, sense escriure l’idioma ni canviar la llengua de l’app.
+
+L’equip té 24 L nominals de resina, però el camp 26 continua `F0 00` (referència 240) i els camps 41–42 continuen en 15. Al frontend del fabricant, `resinVolume` és Resin volume i `periodicWaterProduction` és Water treatment capacity. No hem confirmat independentment quin camp local modificava aquella pantalla de l’app Runxin antiga. `240 / 10 = 24 L` és plausible, però encara no és un contrast amb el valor configurat. Es mantenen les dues lectures sense unitat assumida i no s’aplica el còdec U16 del model 14.
+
+El volum de resina ha de descriure la càrrega real, no ajustar-se al nombre de persones. La capacitat de tractament és un altre paràmetre que depèn de resina, duresa i ajustos de regeneració; reduir-la mantenint els cicles pot fer regenerar més sovint en lloc d’estalviar. Cal aclarir l’etiqueta/unitat i seguir les instruccions de l’equip abans de proposar un canvi. No cal tornar a aparellar, recuperar l’app antiga, repetir diagnòstics ni modificar ajustos per aclarir les lectures.
 
 ## Proves manuals opcionals (2.9.1)
 
-A l’entrada operativa del model 1, obre **Configuració → Dispositius i serveis → Runxin Local → Configura**. Activa **els ajustos experimentals del model 1** i desa. La recàrrega afegeix controls manuals per a rellotge (4), límit de temps de cabal (6), hora de regeneració (10), sal afegida (43) i duresa (47). **Totes les escriptures continuen pendents de verificació física**.
+A l’entrada operativa del model 1, obre **Configuració → Dispositius i serveis → Runxin Local → Configura**. Activa **els ajustos experimentals del model 1** i desa. La recàrrega afegeix controls manuals per a rellotge (4), límit de temps de cabal (6), hora de regeneració (10), sal afegida (43) i duresa (47). **El camp 4 està verificat: escriptures manuals del rellotge i restauració amb sincronització manual. Els camps 6/10/43/47 i la regeneració (34) continuen pendents.** No cal repetir la prova del rellotge ja completada.
 
-Anota una lectura inicial nova, canvia un sol ajust una quantitat petita dins del rang, comprova la lectura posterior i la pantalla/app si és visible, restaura el valor original i confirma’l. Aporta camp, valor inicial, sol·licitat, llegit, unitat/pantalla i restauració. No repeteixis una ordre amb resultat ambigu: la integració comprova l’estat sense reenviar-la a cegues.
+Per a una prova nova, anota una lectura inicial nova, canvia un sol ajust una quantitat petita dins del rang, comprova la lectura posterior i la pantalla/app si és visible, restaura el valor original i confirma’l. Aporta camp, valor inicial, sol·licitat, llegit, unitat/pantalla i restauració. No repeteixis una ordre amb resultat ambigu: la integració comprova l’estat sense reenviar-la a cegues.
 
 Una **segona opció** permet iniciar una regeneració prevista i requereix també el mode d’ajustos. El botó comprova servei i vacances desactivades amb una lectura nova, envia camp 34 = 1 una sola vegada i comprova la fase. L’avanç directe de fases continua bloquejat, també als serveis administratius.
 

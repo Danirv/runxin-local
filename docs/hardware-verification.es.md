@@ -111,6 +111,14 @@ La evidencia de un controlador o firmware no debe generalizarse automáticamente
 
 Consulta también [`waterdevice-audit.es.md`](waterdevice-audit.es.md).
 
+## Controlador sin marca modelo 1 / F150: reloj confirmado
+
+La [respuesta del 10-10-2026 en la issue #17](https://github.com/Danirv/runxin-local/issues/17#issuecomment-6096161743) informa valor inicial 11:23, escrituras manuales desde HA a 11:24 y 11:26 y restauración mediante sincronización manual. Pantalla y Water Device coinciden en cada paso. Se registra **campo 4, reloj/sincronización manuales verificados** en esa unidad (firmware BL3372 62016); los campos 6/10/34/43/47 siguen pendientes. La 2.9.3 actualiza la evidencia: se conservan solo lectura por defecto, opciones explícitas y corrección automática bloqueada.
+
+El código de idioma 7 es neerlandés en pantalla. El G6 modelo 9 del proyecto devuelve código 3 con menús en español; consulta [las correspondencias limitadas por modelo](f79d-settings.es.md). No valida todo el enum ni el idioma de app/cuenta.
+
+Resina raw 240 y referencia por ciclo 15 son lecturas diferentes sin conversión confirmada. El usuario modificó 24 → 15 bajo la etiqueta Water treatment capacity de la app antigua; faltan unidad y correspondencia exacta con el campo local. Los 24 L nominales hacen plausible una escala 0,1 pero no confirman el parámetro configurado. No hace falta repetir reloj/diagnósticos ni aplicar el códec del modelo 14. [Guía del modelo 1](model-1-alpha.es.md).
+
 ## Euro-Clear Midnight / controlador modelo 14 (F136)
 
 **Beta en 2.9.2**, contrastada en Euro-Clear Midnight 25 Plug&Play / F136 / ECOPRO+, BL3372 `0x520F`, firmware **62016**. La [issue #22](https://github.com/Danirv/runxin-local/issues/22) confirma funcionamiento con 2.9.1 tras actualizar/reiniciar, sin modificar modelos localmente. Las lecturas **4/6/7/10/43/47** coinciden con la app (campo 7: 3,5 m³/h; campo 47: 260 mg/L). Las escrituras **4/6/10/43** están verificadas por el usuario; **las escrituras 7/47 y las acciones mecánicas de 34 siguen pendientes**.

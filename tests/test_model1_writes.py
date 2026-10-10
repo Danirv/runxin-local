@@ -15,7 +15,9 @@ api = load("api")
 def test_opt_in_permissions_do_not_claim_verification_or_change_other_models(writes, regen, fields):
     assert models.allowed_write_fields(1, model1_test_writes=writes,
                                        model1_test_regeneration=regen) == fields
-    assert models.model_support_details(1)["hardware_verified_write_fields"] == []
+    assert models.model_support_details(1)["hardware_verified_write_fields"] == [4]
+    assert models.model_support_details(1)["pending_write_fields"] == [6, 10, 34, 43, 47]
+    assert not models.model_support_details(1)["experimental_writes_verified"]
     assert models.model_support_details(1)["read_only"]
     for code in (9, 12, 14):
         assert models.allowed_write_fields(code, model1_test_writes=writes,

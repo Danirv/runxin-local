@@ -5,7 +5,11 @@ Integració local per a descalcificadors compatibles amb **Runxin F79D + BroadLi
 El **model 1 / F150** té una Alpha de només lectura per defecte: sensors periòdics, sense escriptures automàtiques, amb proves manuals opcionals a la 2.9.1. Les lectures són provisionals, sense estadístiques de llarg termini; la resina i la quantitat per cicle no tenen unitat assumida. [Guia](model-1-alpha.ca.md).
 
 
-A la **2.9.1**, el model 1 té opcions desactivades per defecte per provar els ajustos 4/6/10/43/47 i una segona opció per iniciar una regeneració prevista. Cap escriptura del model 1 es considera verificada encara. El rellotge automàtic, el camp 7 i l’avanç de fases continuen bloquejats. [Instruccions](model-1-alpha.ca.md).
+A la **2.9.1**, el model 1 té opcions desactivades per defecte per provar els ajustos 4/6/10/43/47 i una segona opció per iniciar una regeneració prevista. A la 2.9.3, les escriptures manuals del rellotge i la restauració amb sincronització manual (camp 4) estan verificades; la resta continuen pendents. El rellotge automàtic, el camp 7 i l’avanç de fases continuen bloquejats. [Instruccions](model-1-alpha.ca.md).
+
+## Correccions a la 2.9.3
+
+Release estable amb etiquetes d’idioma confirmades a la pantalla: model 1/codi 7 → neerlandès i G6 model 9/codi 3 → castellà. Es conserva la taula de referència per als altres codis/models i el codi cru. El model 1 manté Alpha i només lectura per defecte; resina 240 i capacitat de tractament 15 continuen sent paràmetres diferents amb conversió pendent. [Evidència d’idioma](f79d-settings.ca.md).
 
 ## Compatibilitat a la 2.9.2
 

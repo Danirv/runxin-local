@@ -76,14 +76,21 @@ CONTROLLER_MODELS: dict[int, ControllerModel] = {
         provisional_readings=True,
         unconfirmed_unit_fields=frozenset({"resinVolume", "periodicWaterProduction"}),
         tested_hardware="Unbranded softener reported in issue #17",
+        hardware_verified_write_fields=(4,),
+        pending_write_fields=(6, 10, 34, 43, 47),
         evidence=(
             "Issue #17: BL3372 0x520F firmware 62016, stable model code 1, all "
             "fields 1..52 received in two read-only queries with no failures. "
             "F150 is the manufacturer's API enum name, not a confirmed product "
             "identity. App comparisons and field applicability are pending; "
-            "resin raw 240 and periodic-water reference 15 have no confirmed units."
-            " Optional manual tests of fields 4/6/10/43/47 and separate regeneration "
-            "start are unverified; field 7 and automatic clock correction stay blocked."
+            "resin raw 240 and periodic-water reference 15 have no confirmed units. "
+            "On 2026-10-10, the contributor confirmed two manual field-4 clock "
+            "writes and restoration via manual sync against the controller and "
+            "Water Device app; controller language code 7 is Dutch. The value 15 "
+            "was changed under Runxin's Water treatment capacity setting; it is "
+            "not a confirmed resin value. Optional tests of fields 6/10/43/47 "
+            "and regeneration start remain unverified; field 7 and automatic "
+            "clock correction stay blocked."
         ),
     ),
     9: ControllerModel(
@@ -194,7 +201,9 @@ def model_support_details(code: object) -> dict[str, Any] | None:
         "unconfirmed_unit_fields": sorted(model.unconfirmed_unit_fields),
         **({"experimental_write_fields": sorted(MODEL1_TEST_FIELDS),
             "experimental_regeneration_field": 34,
-            "experimental_writes_verified": False} if model.code == 1 else {}),
+            # Aggregate for all optional settings, not a per-field claim.
+            "experimental_writes_verified": MODEL1_TEST_FIELDS.issubset(
+                model.hardware_verified_write_fields)} if model.code == 1 else {}),
         "evidence": model.evidence,
     }
 

@@ -27,7 +27,7 @@ The integration communicates directly over the LAN and does not depend on the ve
 - Offline protocol, entity, translation, branding and architecture regression checks in `scripts/audit.py`.
 - Proper square icon and landscape logo assets under `custom_components/ypsilon_local/brand/`.
 
-The regeneration button starts only after a fresh reading confirms service state with vacation off, and rejects overlapping requests. It sends the same single command and verifies the resulting phase. Unmapped enum values appear as decimal codes with `raw_code`; known labels are preserved and absent readings remain `unknown`. Clock confirmation allows one ticking minute within 60 seconds of the write, including midnight, only when a fresh pre-write reading proves the next-minute value changed; regeneration schedules still require exact confirmation.
+The regeneration button starts only after a fresh reading confirms service state with vacation off, and rejects overlapping requests. It sends the same single command and verifies the resulting phase. Unmapped enum values appear as decimal codes with `raw_code`; known labels follow the reference map or confirmed per-model exceptions and absent readings remain `unknown`. Clock confirmation allows one ticking minute within 60 seconds of the write, including midnight, only when a fresh pre-write reading proves the next-minute value changed; regeneration schedules still require exact confirmation.
 
 ## Supported hardware
 
@@ -35,16 +35,18 @@ Supported Home Assistant targets (BroadLink BL3372 module, devtype `0x520F`):
 
 | Product | Runxin controller model (field 1) | Support | Evidence |
 |---|---|---|---|
-| Unbranded device reported in issue #17 | 1 (F150 API name) | **Alpha; read-only by default** | All 52 fields received; optional manual configuration/start tests in 2.9.1; app conversions and all model-1 writes pending |
+| Unbranded device reported in issue #17 | 1 (F150 API name) | **Alpha; read-only by default** | All 52 fields received; optional manual configuration/start tests in 2.9.1; manual clock writes/sync verified; other writes and numeric app conversions pending |
 | ATH/BWT Ypsilon G6 | 9 (F79D) | Reference hardware | Per-field read/write evidence documented in the hardware verification guide |
 | Euro-Clear Midnight (ECOPRO+ head) | 12 (F105 API name) | **Experimental / Alpha**, tested on Midnight 25 | Captured state matches the controller. Writes to fields 4, 6, 10 and 43 hardware-verified; fields 7 and 47 and mechanical field-34 actions remain available for testing but are not yet hardware-verified on this model |
 | Euro-Clear Midnight (F136 / ECOPRO+ head) | 14 (F136) | **Beta**, tested on Midnight 25 | Working v2.9.1 installation; app-matched reads 4/6/7/10/43/47; controller-confirmed resin 30.0 L from U16 LE tenths. Writes 4/6/10/43 verified; writes 7/34/47 pending |
 
-**2.9.2 is a normal stable integration release. Support status is per model:** model 1 is Alpha and read-only by default with optional manual test controls; model 12 remains Alpha; model 14 is Beta with confirmed resin decoding and documented pending writes. The Midnight controls and strict fresh read-back remain available; the label does not disable commands or imply that pending actions are verified. See the [model-12 evidence](docs/hardware-verification.md#euro-clear-midnight--controller-model-12) and [model-14 guide](docs/model-14-alpha.md).
+**2.9.3 is a normal stable integration release. Support status is per model:** model 1 is Alpha and read-only by default with optional manual test controls; model 12 remains Alpha; model 14 is Beta with confirmed resin decoding and documented pending writes. The Midnight controls and strict fresh read-back remain available; the label does not disable commands or imply that pending actions are verified. See the [model-12 evidence](docs/hardware-verification.md#euro-clear-midnight--controller-model-12) and [model-14 guide](docs/model-14-alpha.md).
 
 Diagnostics include per-model support/evidence metadata and both raw field-26 resin bytes. Model 12's observed `FA 00` still displays as **25 L**, retaining its U8 decode because that capture does not establish the high byte's meaning. Model 14's `[44, 1]` now uses **U16 little-endian × 0.1 = 30.0 L**, matching its controller photo. This is the configured resin value, distinct from nominal physical capacity; the setting is not changed.
 
 Other rebranded devices using the same controller/module may work, but compatibility must be verified per model and firmware. Separating protocol and transport does **not** imply that every Runxin or non-BroadLink device is supported.
+
+Device-language labels follow confirmed controller observations where available: model 1/code 7 is Dutch, and G6 model 9/code 3 is Spanish. Other pairs keep the reference mapping and unknown codes remain visible. See [language evidence](docs/f79d-settings.md#controller-language-evidence-293).
 
 For model 1, see the [Alpha comparison and write-testing guide](docs/model-1-alpha.md). All readings are provisional; resin and per-cycle quantity have no assumed units, and provisional numeric readings do not generate long-term statistics. Model-1 write tests are off by default and can be enabled in the integration options; regeneration start has a separate opt-in. Automatic clock correction, flow-cutoff writes and phase advancement stay blocked. The policy preserves G6/Midnight controls and conversions.
 

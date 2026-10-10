@@ -164,7 +164,7 @@ async def test_disabling_tests_replaces_and_revokes_old_session_without_losing_c
 
 
 @pytest.mark.asyncio
-async def test_diagnostics_distinguish_opted_permissions_from_unverified_evidence(hass):
+async def test_diagnostics_distinguish_opted_permissions_from_per_field_evidence(hass):
     coordinator, client, entry = context(hass)
     client.write_policy = {"controller_model": 1, "read_only": False,
                            "allowed_write_fields": [4, 6, 10, 43, 47]}
@@ -175,7 +175,9 @@ async def test_diagnostics_distinguish_opted_permissions_from_unverified_evidenc
     assert result["write_policy"]["allowed_write_fields"] == [4, 6, 10, 43, 47]
     assert not result["write_policy"]["read_only"]
     assert not result["write_policy"]["auto_clock_sync_permitted"]
-    assert result["protocol"]["model_support"]["hardware_verified_write_fields"] == []
+    assert result["protocol"]["model_support"]["hardware_verified_write_fields"] == [4]
+    assert result["protocol"]["model_support"]["pending_write_fields"] == [6, 10, 34, 43, 47]
+    assert not result["protocol"]["model_support"]["experimental_writes_verified"]
     assert result["state"]["_rawFieldBytes"][26] == [240, 0]
     assert not client.method_calls
 

@@ -74,7 +74,7 @@
       "resin_volume": {"name": "Volumen de resina"},
       "filter_work_days": {"name": "Intervalo de mantenimiento del material filtrante"},
       "device_model": {"name": "Modelo"},
-      "language_code": {"name": "Idioma del dispositivo", "state": {"chinese": "Chino", "english": "Inglés", "spanish": "Español", "french": "Francés", "russian": "Ruso", "italian": "Italiano", "german": "Alemán", "polish": "Polaco"}},
+      "language_code": {"name": "Idioma del dispositivo", "state": {"chinese": "Chino", "english": "Inglés", "spanish": "Español", "french": "Francés", "russian": "Ruso", "italian": "Italiano", "german": "Alemán", "polish": "Polaco", "dutch": "Neerlandés"}},
       "device_time_scheme": {"name": "Formato horario", "state": {"12_hour": "12 horas", "24_hour": "24 horas"}},
       "washing_increase_number": {"name": "Frecuencia de lavado"},
       "backwash_interval_number": {"name": "Intervalo entre contralavados"},

@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented here.
 
+## [2.9.3] - 2026-10-10
+
+- Correct only physically confirmed field-2 language labels: model 1/code 7 is Dutch and reference G6 model 9/code 3 is Spanish. Retain the reference enum for other model/code pairs, raw codes, disabled-by-default diagnostic entities and existing unique IDs. Add Dutch translations and model-aware enum options.
+- Record issue #17's two manual clock writes and restoration through manual clock sync as contributor-verified field-4 evidence for model 1. Other optional settings and regeneration start remain pending; default read-only mode, explicit opt-ins and blocked automatic clock correction are retained.
+- Clarify the distinction between field-26 resin and fields 41–42 treatment capacity. Model-1 raw resin 240 and treatment-capacity reference 15 remain unscaled without assumed units; the nominal 24 L unit alone does not confirm the configured resin conversion. Update English/Catalan/Spanish evidence and comparison guides.
+- Add per-model language and partial-write-evidence regressions. Preserve all wire codecs, queries, controls, resin conversions, domain/config entries and model support levels (1/12 Alpha, 14 Beta).
+
 ## [2.9.2] - 2026-10-09
 
 - Fix model-14/F136 resin volume by reading both field-26 bytes as U16 little-endian tenths of a litre. Issue #22's `[44, 1]` now displays 30.0 L instead of 4.4 L, matching the controller photo. Preserve original byte pairs and reference G6/model-12 decoding.

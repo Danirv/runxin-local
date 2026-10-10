@@ -71,7 +71,7 @@
       "resin_volume": {"name": "Resin volume"},
       "filter_work_days": {"name": "Filter media service interval"},
       "device_model": {"name": "Model"},
-      "language_code": {"name": "Device language", "state": {"chinese": "Chinese", "english": "English", "spanish": "Spanish", "french": "French", "russian": "Russian", "italian": "Italian", "german": "German", "polish": "Polish"}},
+      "language_code": {"name": "Device language", "state": {"chinese": "Chinese", "english": "English", "spanish": "Spanish", "french": "French", "russian": "Russian", "italian": "Italian", "german": "German", "polish": "Polish", "dutch": "Dutch"}},
       "device_time_scheme": {"name": "Time format", "state": {"12_hour": "12-hour", "24_hour": "24-hour"}},
       "washing_increase_number": {"name": "Washing frequency"},
       "backwash_interval_number": {"name": "Backwash interval count"},
