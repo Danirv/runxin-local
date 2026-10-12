@@ -28,7 +28,7 @@ from homeassistant.helpers import device_registry, entity_registry
 from homeassistant.helpers.entity_platform import EntityPlatform
 from homeassistant.helpers.service_info.dhcp import DhcpServiceInfo
 
-from .helpers import load
+from .helpers import broadlink_reply, io_mock, load
 from .test_model12 import STATE_FRAME
 
 flow_mod = load("config_flow")
@@ -79,7 +79,7 @@ async def test_diagnostic_progress_and_saved_report_need_no_manual_environment(h
         assert not cancel.is_set()
         identifier_sink.append(TEST_MAC.replace(":",""))
         return _report(code,status=status)
-    collect_mock=Mock(side_effect=collect)
+    collect_mock=AsyncMock(side_effect=collect)
     monkeypatch.setattr(flow_mod,"probe",collect_mock)
     result=await flow.async_step_user({"host":TEST_HOST,"diagnostic_only":True})
     assert result["type"] is FlowResultType.SHOW_PROGRESS
@@ -113,7 +113,7 @@ async def test_diagnostic_entry_reloads_export_and_removal_do_not_contact_device
     entry=SimpleNamespace(entry_id="diagnostic-entry",data={
         "host":TEST_HOST,"diagnostic_only":True,"diagnostic_report_id":report_id,
     })
-    client=Mock()
+    client=io_mock()
     coordinator=Mock()
     forward=AsyncMock()
     monkeypatch.setattr(init_mod,"YpsilonLocalClient",client)
@@ -293,7 +293,7 @@ async def test_discovery_rejects_model_that_changes_before_confirmation(hass):
 @pytest.mark.asyncio
 @pytest.mark.parametrize("fails", [False, True])
 async def test_probe_always_closes_temporary_client(hass, monkeypatch, fails):
-    client = Mock(mac=TEST_MAC)
+    client = io_mock(mac=TEST_MAC)
     client.connection_diagnostics = {}
     if fails:
         client.read_identity.side_effect = flow_mod.YpsilonConnectionError("test failure")
@@ -492,9 +492,9 @@ async def test_setup_paths_distinguish_rejected_auth_from_timeout(hass, step, ki
 @pytest.mark.asyncio
 async def test_real_probe_logs_safe_authentication_context_before_entry_exists(hass, monkeypatch, caplog):
     transport_mod = load("transport.broadlink_bl3372")
-    device = Mock(devtype=0x520F, is_locked=True)
+    device = io_mock(devtype=0x520F, is_locked=True)
     device.auth.side_effect = broadlink.exceptions.AuthenticationError(-1, f"{TEST_HOST} {TEST_MAC} secret-key")
-    monkeypatch.setattr(transport_mod.broadlink, "hello", Mock(return_value=device))
+    monkeypatch.setattr(transport_mod.broadlink, "hello", AsyncMock(return_value=device))
     with caplog.at_level(logging.DEBUG):
         result = await _flow(hass).async_step_user({"host": TEST_HOST})
     assert result["errors"] == {"base": "device_locked"}
@@ -513,9 +513,10 @@ async def test_real_probe_logs_safe_authentication_context_before_entry_exists(h
 async def test_real_short_auth_response_is_connection_error_even_with_advertised_lock(hass, monkeypatch, caplog):
     transport_mod = load("transport.broadlink_bl3372")
     device = transport_mod.broadlink.Device((TEST_HOST, 80), bytes(6), 0x520F, is_locked=True)
-    device.send_packet = Mock(return_value=bytes(0x38) + bytes(16))
+    auth_exchange = AsyncMock(side_effect=lambda packet: broadlink_reply(device))
+    device._exchange = auth_exchange
     device.decrypt = Mock(return_value=bytes(16))
-    monkeypatch.setattr(transport_mod.broadlink, "hello", Mock(return_value=device))
+    monkeypatch.setattr(transport_mod.broadlink, "hello", AsyncMock(return_value=device))
     with caplog.at_level(logging.WARNING):
         result = await _flow(hass).async_step_user({"host": TEST_HOST})
     assert result["errors"] == {"base": "cannot_connect"}
@@ -523,4 +524,4 @@ async def test_real_short_auth_response_is_connection_error_even_with_advertised
     assert "error_type=ValueError" in caplog.text
     assert "result=cannot_connect" in caplog.text
     assert TEST_HOST not in caplog.text
-    assert [call.args[0] for call in device.send_packet.call_args_list] == [0x65]
+    assert [int.from_bytes(call.args[0][0x26:0x28], "little") for call in auth_exchange.call_args_list] == [0x65]

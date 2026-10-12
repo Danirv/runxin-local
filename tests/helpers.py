@@ -39,3 +39,35 @@ def load(relative: str):
     sys.modules[full] = module
     spec.loader.exec_module(module)
     return module
+
+
+def io_mock(*args, **kwargs):
+    """Synchronous metadata parent with explicit asynchronous I/O children."""
+    from unittest.mock import Mock, AsyncMock
+    result = Mock(*args, **kwargs)
+    for name in ("read_state", "read_fields", "read_identity", "write_fields",
+                 "transact", "transact_write", "close", "auth", "get_fwversion",
+                 "send_packet", "aclose", "invalidate", "_exchange"):
+        setattr(result, name, AsyncMock())
+    import asyncio
+    from collections import deque
+    result._lock = asyncio.Lock()
+    result._recent = deque()
+    result._frame = Mock()
+    result._endpoint = AsyncMock()
+    result._drop_endpoint = Mock()
+    return result
+
+
+def broadlink_reply(device, body=bytes(16), error=0):
+    """A structurally valid reply; caller chooses real or fake encrypted body."""
+    header = bytearray(0x38)
+    header[:8] = bytes.fromhex("5aa5aa555aa5aa55")
+    header[0x22:0x24] = error.to_bytes(2, "little", signed=True)
+    header[0x24:0x26] = device.devtype.to_bytes(2, "little")
+    header[0x26:0x28] = (0x03E9).to_bytes(2, "little")
+    header[0x28:0x2A] = device.count.to_bytes(2, "little")
+    header[0x2A:0x30] = device.mac[::-1]
+    response = header + body
+    response[0x20:0x22] = (sum(response, 0xBEAF) & 0xFFFF).to_bytes(2, "little")
+    return bytes(response)

@@ -33,7 +33,7 @@ Read [`docs/architecture.md`](docs/architecture.md) before protocol work.
 
 These boundaries are enforced by the offline audit where practical.
 
-The native job runs the complete suite on HA 2026.9.4; a separate baseline job uses `requirements-test-ha-baseline.txt` for HA 2026.9.3. Both use mocked device I/O. These are tested releases, not a declared minimum HA version.
+The native job runs the complete suite on HA 2026.10.1; a separate baseline job uses `requirements-test-ha-baseline.txt` for HA 2026.10.0. They cover existing mocked regressions plus real-library/AES/loopback UDP and Core BroadLink coexistence. These do not replace BL3372 hardware validation. Minimum HA is 2026.10.0, declared in HACS.
 
 Workflow action source revisions are pinned, but the upstream HACS/hassfest actions still use floating container tags. This does not pin the entire toolchain. Import checks are static architecture checks, not a runtime sandbox.
 
@@ -57,7 +57,7 @@ and an inference. Prefer an explicit `inferred` note to false certainty.
 ## New transports
 
 See [`docs/adding-a-transport.md`](docs/adding-a-transport.md). A transport should
-implement the raw `transact(frame: bytes) -> bytes` contract and remove only its
+implement the awaitable `transact(frame: bytes) -> bytes` contract and remove only its
 own envelope before returning the response.
 
 The existence of a transport implementation does not automatically make that

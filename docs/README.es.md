@@ -1,5 +1,9 @@
 # Runxin Local para Home Assistant
 
+## Home Assistant 2026.10 y transporte asíncrono: 2.10.0
+
+Desde 2.10.0 se requiere **HA 2026.10.0 o posterior**. La dependencia es `python-broadlink>=1.0.6`, como BroadLink oficial de HA; se conservan entradas, entidades y políticas de los modelos. Para HA anterior, conserva 2.9.3. [Migración, recuperación y prueba en el G6](ha-2026-10.es.md).
+
 Integración local para descalcificadores compatibles con **Runxin F79D + BroadLink BL3372**, con el Ypsilon G6 como hardware de referencia y soporte experimental para Euro-Clear Midnight.
 
 El **modelo 1 / F150** tiene una Alpha de lecturas con reloj manual validado en 2.9.3: sensores periódicos, sin escrituras automáticas, con pruebas manuales opcionales en 2.9.1. Las lecturas son provisionales, sin estadísticas a largo plazo; la resina y la cantidad por ciclo no tienen unidad asumida. [Guia](model-1-alpha.es.md).

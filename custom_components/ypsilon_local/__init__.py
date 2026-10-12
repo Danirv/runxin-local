@@ -7,9 +7,10 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_HOST, Platform
+from homeassistant.const import CONF_HOST, EVENT_HOMEASSISTANT_STOP, Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry as dr, entity_registry as er
+from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.device_registry import format_mac
 
 from .api import YpsilonLocalClient
@@ -22,6 +23,7 @@ from .coordinator import YpsilonDataUpdateCoordinator
 from .services import async_setup_services
 
 _LOGGER = logging.getLogger(__name__)
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 PLATFORMS: list[Platform] = [
     Platform.BINARY_SENSOR,
@@ -42,6 +44,7 @@ class YpsilonStore:
     client: YpsilonLocalClient
     field52_cache: dict[str, Any] = field(default_factory=dict)
     write_options: tuple[bool, bool] = (False, False)
+    inactive: bool = False
 
 
 async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
@@ -50,7 +53,7 @@ async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
     return True
 
 
-def _get_store(hass: HomeAssistant, entry: ConfigEntry) -> YpsilonStore:
+async def _get_store(hass: HomeAssistant, entry: ConfigEntry) -> YpsilonStore:
     domain_store: dict[str, YpsilonStore] = hass.data.setdefault(DOMAIN, {})
     store = domain_store.get(entry.entry_id)
     host = entry.data[CONF_HOST]
@@ -69,11 +72,12 @@ def _get_store(hass: HomeAssistant, entry: ConfigEntry) -> YpsilonStore:
     if store is None:
         store = YpsilonStore(client=new_client(), write_options=write_options)
         domain_store[entry.entry_id] = store
-    elif store.client.host != host or store.write_options != write_options:
+    elif store.inactive or store.client.host != host or store.write_options != write_options:
         store.client.revoke_writes()
-        store.client.close()
+        await store.client.close()
         store.client = new_client()
         store.write_options = write_options
+        store.inactive = False
     return store
 
 
@@ -226,27 +230,51 @@ async def async_setup_entry(hass: HomeAssistant, entry: YpsilonConfigEntry) -> b
         report = await report_store(hass, report_id).async_load() if report_id else None
         entry.runtime_data = DiagnosticReport(report)
         return True
-    store = _get_store(hass, entry)
+    store = await _get_store(hass, entry)
 
     coordinator = YpsilonDataUpdateCoordinator(
         hass, entry, store.client, store.field52_cache
     )
-    await coordinator.async_config_entry_first_refresh()
+    try:
+        await coordinator.async_config_entry_first_refresh()
+    except BaseException:
+        store.inactive = True
+        await store.client.close()
+        raise
     entry.runtime_data = coordinator
 
     _cleanup_legacy_entity_registry_entries(hass, entry)
     _enable_wash_start_sensor_if_integration_disabled(hass, entry)
     coordinator.platforms = READ_ONLY_PLATFORMS if coordinator.read_only else PLATFORMS
-    await hass.config_entries.async_forward_entry_setups(entry, coordinator.platforms)
+    try:
+        await hass.config_entries.async_forward_entry_setups(entry, coordinator.platforms)
+    except BaseException:
+        store.inactive = True
+        await store.client.close()
+        raise
     entry.async_on_unload(entry.add_update_listener(_async_reload_entry))
+
+    async def close_on_stop(_event: Any) -> None:
+        store.client.revoke_writes()
+        store.inactive = True
+        await store.client.close()
+
+    entry.async_on_unload(hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, close_on_stop))
     return True
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: YpsilonConfigEntry) -> bool:
-    """Unload a config entry, keeping the session and cache warm."""
+    """Unload entities and close the persistent UDP session; retain the cache."""
     if entry.data.get(CONF_DIAGNOSTIC_ONLY):
         return True
-    return await hass.config_entries.async_unload_platforms(entry, entry.runtime_data.platforms)
+    unloaded = await hass.config_entries.async_unload_platforms(entry, entry.runtime_data.platforms)
+    if unloaded:
+        store = hass.data.get(DOMAIN, {}).get(entry.entry_id)
+        if store is not None:
+            store.client.revoke_writes()
+            store.inactive = True
+            await store.client.close()
+    return unloaded
 
 
 async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
@@ -258,7 +286,7 @@ async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
         return
     store: YpsilonStore | None = hass.data.get(DOMAIN, {}).pop(entry.entry_id, None)
     if store is not None:
-        await hass.async_add_executor_job(store.client.close)
+        await store.client.close()
 
 
 async def _async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
@@ -276,7 +304,7 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     client = YpsilonLocalClient(host)
     try:
-        identity = await hass.async_add_executor_job(client.read_identity)
+        identity = await client.read_identity()
         mac = identity.get("mac") or client.mac
     except Exception as err:  # noqa: BLE001 - migration is retried later
         _LOGGER.warning(
@@ -287,7 +315,7 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         )
         return True
     finally:
-        await hass.async_add_executor_job(client.close)
+        await client.close()
 
     if not mac:
         _LOGGER.warning("Device at %s reported no MAC; keeping v1 entry", host)

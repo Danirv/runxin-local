@@ -4,8 +4,6 @@ from __future__ import annotations
 
 import logging
 import asyncio
-from functools import partial
-import threading
 from typing import Any
 from uuid import uuid4
 
@@ -83,7 +81,7 @@ class YpsilonLocalConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self._diagnostic_reason = "unsupported_device"
         self._diagnostic_report: dict[str, Any] | None = None
         self._diagnostic_task: asyncio.Task | None = None
-        self._diagnostic_cancel = threading.Event()
+        self._diagnostic_cancel = asyncio.Event()
         self._diagnostic_identifiers: list[str] = []
         self._alpha_host: str | None = None
         self._alpha_identity: dict[str, Any] = {}
@@ -113,7 +111,7 @@ class YpsilonLocalConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     @callback
     def async_remove(self) -> None:
-        """Cancelling a flow stops its executor worker at the next boundary."""
+        """Cancelling a flow stops its asynchronous collector and closes its endpoint."""
         self._diagnostic_cancel.set()
         if self._diagnostic_task is not None and not self._diagnostic_task.done():
             self._diagnostic_task.cancel()
@@ -131,7 +129,7 @@ class YpsilonLocalConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         client = YpsilonLocalClient(host)
         try:
             _LOGGER.debug("Starting local setup probe")
-            identity = await self.hass.async_add_executor_job(client.read_identity)
+            identity = await client.read_identity()
             mac = identity.get("mac") or client.mac
             return identity, mac
         except PROBE_ERRORS as err:
@@ -150,7 +148,7 @@ class YpsilonLocalConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             )
             raise
         finally:
-            await self.hass.async_add_executor_job(client.close)
+            await client.close()
 
     async def async_step_dhcp(
         self, discovery_info: DhcpServiceInfo
@@ -256,10 +254,10 @@ class YpsilonLocalConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def _async_collect_report(self) -> None:
         assert self._diagnostic_host is not None
         try:
-            report = await self.hass.async_add_executor_job(partial(
-                probe, self._diagnostic_host, cancel=self._diagnostic_cancel,
+            report = await probe(
+                self._diagnostic_host, cancel=self._diagnostic_cancel,
                 identifier_sink=self._diagnostic_identifiers,
-            ))
+            )
             self._diagnostic_report = await self.hass.async_add_executor_job(prepare_report, report)
         except asyncio.CancelledError:
             self._diagnostic_cancel.set()

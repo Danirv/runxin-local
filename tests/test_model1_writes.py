@@ -1,8 +1,8 @@
 """Opted-in model-1 adapter permissions with no sockets or hardware writes."""
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
 import pytest
-from .helpers import load
+from .helpers import io_mock, load
 
 models = load("models")
 api = load("api")
@@ -27,62 +27,65 @@ def test_opt_in_permissions_do_not_claim_verification_or_change_other_models(wri
     assert not models.allowed_write_fields(15, model1_test_writes=True)
 
 
-def test_adapter_requires_each_opt_in_and_never_grants_flow_cutoff_or_vacation(monkeypatch):
-    monkeypatch.setattr(api.time, "sleep", Mock())
+@pytest.mark.asyncio
+async def test_adapter_requires_each_opt_in_and_never_grants_flow_cutoff_or_vacation(monkeypatch):
+    monkeypatch.setattr(api.asyncio, "sleep", AsyncMock())
     client = api.YpsilonLocalClient("192.0.2.1", model1_test_writes=True)
-    client._f79d = Mock()
+    client._f79d = io_mock()
     client._observe_model({"deviceModel": 1})
-    client.write_fields({43: 26})
+    await client.write_fields({43: 26})
     client._f79d.write_fields.assert_called_once_with({43: 26})
     for fields in ({7: 100}, {34: 1}, {49: 1}):
         with pytest.raises(api.YpsilonConnectionError):
-            client.write_fields(fields)
+            await client.write_fields(fields)
     client._observe_model({"deviceModel": 9})
     with pytest.raises(api.YpsilonConnectionError):
-        client.write_fields({7: 100})
+        await client.write_fields({7: 100})
     assert client.write_policy["allowed_write_fields"] == [4, 6, 10, 43, 47]
     client.revoke_writes()
     with pytest.raises(api.YpsilonConnectionError):
-        client.write_fields({43: 25})
+        await client.write_fields({43: 25})
     client._f79d.write_fields.assert_called_once()
-    client.close()
+    await client.close()
 
 
-def test_default_adapter_allows_only_clock_and_preserves_revocation(monkeypatch):
-    monkeypatch.setattr(api.time, "sleep", Mock())
+@pytest.mark.asyncio
+async def test_default_adapter_allows_only_clock_and_preserves_revocation(monkeypatch):
+    monkeypatch.setattr(api.asyncio, "sleep", AsyncMock())
     client = api.YpsilonLocalClient("192.0.2.1")
-    client._f79d = Mock()
+    client._f79d = io_mock()
     client._observe_model({"deviceModel": 1})
     assert client.write_policy["allowed_write_fields"] == [4]
-    client.write_fields({4: (11, 24)})
+    await client.write_fields({4: (11, 24)})
     client._f79d.write_fields.assert_called_once_with({4: (11, 24)})
     for fields in ({4: (11, 26), 43: 25}, {6: 51}, {10: (1, 0)},
                    {34: 1}, {47: 290}, {7: 100}, {49: 1}):
         with pytest.raises(api.YpsilonConnectionError):
-            client.write_fields(fields)
+            await client.write_fields(fields)
     client._observe_model({})
     with pytest.raises(api.YpsilonConnectionError):
-        client.write_fields({4: (11, 26)})
+        await client.write_fields({4: (11, 26)})
     client._observe_model({"deviceModel": 9})
     assert client.write_policy["allowed_write_fields"] == [4]
     client.revoke_writes()
     with pytest.raises(api.YpsilonConnectionError):
-        client.write_fields({4: (11, 26)})
+        await client.write_fields({4: (11, 26)})
     client._f79d.write_fields.assert_called_once()
-    client.close()
+    await client.close()
 
 
-def test_mechanical_opt_in_permits_only_regeneration_start(monkeypatch):
-    monkeypatch.setattr(api.time, "sleep", Mock())
+@pytest.mark.asyncio
+async def test_mechanical_opt_in_permits_only_regeneration_start(monkeypatch):
+    monkeypatch.setattr(api.asyncio, "sleep", AsyncMock())
     client = api.YpsilonLocalClient("192.0.2.1", model1_test_writes=True,
                                     model1_test_regeneration=True)
-    client._f79d = Mock()
+    client._f79d = io_mock()
     client._observe_model({"deviceModel": 1})
     for value in (0, 2, 3, 4):
         with pytest.raises(api.YpsilonConnectionError):
-            client.write_fields({34: value})
+            await client.write_fields({34: value})
     with pytest.raises(api.YpsilonConnectionError):
-        client.write_fields({34: 1, 43: 25})
-    client.write_fields({34: 1})
+        await client.write_fields({34: 1, 43: 25})
+    await client.write_fields({34: 1})
     client._f79d.write_fields.assert_called_once_with({34: 1})
-    client.close()
+    await client.close()

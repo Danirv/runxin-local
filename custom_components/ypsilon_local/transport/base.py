@@ -15,13 +15,13 @@ class RunxinTransport(ABC):
     """Optional convenience base class for stateful Runxin transports."""
 
     @abstractmethod
-    def transact(self, frame: bytes) -> bytes:
+    async def transact(self, frame: bytes) -> bytes:
         """Send one raw Runxin request and return one raw Runxin response."""
 
-    def invalidate(self) -> None:
+    async def invalidate(self) -> None:
         """Drop stale session/framing state, if this transport has any."""
 
-    def close(self) -> None:
+    async def close(self) -> None:
         """Release resources, if this transport owns any."""
 
     @property

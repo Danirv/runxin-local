@@ -6,7 +6,7 @@ The reusable F79D client consumes a deliberately small structural interface:
 
 ```python
 class MyTransport:
-    def transact(self, frame: bytes) -> bytes:
+    async def transact(self, frame: bytes) -> bytes:
         """Send one raw Runxin frame and return one raw Runxin frame."""
         ...
 ```
@@ -15,20 +15,27 @@ Optional hooks are recognised when present:
 
 ```python
 class MyTransport:
-    def transact(self, frame: bytes) -> bytes: ...
-    def transact_write(self, frame: bytes) -> bytes: ...  # optional, non-idempotent path
-    def invalidate(self) -> None: ...                      # reset session/framing
-    def close(self) -> None: ...                           # release resources
+    async def transact(self, frame: bytes) -> bytes: ...
+    async def transact_write(self, frame: bytes) -> bytes: ...  # optional, non-idempotent path
+    async def invalidate(self) -> None: ...                      # reset session/framing
+    async def close(self) -> None: ...                           # release resources
 ```
 
 The client can then be used without Home Assistant:
 
 ```python
+import asyncio
 from runxin.client import F79DClient
 
-client = F79DClient(MyTransport(...))
-identity = client.read_identity()
-state = client.read_state()
+async def main():
+    client = F79DClient(MyTransport(...))
+    try:
+        identity = await client.read_identity()
+        state = await client.read_state()
+    finally:
+        await client.close()
+
+asyncio.run(main())
 ```
 
 `F79DClient` is a wire-level tool: it does not enforce the integration’s model permissions. The HA composition adapter adds those guards. A standalone caller must establish model/range compatibility and physical read-back before using writes; the example above only reads.

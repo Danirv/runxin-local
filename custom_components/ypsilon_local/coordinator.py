@@ -283,10 +283,7 @@ class YpsilonDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             _LOGGER.info("Valve clock is %+d min out; correcting", drift)
             write_error: YpsilonConnectionError | None = None
             try:
-                await self.hass.async_add_executor_job(
-                    self.client.write_fields,
-                    {FIELD_CURRENT_TIME: (local.hour, local.minute)},
-                )
+                await self.client.write_fields({FIELD_CURRENT_TIME: (local.hour, local.minute)})
             except YpsilonConnectionError as err:
                 write_error = err
 
@@ -347,17 +344,13 @@ class YpsilonDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 
     async def _async_strict_read(self) -> dict[str, Any]:
         started = time.perf_counter()
-        data = await self.hass.async_add_executor_job(
-            self.client.read_state, self._field52_cache
-        )
+        data = await self.client.read_state(self._field52_cache)
         return self._decorate_successful_read(data, started)
 
     async def _async_update_data(self) -> dict[str, Any]:
         started = time.perf_counter()
         try:
-            data = await self.hass.async_add_executor_job(
-                self.client.read_state, self._field52_cache
-            )
+            data = await self.client.read_state(self._field52_cache)
         except YpsilonConnectionError as err:
             self._failed_polls += 1
             self._consecutive_failures += 1
@@ -541,7 +534,7 @@ class YpsilonDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 
             write_error: YpsilonConnectionError | None = None
             try:
-                await self.hass.async_add_executor_job(self.client.write_fields, values)
+                await self.client.write_fields(values)
             except YpsilonConnectionError as err:
                 write_error = err
                 _LOGGER.warning(

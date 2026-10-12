@@ -7,7 +7,7 @@ import pytest
 pytest.importorskip("homeassistant", reason="Requires requirements-test-ha.txt")
 from homeassistant import config_entries
 from homeassistant.exceptions import ServiceValidationError
-from .helpers import load
+from .helpers import io_mock, load
 from .test_homeassistant import hass
 from .test_control_guards import _coordinator
 from .test_model1 import reported_state
@@ -179,17 +179,17 @@ async def test_disabling_tests_replaces_and_revokes_old_session_without_losing_c
     coordinator, client, entry = context(hass)
     created = []
     def create(host, **kwargs):
-        client = Mock(host=host)
+        client = io_mock(host=host)
         created.append((client, kwargs))
         return client
     monkeypatch.setattr(init_mod, "YpsilonLocalClient", create)
-    store = init_mod._get_store(hass, entry)
+    store = await init_mod._get_store(hass, entry)
     store.field52_cache["value"] = 42
     assert created[0][1] == {"model1_test_writes": True, "model1_test_regeneration": False}
     old = store.client
     hass.config_entries._entries[entry.entry_id] = entry
     hass.config_entries.async_update_entry(entry, options={"model1_test_writes": False})
-    updated = init_mod._get_store(hass, entry)
+    updated = await init_mod._get_store(hass, entry)
     assert updated is store
     assert updated.field52_cache["value"] == 42
     assert updated.client is not old

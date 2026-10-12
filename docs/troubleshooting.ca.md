@@ -38,7 +38,7 @@ per descarregar: utilitza l'avís del log o el script independent.
 
 ## Informe independent
 
-Des de l'arrel del repositori, en un entorn Python que ja tingui `broadlink==0.19.0`,
+Des de l'arrel del repositori, en un entorn Python que ja tingui `python-broadlink==1.0.6`,
 executa això substituint `DEVICE_IP` localment:
 
 ```bash
@@ -88,3 +88,7 @@ Un usuari amb Runxin/润新 iOS 2.0.0 va observar bloqueig anunciat i autenticac
 És un cas documentat, no una regla per a totes les versions. Reaparellar pot substituir el vincle de l'app anterior; no és simplement afegir un segon client. No implementem claus cloud ni desbloqueig automàtic. No cal repetir el procediment en un dispositiu que ja funciona.
 
 El controlador resultant retorna codi 1; autenticar no confirma identitat G6/model 9. [Issue #17](https://github.com/Danirv/runxin-local/issues/17) i [Alpha de lectura](model-1-alpha.ca.md).
+
+## Conflicte de dependència amb HA 2026.10
+
+Des de Runxin Local 2.10.0 cal HA 2026.10.0+ i `python-broadlink>=1.0.6` asíncrona. Si BroadLink oficial no pot importar `EndpointClosedError`, canviar el requisit antic pot no reparar fitxers ja sobreescrits. Actualitza/elimina totes les integracions amb `broadlink` antic i després reconstrueix/recrea Core segons la [guia de recuperació](ha-2026-10.ca.md).

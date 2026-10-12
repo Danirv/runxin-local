@@ -25,7 +25,7 @@ jobs:
       - name: F79D field surface audit
         run: python scripts/field_surface_audit.py
       - name: Unit tests
-        run: python -m pytest -q
+        run: python -m pytest -q -W error::RuntimeWarning -W error::pytest.PytestUnraisableExceptionWarning
       - name: Compile Python
         run: python -m compileall -q custom_components/ypsilon_local scripts tests
 
@@ -40,10 +40,10 @@ jobs:
       - name: Install Home Assistant test dependencies
         run: python -m pip install --disable-pip-version-check -r requirements-test-ha.txt
       - name: Test config flow, entities, controls and diagnostics
-        run: python -m pytest -q
+        run: python -m pytest -q -W error::RuntimeWarning -W error::pytest.PytestUnraisableExceptionWarning
 
   home-assistant-baseline:
-    name: Home Assistant baseline 2026.9.3
+    name: Home Assistant baseline 2026.10.0
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -53,4 +53,4 @@ jobs:
       - name: Install earlier Home Assistant test dependencies
         run: python -m pip install --disable-pip-version-check -r requirements-test-ha-baseline.txt
       - name: Test all regressions on the earlier reported HA release
-        run: python -m pytest -q
+        run: python -m pytest -q -W error::RuntimeWarning -W error::pytest.PytestUnraisableExceptionWarning

@@ -1,9 +1,9 @@
 """Issue #22 model-14 evidence: reported byte pairs, not a captured raw frame."""
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-from .helpers import load
+from .helpers import io_mock, load
 
 models = load("models")
 codec = load("runxin.f79d")
@@ -52,30 +52,33 @@ def test_nonzero_high_byte_override_is_limited_to_model14(model):
     assert codec.decode_tlvs(tlvs)["resinVolume"] == 44
 
 
-def test_partial_resin_read_uses_previously_received_model_without_extra_io():
+@pytest.mark.asyncio
+async def test_partial_resin_read_uses_previously_received_model_without_extra_io():
     # Synthetic response wrappers around reported byte pairs.
-    transport = Mock()
+    transport = io_mock()
+    transport.transact = AsyncMock()
     transport.transact.side_effect = [
         framing.build_frame(framing.QUERY_RESPONSE_CODE, [1, 14, 0]),
         framing.build_frame(framing.QUERY_RESPONSE_CODE, [26, 44, 1]),
     ]
     client = client_mod.F79DClient(transport)
-    client.read_identity()
-    assert client.read_fields([26])["resinVolume"] == 300
+    await client.read_identity()
+    assert (await client.read_fields([26]))["resinVolume"] == 300
     assert transport.transact.call_count == 2
     assert codec.decode_tlvs({26: (44, 1), 1: (9, 0)}, device_model=14)["resinVolume"] == 44
 
 
-def test_invalid_reply_does_not_cache_model_context():
-    transport = Mock()
+@pytest.mark.asyncio
+async def test_invalid_reply_does_not_cache_model_context():
+    transport = io_mock()
     transport.transact.side_effect = [
         framing.build_frame(framing.WRITE_RESPONSE_CODE, [1, 14, 0]),
         framing.build_frame(framing.QUERY_RESPONSE_CODE, [26, 44, 1]),
     ]
     client = client_mod.F79DClient(transport)
     with pytest.raises(client_mod.RunxinProtocolError):
-        client.read_identity()
-    assert client.read_fields([26])["resinVolume"] == 44
+        await client.read_identity()
+    assert (await client.read_fields([26]))["resinVolume"] == 44
 
 
 def test_model12_adds_f105_name_without_changing_entry_title_or_policy():
