@@ -16,7 +16,7 @@ import asyncio
 import time
 from typing import Any
 
-from .transport.broadlink_packet import validate_reply, PacketValidationError
+from .transport.broadlink_packet import require_packet_interface, validate_reply, PacketValidationError
 
 from .models import controller_protocol_name, is_supported_model
 from .runxin.f79d import decode_tlvs
@@ -190,6 +190,7 @@ class ReadSession:
         self.query_count = 0
         self.transient_retries = 0
         self.cancel = cancel
+        require_packet_interface(device)
         original_exchange = device._exchange
 
         async def checked_exchange(packet: bytes) -> bytes:
@@ -390,8 +391,6 @@ async def probe(host: str, *, timeout: float = 5, max_seconds: float = 180,
             report["broadlink_version"] = version("python-broadlink")
         except PackageNotFoundError:
             raise ProbeError("python_broadlink_1_0_6_required") from None
-        if report["broadlink_version"] != "1.0.6":
-            raise ProbeError("python_broadlink_1_0_6_required")
         import broadlink
         if not inspect.iscoroutinefunction(broadlink.hello):
             raise ProbeError("broadlink_async_runtime_unavailable")

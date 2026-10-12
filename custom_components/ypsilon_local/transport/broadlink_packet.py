@@ -1,6 +1,6 @@
 """BL3372 packet checks and single-send adapter for python-broadlink 1.0.6.
 
-Only the write path uses the library's pinned framing/endpoint internals. The
+Only the write path uses the library's tested framing/endpoint internals. The
 public send_packet method retries on silence and expired sessions, which is
 inappropriate for commands whose physical delivery may already have occurred.
 No global library methods are patched. Reads/authentication keep the library API.
@@ -36,6 +36,17 @@ def validate_reply(response: bytes, device: Any, counter: int) -> bytes:
     return response
 
 
+def require_packet_interface(device: Any) -> None:
+    """Fail before I/O if a Core library update changes the required interface."""
+    for name in ("_exchange", "_frame", "_endpoint", "_drop_endpoint"):
+        if not callable(getattr(device, name, None)):
+            raise PacketValidationError("unsupported_broadlink_packet_interface")
+    if not hasattr(getattr(device, "_lock", None), "__aenter__") or not callable(
+        getattr(getattr(device, "_recent", None), "append", None)
+    ):
+        raise PacketValidationError("unsupported_broadlink_packet_interface")
+
+
 def guard_exchange(device: Any) -> None:
     """Validate auth/firmware/read replies on this device, before key changes.
 
@@ -43,25 +54,30 @@ def guard_exchange(device: Any) -> None:
     counter from its framed request rather than assuming a counter delta across
     the library's internal reauthentication. Preserve the original async API.
     """
-    if device.__dict__.get("_runxin_reply_guard"):
+    if getattr(device, "__dict__", {}).get("_runxin_reply_guard"):
         return
+    require_packet_interface(device)
     original = device._exchange
 
     async def checked(packet: bytes) -> bytes:
         response = bytes(await original(packet))
         return validate_reply(response, device, int.from_bytes(packet[0x28:0x2A], "little"))
 
-    device._exchange = checked
-    device._runxin_reply_guard = True
+    try:
+        device._exchange = checked
+        device._runxin_reply_guard = True
+    except (AttributeError, TypeError) as err:
+        raise PacketValidationError("unsupported_broadlink_packet_interface") from err
 
 
 async def send_packet_once(device: Any, packet_type: int, payload: bytes) -> bytes:
     """Send exactly one datagram; do not reauthenticate/replay this command.
 
-    Calls the pinned library's framing and endpoint primitives under its lock.
+    Calls the tested library's framing and endpoint primitives under its lock.
     Delayed/unrelated responses are discarded within one deadline. Cancellation
     closes the endpoint: the caller must reconcile delivery using a fresh read.
     """
+    require_packet_interface(device)
     async with device._lock:
         packet = device._frame(packet_type, bytes(payload))
         transport, protocol = await device._endpoint()

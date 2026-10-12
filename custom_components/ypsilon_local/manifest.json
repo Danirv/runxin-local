@@ -21,7 +21,7 @@
     "broadlink"
   ],
   "requirements": [
-    "python-broadlink==1.0.6"
+    "python-broadlink>=1.0.6"
   ],
   "version": "2.10.0"
 }

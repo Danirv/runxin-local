@@ -4,10 +4,10 @@ All notable changes to this project are documented here.
 
 ## [2.10.0] - Unreleased
 
-- Require Home Assistant 2026.10.0+ and replace the old `broadlink` distribution with `python-broadlink==1.0.6`, matching Core’s async library and avoiding shared-module overwrite (issue #33).
+- Require Home Assistant 2026.10.0+ and replace the old `broadlink` distribution with `python-broadlink>=1.0.6`, matching Core’s async library and avoiding shared-module overwrite (issue #33).
 - Await all device I/O, migrate operation locks and delays to asyncio, and close persistent endpoints on unload/replacement/cancellation while retaining cached field 52 across reloads.
 - Preserve guarded read-only compatibility scans, authentication error classification, strict request/reply checks and sanitized reports with the new auth exchange path. Update standalone diagnostics.
-- Use a pinned per-device adapter for single-datagram writes, bypassing library retransmission and automatic reauthentication/replay; retain independent physical read-back reconciliation. No global BroadLink patch.
+- Use a per-device adapter tested against 1.0.6 for single-datagram writes, bypassing library retransmission and automatic reauthentication/replay; retain independent physical read-back reconciliation. No global BroadLink patch.
 - Add HA 2026.10.0/2026.10.1 coexistence and real-library/AES/loopback UDP regressions, cancellation/revocation tests and migration/recovery documentation. Async BL3372 hardware validation is still pending. Existing domain, config-entry/entity identities, field codecs, conversions, model support status and permissions remain unchanged.
 
 ## [2.9.3] - 2026-10-10

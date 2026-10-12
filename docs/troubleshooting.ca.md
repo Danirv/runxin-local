@@ -91,4 +91,4 @@ El controlador resultant retorna codi 1; autenticar no confirma identitat G6/mod
 
 ## Conflicte de dependència amb HA 2026.10
 
-Des de Runxin Local 2.10.0 cal HA 2026.10.0+ i `python-broadlink==1.0.6` asíncrona. Si BroadLink oficial no pot importar `EndpointClosedError`, canviar el requisit antic pot no reparar fitxers ja sobreescrits. Actualitza/elimina totes les integracions amb `broadlink` antic i després reconstrueix/recrea Core segons la [guia de recuperació](ha-2026-10.ca.md).
+Des de Runxin Local 2.10.0 cal HA 2026.10.0+ i `python-broadlink>=1.0.6` asíncrona. Si BroadLink oficial no pot importar `EndpointClosedError`, canviar el requisit antic pot no reparar fitxers ja sobreescrits. Actualitza/elimina totes les integracions amb `broadlink` antic i després reconstrueix/recrea Core segons la [guia de recuperació](ha-2026-10.ca.md).

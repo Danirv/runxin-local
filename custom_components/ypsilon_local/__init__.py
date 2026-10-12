@@ -10,6 +10,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, EVENT_HOMEASSISTANT_STOP, Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry as dr, entity_registry as er
+from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.device_registry import format_mac
 
 from .api import YpsilonLocalClient
@@ -22,6 +23,7 @@ from .coordinator import YpsilonDataUpdateCoordinator
 from .services import async_setup_services
 
 _LOGGER = logging.getLogger(__name__)
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 PLATFORMS: list[Platform] = [
     Platform.BINARY_SENSOR,

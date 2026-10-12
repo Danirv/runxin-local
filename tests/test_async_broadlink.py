@@ -6,6 +6,7 @@ import importlib.metadata
 import inspect
 import json
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock
 
 import broadlink
@@ -227,7 +228,7 @@ def test_core_and_runxin_share_the_async_distribution_without_old_package():
     assert inspect.iscoroutinefunction(broadlink.hello)
     assert inspect.iscoroutinefunction(BroadlinkDevice.async_auth)
     manifest = json.loads((Path(__file__).parents[1] / "custom_components/ypsilon_local/manifest.json").read_text())
-    assert manifest["requirements"] == ["python-broadlink==1.0.6"]
+    assert manifest["requirements"] == ["python-broadlink>=1.0.6"]
 
 
 @pytest.mark.asyncio
@@ -249,3 +250,13 @@ async def test_old_overwritten_runtime_fails_before_device_io(monkeypatch):
     with pytest.raises(transport_mod.RunxinTransportError, match="Incompatible BroadLink runtime"):
         await transport.transact(b"frame")
     hello.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_changed_library_interface_rejects_write_before_framing_or_io():
+    device = SimpleNamespace(_exchange=AsyncMock(), _frame=Mock(),
+                             _endpoint=AsyncMock(), _drop_endpoint=Mock())
+    with pytest.raises(packet.PacketValidationError, match="unsupported_broadlink_packet_interface"):
+        await packet.send_packet_once(device, 0x6A, WRITE_PAYLOAD)
+    device._frame.assert_not_called()
+    device._endpoint.assert_not_awaited()

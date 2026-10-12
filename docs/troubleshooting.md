@@ -91,4 +91,4 @@ The resulting device reports controller code 1; successful authentication does n
 
 ## HA 2026.10 dependency conflict
 
-From Runxin Local 2.10.0, HA 2026.10.0+ and async `python-broadlink==1.0.6` are required. If Core BroadLink cannot import `EndpointClosedError`, replacing the old requirement alone may not repair already overwritten module files. Update/remove all integrations still requiring old `broadlink`, then rebuild/recreate Core as described in [migration and recovery](ha-2026-10.md).
+From Runxin Local 2.10.0, HA 2026.10.0+ and async `python-broadlink>=1.0.6` are required. If Core BroadLink cannot import `EndpointClosedError`, replacing the old requirement alone may not repair already overwritten module files. Update/remove all integrations still requiring old `broadlink`, then rebuild/recreate Core as described in [migration and recovery](ha-2026-10.md).

@@ -2,7 +2,7 @@
 
 ## Home Assistant 2026.10 i transport asíncron: 2.10.0
 
-Des de la 2.10.0 cal **HA 2026.10.0 o posterior**. La dependència és `python-broadlink==1.0.6`, com a BroadLink oficial de HA; es conserven entrades, entitats i polítiques dels models. Per a HA anterior, conserva la 2.9.3. [Migració, recuperació i prova al G6](ha-2026-10.ca.md).
+Des de la 2.10.0 cal **HA 2026.10.0 o posterior**. La dependència és `python-broadlink>=1.0.6`, com a BroadLink oficial de HA; es conserven entrades, entitats i polítiques dels models. Per a HA anterior, conserva la 2.9.3. [Migració, recuperació i prova al G6](ha-2026-10.ca.md).
 
 Integració local per a descalcificadors compatibles amb **Runxin F79D + BroadLink BL3372**, amb el Ypsilon G6 com a maquinari de referència i suport experimental per al Euro-Clear Midnight.
 

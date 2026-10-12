@@ -11,7 +11,7 @@ la integración Home Assistant y está separado deliberadamente del codec F79D.
 - módulo: BL3372
 - controlador: Runxin F79D
 - comando BroadLink para datos de producto: `0x6A`
-- dependencia Python: `python-broadlink==1.0.6`
+- dependencia Python: `python-broadlink>=1.0.6`
 
 Probar otro devtype en investigación no significa que esa combinación quede
 soportada por Ypsilon.
@@ -75,4 +75,4 @@ Consulta [`adding-a-transport.es.md`](adding-a-transport.es.md).
 
 ## Transporte asíncrono: 2.10.0
 
-Se requiere HA 2026.10.0+. Todas las llamadas de red se esperan con `await`. Las lecturas conservan los intercambios limitados de la biblioteca y la recuperación acotada de sesiones. Las escrituras utilizan `broadlink_packet.send_packet_once`: un solo datagrama UDP, sin reenvío ni reautenticación automática del comando. Las respuestas de autenticación/lectura se validan por dispositivo contra el contador del paquete enviado antes de cambiar la clave. No se modifican clases globales. Descargar, sustituir o cancelar cierra el socket persistente. El adaptador utiliza API internas de la versión fijada 1.0.6; cambiarla requiere revalidación. [Migración, recuperación y prueba física](ha-2026-10.es.md).
+Se requiere HA 2026.10.0+. Todas las llamadas de red se esperan con `await`. Las lecturas conservan los intercambios limitados de la biblioteca y la recuperación acotada de sesiones. Las escrituras utilizan `broadlink_packet.send_packet_once`: un solo datagrama UDP, sin reenvío ni reautenticación automática del comando. Las respuestas de autenticación/lectura se validan por dispositivo contra el contador del paquete enviado antes de cambiar la clave. No se modifican clases globales. Descargar, sustituir o cancelar cierra el socket persistente. El adaptador utiliza API internas de la interfaz probada con 1.0.6; cambiarla requiere revalidación. [Migración, recuperación y prueba física](ha-2026-10.es.md).

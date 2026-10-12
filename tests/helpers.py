@@ -49,6 +49,13 @@ def io_mock(*args, **kwargs):
                  "transact", "transact_write", "close", "auth", "get_fwversion",
                  "send_packet", "aclose", "invalidate", "_exchange"):
         setattr(result, name, AsyncMock())
+    import asyncio
+    from collections import deque
+    result._lock = asyncio.Lock()
+    result._recent = deque()
+    result._frame = Mock()
+    result._endpoint = AsyncMock()
+    result._drop_endpoint = Mock()
     return result
 
 

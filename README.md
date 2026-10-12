@@ -10,7 +10,7 @@ The integration communicates directly over the LAN and does not depend on the ve
 
 > **Status:** community integration, independently developed for interoperability. Not affiliated with or endorsed by ATH, BWT, Runxin or BroadLink.
 
-**From 2.10.0: Home Assistant 2026.10.0 or later is required.** The integration uses `python-broadlink==1.0.6`, matching HA’s async BroadLink library, and preserves existing entries/entities. For older HA releases, keep 2.9.3. See [migration and recovery](docs/ha-2026-10.md).
+**From 2.10.0: Home Assistant 2026.10.0 or later is required.** The integration uses `python-broadlink>=1.0.6`, matching HA’s async BroadLink library, and preserves existing entries/entities. For older HA releases, keep 2.9.3. See [migration and recovery](docs/ha-2026-10.md).
 
 ## Highlights
 
