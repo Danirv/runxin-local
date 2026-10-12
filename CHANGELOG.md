@@ -8,7 +8,7 @@ All notable changes to this project are documented here.
 - Await all device I/O, migrate operation locks and delays to asyncio, and close persistent endpoints on unload/replacement/cancellation while retaining cached field 52 across reloads.
 - Preserve guarded read-only compatibility scans, authentication error classification, strict request/reply checks and sanitized reports with the new auth exchange path. Update standalone diagnostics.
 - Use a per-device adapter tested against 1.0.6 for single-datagram writes, bypassing library retransmission and automatic reauthentication/replay; retain independent physical read-back reconciliation. No global BroadLink patch.
-- Add HA 2026.10.0/2026.10.1 coexistence and real-library/AES/loopback UDP regressions, cancellation/revocation tests and migration/recovery documentation. Async BL3372 hardware validation is still pending. Existing domain, config-entry/entity identities, field codecs, conversions, model support status and permissions remain unchanged.
+- Add HA 2026.10.0/2026.10.1 coexistence and real-library/AES/loopback UDP regressions, cancellation/revocation tests and migration/recovery documentation. At publication, async BL3372 hardware validation was pending. A documentation follow-up on 2026-10-12 records maintainer-confirmed G6 readings and field-10 writes on HA 2026.10.1 after rebuilding Core; other async hardware checks remain separate. Clarify recovery for installations that already ran HA 2026.10 with 2.9.3 or earlier; clean installations do not require a rebuild. Existing domain, config-entry/entity identities, field codecs, conversions, model support status and permissions remain unchanged.
 
 ## [2.9.3] - 2026-10-10
 

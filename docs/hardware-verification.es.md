@@ -46,6 +46,16 @@ Pendientes o deliberadamente no verificados:
 - **campo 34** — escrituras mecánicas/máquina de estados más allá del comportamiento específico ya probado;
 - **campo 49** — el control local directo `1/0` de vacaciones está explícitamente no verificado en el G6 probado y no se expone como control de HA.
 
+## Transporte asíncrono 2.10.0: observación física en el G6
+
+El **2026-10-12**, el mantenedor validó **Runxin Local 2.10.0 con HA 2026.10.1 / HA OS 18.3**, contra el **ATH/BWT Ypsilon G6 físico, controlador modelo 9, BL3372 `0x520F`, firmware 62016**. La instalación había ejecutado HA 2026.10 con Runxin Local 2.9.3; antes de la validación se reconstruyó Core.
+
+El diagnóstico muestra conexión disponible y preparada, una lectura correcta en **813,7 ms**, cero errores de lectura, reintentos o reautenticaciones registrados, y pares de bytes de los campos 1–52. La captura no demuestra que todos los campos se consultaran de nuevo en ese sondeo; el campo 52 puede proceder de la caché. El mantenedor también cambió la **hora de regeneración (campo 10) desde HA y la confirmó en la app del fabricante**, y después la cambió en la app y confirmó la actualización en HA. Esto acredita lecturas físicas y aceptación de la escritura del campo 10 con el nuevo transporte asíncrono después de recuperar Core.
+
+Esta observación no demuestra que actualizar/reiniciar sin reconstruir hubiera reparado aquella instalación. Las demás escrituras conservan su evidencia anterior por campo; este informe no las vuelve a probar con el transporte asíncrono. No se han validado de nuevo la orden de inicio de regeneración, el funcionamiento prolongado, la recuperación al recargar/reiniciar ni la convivencia física con otros dispositivos BroadLink de Core. El informe no modifica niveles de soporte ni permisos de escritura.
+
+Consulta el procedimiento en la [guía de migración y recuperación](ha-2026-10.es.md).
+
 ## Evidencia del campo 7
 
 El G6 físico resuelve el orden de bytes del campo 7 independientemente de la interpretación de la aplicación antigua:

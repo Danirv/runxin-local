@@ -46,6 +46,16 @@ Pendents o deliberadament no verificats:
 - **camp 34** — escriptures mecàniques/màquina d'estats més enllà del comportament específic provat;
 - **camp 49** — el control local directe `1/0` de vacances està explícitament no verificat al G6 provat i no s'exposa com a control HA.
 
+## Transport asíncron 2.10.0: observació física al G6
+
+El **2026-10-12**, el mantenidor va validar **Runxin Local 2.10.0 amb HA 2026.10.1 / HA OS 18.3**, contra el **ATH/BWT Ypsilon G6 físic, controlador model 9, BL3372 `0x520F`, firmware 62016**. La instal·lació havia executat HA 2026.10 amb Runxin Local 2.9.3; abans de la validació es va reconstruir Core.
+
+El diagnòstic mostra connexió disponible i preparada, una lectura correcta en **813,7 ms**, zero errors de lectura, reintents o reautenticacions registrats, i parelles de bytes dels camps 1–52. La captura no demostra que tots els camps s'hagin consultat de nou en aquell sondeig; el camp 52 pot provenir de la memòria cau. El mantenidor també va canviar l'**hora de regeneració (camp 10) des de HA i la va confirmar a l'app del fabricant**, i després la va canviar a l'app i va confirmar l'actualització a HA. Això acredita lectures físiques i acceptació de l'escriptura del camp 10 amb el transport asíncron nou després de recuperar Core.
+
+Aquesta observació no demostra que actualitzar/reiniciar sense reconstruir hagués reparat aquella instal·lació. Les altres escriptures conserven la seva evidència anterior per camp; aquest informe no les torna a provar amb el transport asíncron. No s'han validat de nou l'ordre d'inici de regeneració, el funcionament prolongat, la recuperació en recàrrega/reinici ni la convivència física amb altres dispositius BroadLink de Core. L'informe no modifica nivells de suport ni permisos d'escriptura.
+
+Consulta el procediment a la [guia de migració i recuperació](ha-2026-10.ca.md).
+
 ## Evidència del camp 7
 
 El G6 físic resol l'ordre de bytes del camp 7 independentment de la interpretació de l'app antiga:

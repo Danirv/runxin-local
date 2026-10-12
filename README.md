@@ -12,6 +12,8 @@ The integration communicates directly over the LAN and does not depend on the ve
 
 **From 2.10.0: Home Assistant 2026.10.0 or later is required.** The integration uses `python-broadlink>=1.0.6`, matching HA’s async BroadLink library, and preserves existing entries/entities. For older HA releases, keep 2.9.3. See [migration and recovery](docs/ha-2026-10.md).
 
+**Already ran HA 2026.10 with Runxin Local 2.9.3 or earlier?** Update all integrations requiring the old `broadlink` package, then rebuild Core on HA OS (`ha core rebuild`) or recreate the official Core container. An apparently working old Runxin installation does not prove that Core’s BroadLink files are intact. A clean HA 2026.10+/Runxin Local 2.10.0 installation does not require this recovery. The maintainer confirmed G6 reads and field-10 writes after rebuilding Core on 2026-10-12; see the [validation record](docs/ha-2026-10.md#maintainer-result-2026-10-12).
+
 ## Highlights
 
 - DHCP discovery for known compatible BroadLink module prefixes.
