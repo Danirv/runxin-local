@@ -91,4 +91,4 @@ El controlador resultante devuelve código 1; autenticar no confirma identidad G
 
 ## Conflicto de dependencia con HA 2026.10
 
-Desde Runxin Local 2.10.0 se requiere HA 2026.10.0+ y `python-broadlink>=1.0.6` asíncrona. Si BroadLink oficial no puede importar `EndpointClosedError`, cambiar el requisito antiguo puede no reparar archivos ya sobrescritos. Actualiza/elimina todas las integraciones con `broadlink` antiguo y después reconstruye/recrea Core según la [guía de recuperación](ha-2026-10.es.md).
+Runxin Local 2.10.0 requiere HA 2026.10.0+ y `python-broadlink>=1.0.6` asíncrona. Si HA 2026.10 ya ha ejecutado Runxin Local 2.9.3 o anterior, actualiza/elimina todas las integraciones que requieran `broadlink` antiguo y después reconstruye/recrea Core según la [guía de recuperación](ha-2026-10.es.md). Se recomienda esta recuperación aunque Runxin Local antiguo funcionara; hay que reparar los archivos ya sobrescritos, incluido el fallo de importación de `EndpointClosedError`. Una instalación limpia de HA 2026.10+/2.10.0 no necesita reconstrucción. Actualizar y reiniciar no restaura los archivos sobrescritos.

@@ -52,6 +52,16 @@ Pending or deliberately unverified:
 - **field 34 — mechanical regeneration/state-machine writes:** only specifically observed/tested actions should be exposed; codec support alone is not sufficient to generalise all values;
 - **field 49 — vacation mode:** direct local `1/0` control is explicitly **not verified** on the tested current G6 and remains absent from Home Assistant.
 
+## Async transport 2.10.0: physical G6 observation
+
+On **2026-10-12**, the maintainer validated **Runxin Local 2.10.0 on HA 2026.10.1 / HA OS 18.3**, against the physical **ATH/BWT Ypsilon G6, controller model 9, BL3372 `0x520F`, firmware 62016**. The installation had previously run HA 2026.10 with Runxin Local 2.9.3; Core was rebuilt before this validation.
+
+The diagnostic snapshot reports a ready/available connection, a successful poll in **813.7 ms**, zero recorded failed polls, retries or reauthentications, and raw pairs for fields 1–52. The snapshot does not establish that all fields were queried afresh in that poll; field 52 can be cached. The maintainer also changed the **regeneration trigger time (field 10) from HA and confirmed it in the manufacturer app**, then changed it in the app and confirmed the refresh in HA. This establishes physical readings and field-10 write acceptance with the new async transport after Core recovery.
+
+This observation does not establish that updating/restarting without rebuilding would have repaired that installation. Other writes retain their earlier per-field evidence; they were not retested with the async transport in this report. Regeneration-start commands, prolonged operation, reload/restart recovery and physical coexistence with other Core BroadLink devices were not newly validated. No model support level or write permission changes follow from this report.
+
+See [migration and recovery](ha-2026-10.md) for the upgrade procedure.
+
 ## Field 7 / flow cutoff evidence
 
 The physical G6 resolves the field-7 byte order independently of the recovered legacy-app interpretation:
