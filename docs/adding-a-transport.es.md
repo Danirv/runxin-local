@@ -6,7 +6,7 @@ El cliente F79D reutilizable usa una interfaz estructural deliberadamente peque�
 
 ```python
 class MyTransport:
-    def transact(self, frame: bytes) -> bytes:
+    async def transact(self, frame: bytes) -> bytes:
         """Envía una trama Runxin cruda y devuelve una trama Runxin cruda."""
         ...
 ```
@@ -15,20 +15,27 @@ Hooks opcionales:
 
 ```python
 class MyTransport:
-    def transact(self, frame: bytes) -> bytes: ...
-    def transact_write(self, frame: bytes) -> bytes: ...  # ruta no idempotente
-    def invalidate(self) -> None: ...                      # reinicia sesión/framing
-    def close(self) -> None: ...                           # libera recursos
+    async def transact(self, frame: bytes) -> bytes: ...
+    async def transact_write(self, frame: bytes) -> bytes: ...  # ruta no idempotente
+    async def invalidate(self) -> None: ...                      # reinicia sesión/framing
+    async def close(self) -> None: ...                           # libera recursos
 ```
 
 Puede usarse sin Home Assistant:
 
 ```python
+import asyncio
 from runxin.client import F79DClient
 
-client = F79DClient(MyTransport(...))
-identity = client.read_identity()
-state = client.read_state()
+async def main():
+    client = F79DClient(MyTransport(...))
+    try:
+        identity = await client.read_identity()
+        state = await client.read_state()
+    finally:
+        await client.close()
+
+asyncio.run(main())
 ```
 
 `F79DClient` es una herramienta de protocolo y no impone los permisos por modelo de la integración; el adaptador HA añade esos bloqueos. Un consumidor independiente debe demostrar compatibilidad de modelo/rangos y lectura física posterior antes de escribir. El ejemplo anterior solo lee.

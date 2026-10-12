@@ -3,9 +3,9 @@ from contextlib import redirect_stderr
 import io
 import json
 import time
-import threading
+import asyncio
 import unittest
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 
 from broadlink.device import Device
 from .helpers import load
@@ -27,7 +27,7 @@ class MockWireDevice(Device):
     """No sockets: preserve library auth, AES and firmware decoding."""
 
     def __init__(self, values=None, auth_error=0, handler=None):
-        super().__init__(("192.0.2.17", 80), "020000000017", 0x520F,
+        super().__init__(("192.0.2.17", 80), bytes.fromhex("020000000017"), 0x520F,
                          name="PRIVATE_DEVICE_NAME", is_locked=bool(auth_error))
         self.values = values or {f: (0, 0) for f in range(1, 53)}
         self.auth_error = auth_error
@@ -35,9 +35,13 @@ class MockWireDevice(Device):
         self.calls = []
         self.session_key = bytes.fromhex("11112222333344445555666677778888")
 
-    def send_packet(self, packet_type, payload):
+    async def _exchange(self, packet):
+        packet_type = int.from_bytes(packet[0x26:0x28], "little")
+        payload = self.decrypt(packet[0x38:])
+        if packet_type == 0x6A:
+            payload = b"\x68" if payload[:1] == b"\x68" else payload[:2 + int.from_bytes(payload[:2], "little")]
+
         self.calls.append((packet_type, bytes(payload)))
-        self.count = ((self.count + 1) | 0x8000) & 0xFFFF
         error = 0
         if packet_type == 0x65:
             plaintext = (123456).to_bytes(4, "little") + self.session_key
@@ -69,69 +73,69 @@ class MockWireDevice(Device):
         return bytes(response)
 
 
-def run_device(device):
+async def run_device(device):
     with patch("broadlink.hello", return_value=device), redirect_stderr(io.StringIO()):
-        return probe.probe("192.0.2.17")
+        return await probe.probe("192.0.2.17")
 
 
-class ProbeValidation(unittest.TestCase):
-    def test_cancellation_stops_before_discovery(self):
-        cancel = threading.Event()
+class ProbeValidation(unittest.IsolatedAsyncioTestCase):
+    async def test_cancellation_stops_before_discovery(self):
+        cancel = asyncio.Event()
         cancel.set()
         with patch("broadlink.hello") as hello:
-            report = probe.probe("192.0.2.17", cancel=cancel)
+            report = await probe.probe("192.0.2.17", cancel=cancel)
         hello.assert_not_called()
         self.assertEqual(report["summary"]["status"], "cancelled")
 
-    def test_cancellation_during_reads_preserves_partial_report(self):
-        cancel = threading.Event()
+    async def test_cancellation_during_reads_preserves_partial_report(self):
+        cancel = asyncio.Event()
         def handler(fields, selected):
             cancel.set()
             return selected, 0
         device = MockWireDevice(handler=handler)
         with patch("broadlink.hello", return_value=device):
-            report = probe.probe("192.0.2.17", cancel=cancel)
+            report = await probe.probe("192.0.2.17", cancel=cancel)
         self.assertEqual(report["summary"]["fields_observed_count"], 2)
         self.assertEqual(report["scan_stop_reason"], "cancelled")
         self.assertEqual(len(device.calls), 3)  # auth, firmware, identity
 
-    def test_invalid_identity_response_does_not_expand_to_full_scan(self):
+    async def test_invalid_identity_response_does_not_expand_to_full_scan(self):
         device = MockWireDevice()
-        original = device.send_packet
-        def invalid(packet_type, payload):
-            reply = bytearray(original(packet_type, payload))
-            if packet_type == 0x6A and payload != b"\x68":
+        original = device._exchange
+        async def invalid(packet):
+            reply = bytearray(await original(packet))
+            if int.from_bytes(packet[0x26:0x28], "little") == 0x6A and device.decrypt(packet[0x38:])[:1] != b"\x68":
                 reply[-1] ^= 1
             return bytes(reply)
-        device.send_packet = invalid
-        report = run_device(device)
+        device._exchange = invalid
+        report = await run_device(device)
         self.assertEqual(report["summary"]["fields_observed_count"], 0)
         self.assertEqual(len(device.calls), 3)
         self.assertEqual(report["scan_stop_reason"], "invalid_broadlink_packet_checksum")
 
-    def test_wrong_transport_never_authenticates_or_queries(self):
+    async def test_wrong_transport_never_authenticates_or_queries(self):
         device = MockWireDevice()
         device.devtype = 0x1234
-        report = run_device(device)
+        report = await run_device(device)
         self.assertEqual(device.calls, [])
         self.assertFalse(report["authentication"]["attempted"])
 
-    def test_name_lookup_never_enables_unknown_models_or_exports_identifier(self):
+    async def test_name_lookup_never_enables_unknown_models_or_exports_identifier(self):
         values={field:(0,0) for field in range(1,53)}
         values[1]=(15,0)
         identifiers=[]
         with patch("broadlink.hello", return_value=MockWireDevice(values)):
-            report=probe.probe("192.0.2.17", identifier_sink=identifiers)
+            report=await probe.probe("192.0.2.17", identifier_sink=identifiers)
         self.assertEqual(report["controller"]["manufacturer_protocol_name"],"F138")
         self.assertFalse(report["controller"]["supported_for_normal_use"])
         self.assertEqual(identifiers,["020000000017"])
         self.assertNotIn(identifiers[0],json.dumps(report))
 
-    def test_queries_match_repository_wire_frames(self):
+    async def test_queries_match_repository_wire_frames(self):
         for fields in ([1], [1, 34], list(range(1, 53)), [8, 35, 36]):
             self.assertEqual(probe.build_read(fields), f79d.build_query(fields))
 
-    def test_real_identity_and_state_fixtures_match_reference_decoder(self):
+    async def test_real_identity_and_state_fixtures_match_reference_decoder(self):
         for fixture in (IDENTITY, STATE):
             tlvs, _ = probe.parse_read(fixture)
             decoded = f79d.decode_frame(fixture)
@@ -145,11 +149,11 @@ class ProbeValidation(unittest.TestCase):
         self.assertEqual(probe.describe_field(26, tlvs[26], tlvs)["reference_value"], 250)
         self.assertIsNone(probe.describe_field(26, tlvs[26], tlvs)["reference_unit_hint"])
 
-    def test_auth_fw_and_unknown_model_all_52_without_home_assistant(self):
+    async def test_auth_fw_and_unknown_model_all_52_without_home_assistant(self):
         values = {f: (0, 0) for f in range(1, 53)}
         values.update({1: (15, 0), 8: (2, 0), 9: (255, 0), 52: (0x2C, 0x01)})
         device = MockWireDevice(values)
-        report = run_device(device)
+        report = await run_device(device)
         self.assertTrue(report["authentication"]["ok"])
         self.assertEqual(report["firmware"]["version"], 62016)
         self.assertEqual(report["identity"]["device_model_code"], 15)
@@ -162,9 +166,9 @@ class ProbeValidation(unittest.TestCase):
         for packet_type, payload in device.calls:
             probe.guard_outbound(packet_type, payload)
 
-    def test_no_identifiers_keys_or_exception_text_in_report(self):
+    async def test_no_identifiers_keys_or_exception_text_in_report(self):
         device = MockWireDevice(auth_error=-1)
-        report = run_device(device)
+        report = await run_device(device)
         self.assertEqual(report["summary"]["status"], "authentication_failed")
         self.assertEqual(len(device.calls), 1)
         text = json.dumps(report)
@@ -174,7 +178,7 @@ class ProbeValidation(unittest.TestCase):
         err = RuntimeError("192.0.2.17 PRIVATE_DEVICE_NAME SECRET_TOKEN")
         self.assertNotIn("SECRET_TOKEN", json.dumps(probe.safe_error(err)))
 
-    def test_guard_blocks_writes_unlock_and_reset_before_wire(self):
+    async def test_guard_blocks_writes_unlock_and_reset_before_wire(self):
         device = MockWireDevice()
         probe.ReadSession(device, 5, time.monotonic() + 20)
         write = f79d.build_write_fields({34: 1})
@@ -183,43 +187,43 @@ class ProbeValidation(unittest.TestCase):
             (0x6A, bytes(0x50)), (0x6A, b"\x72"), (0x66, bytes(16)),
         ):
             with self.assertRaises(probe.ProbeError):
-                device.send_packet(packet_type, payload)
+                await device.send_packet(packet_type, payload)
         self.assertEqual(device.calls, [])
 
-    def test_bulk_failure_falls_back_and_recovers_all_fields(self):
+    async def test_bulk_failure_falls_back_and_recovers_all_fields(self):
         def handler(fields, selected):
             if len(fields) > 16:
                 raise TimeoutError("PRIVATE_HOST SECRET_SESSION")
             return selected, 0
-        report = run_device(MockWireDevice(handler=handler))
+        report = await run_device(MockWireDevice(handler=handler))
         self.assertEqual(report["summary"]["status"], "complete")
         self.assertTrue(any(q["phase"] == "fallback_group" for q in report["queries"]))
         self.assertNotIn("PRIVATE_HOST", json.dumps(report))
 
-    def test_missing_model_is_not_replaced_with_zero_or_guessed_model(self):
+    async def test_missing_model_is_not_replaced_with_zero_or_guessed_model(self):
         values = {f: (0, 0) for f in range(2, 53)}
-        report = run_device(MockWireDevice(values))
+        report = await run_device(MockWireDevice(values))
         self.assertEqual(report["summary"]["status"], "partial")
         self.assertFalse(report["identity"]["device_model_present"])
         self.assertIsNone(report["identity"]["device_model_code"])
         self.assertEqual(report["summary"]["fields_not_returned"], [1])
         self.assertTrue(any(q["phase"] == "identity_single_field" for q in report["queries"]))
 
-    def test_partial_zero_false_and_field52_absence_are_preserved(self):
+    async def test_partial_zero_false_and_field52_absence_are_preserved(self):
         values = {f: (0, 0) for f in range(1, 52)}
-        report = run_device(MockWireDevice(values))
+        report = await run_device(MockWireDevice(values))
         fields = {f["field_id"]: f for f in report["fields"]}
         self.assertEqual(fields[1]["reference_value"], 0)
         self.assertIs(fields[49]["reference_value"], False)
         self.assertEqual(report["summary"]["fields_not_returned"], [52])
 
-    def test_unit_and_volume_bytes_from_different_responses_are_not_combined(self):
+    async def test_unit_and_volume_bytes_from_different_responses_are_not_combined(self):
         def handler(fields, selected):
             if 35 in fields:
                 selected.pop(8, None)
                 selected.pop(36, None)
             return selected, 0
-        report = run_device(MockWireDevice(handler=handler))
+        report = await run_device(MockWireDevice(handler=handler))
         for query in report["queries"]:
             for record in query.get("fields", []):
                 if record["field_id"] == 35:
@@ -227,26 +231,26 @@ class ProbeValidation(unittest.TestCase):
                     self.assertIn("unit_or_continuation_missing_in_same_response",
                                   record["interpretation_warnings"])
 
-    def test_malformed_checksum_and_write_ack_rejected(self):
+    async def test_malformed_checksum_and_write_ack_rejected(self):
         malformed = bytearray(IDENTITY)
         malformed[-2] ^= 1
         for frame in (bytes(malformed), framing.build_frame(0xD9, [])):
             with self.assertRaises(probe.ProbeError):
                 probe.parse_read(frame)
 
-    def test_deadline_and_budget_stop_reads(self):
+    async def test_deadline_and_budget_stop_reads(self):
         device = MockWireDevice()
         session = probe.ReadSession(device, 5, time.monotonic() - 1)
         with self.assertRaises(probe.ProbeError):
-            session.read([1])
+            await session.read([1])
         self.assertEqual(device.calls, [])
         session.deadline = time.monotonic() + 20
         session.query_count = probe.MAX_QUERIES
         with self.assertRaises(probe.ProbeError):
-            session.read([1])
+            await session.read([1])
         self.assertEqual(device.calls, [])
 
-    def test_transient_error_only_retries_once(self):
+    async def test_transient_error_only_retries_once(self):
         failures = 0
         def handler(fields, selected):
             nonlocal failures
@@ -254,30 +258,32 @@ class ProbeValidation(unittest.TestCase):
                 failures += 1
                 return {}, -5
             return selected, 0
-        with patch.object(probe.time, "sleep", lambda _: None):
-            report = run_device(MockWireDevice(handler=handler))
+        with patch.object(probe.asyncio, "sleep", AsyncMock()):
+            report = await run_device(MockWireDevice(handler=handler))
         self.assertEqual(report["summary"]["status"], "complete")
         self.assertEqual(report["summary"]["transient_retries"], 1)
 
-    def test_interruption_preserves_observations(self):
+    async def test_interruption_preserves_observations(self):
         def handler(fields, selected):
             if len(fields) == 52:
                 raise KeyboardInterrupt
             return selected, 0
-        report = run_device(MockWireDevice(handler=handler))
+        report = await run_device(MockWireDevice(handler=handler))
         self.assertTrue(report["interrupted"])
         self.assertEqual(report["summary"]["fields_observed_count"], 2)
         self.assertEqual(len(report["fields"]), 2)
 
-    def test_counter_mismatch_stops_authentication_before_any_query(self):
+    async def test_counter_mismatch_stops_authentication_before_any_query(self):
         device = MockWireDevice()
-        original = device.send_packet
-        def wrong_counter(packet_type, payload):
-            reply = original(packet_type, payload)
-            device.count += 1
-            return reply
-        device.send_packet = wrong_counter
-        report = run_device(device)
+        original = device._exchange
+        async def wrong_counter(packet):
+            reply = bytearray(await original(packet))
+            reply[0x28:0x2A] = ((device.count + 1) & 0xFFFF).to_bytes(2, "little")
+            reply[0x20:0x22] = bytes(2)
+            reply[0x20:0x22] = (sum(reply, 0xBEAF) & 0xFFFF).to_bytes(2, "little")
+            return bytes(reply)
+        device._exchange = wrong_counter
+        report = await run_device(device)
         self.assertFalse(report["authentication"]["ok"])
         self.assertEqual(report["authentication"]["error"]["reason"], "broadlink_counter_mismatch")
         self.assertEqual(len(device.calls), 1)

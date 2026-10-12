@@ -114,7 +114,7 @@ async def test_model1_startup_and_unload_forward_clock_platforms_without_writes(
     client.read_state.return_value = reported_state()
     forward = AsyncMock()
     unload = AsyncMock(return_value=True)
-    monkeypatch.setattr(init_mod, '_get_store', Mock(return_value=SimpleNamespace(client=client, field52_cache={})))
+    monkeypatch.setattr(init_mod, '_get_store', AsyncMock(return_value=SimpleNamespace(client=client, field52_cache={})))
     monkeypatch.setattr(hass.config_entries, 'async_forward_entry_setups', forward)
     monkeypatch.setattr(hass.config_entries, 'async_unload_platforms', unload)
     for _ in range(2):

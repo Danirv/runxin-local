@@ -13,7 +13,7 @@ pytest.importorskip("homeassistant", reason="Requires requirements-test-ha.txt")
 from homeassistant import config_entries
 from homeassistant.exceptions import ServiceValidationError
 
-from .helpers import load
+from .helpers import io_mock, load
 from .test_homeassistant import hass, _entity_context, _add_sensor
 
 coordinator_mod = load("coordinator")
@@ -28,7 +28,7 @@ def _coordinator(hass, model=9, *, data=None, options=None):
         data=data or {}, options=options if options is not None else {"auto_sync_clock": False}, source=config_entries.SOURCE_USER,
         version=2, minor_version=1, discovery_keys=MappingProxyType({}), subentries_data=[],
     )
-    client = Mock()
+    client = io_mock()
     coordinator = Coordinator(hass, entry, client, {})
     coordinator.data = {"deviceModel": model, "station": 0, "vacationPattern": False}
     coordinator.async_set_updated_data = Mock()

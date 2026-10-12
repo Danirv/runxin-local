@@ -7,7 +7,7 @@ transport implementation details now live in independent subpackages.
 
 from __future__ import annotations
 
-import threading
+import asyncio
 import time
 from typing import Any
 
@@ -35,7 +35,7 @@ class YpsilonWriteNotConfirmed(YpsilonConnectionError):
 
 
 class YpsilonLocalClient:
-    """Blocking local client for the tested Ypsilon G6 / BL3372 combination."""
+    """Asynchronous local client for the tested Ypsilon G6 / BL3372 combination."""
 
     def __init__(
         self, host: str, *, model1_test_writes: bool = False,
@@ -47,7 +47,8 @@ class YpsilonLocalClient:
         # Preserve the original whole-operation serialization: the optional
         # field-52 refresh and write-settle delay must not interleave with a
         # concurrent poll/write even though both lower layers are also safe.
-        self._lock = threading.Lock()
+        self._lock = asyncio.Lock()
+        self._closed = False
         self._controller_model: object = None
         self._read_only_latched = False
         self._model1_seen = False
@@ -107,25 +108,33 @@ class YpsilonLocalClient:
             "allowed_write_fields": [] if blocked else sorted(fields),
         }
 
-    def close(self) -> None:
-        with self._lock:
-            self._f79d.close()
+    async def close(self) -> None:
+        # Prevent queued reads from reopening an endpoint after unload/remove.
+        self._closed = True
+        self.revoke_writes()
+        async with self._lock:
+            await self._f79d.close()
 
     def revoke_writes(self) -> None:
         """Permanently stop queued writes before replacing this session."""
-        with self._lock:
-            self._read_only_latched = True
+        self._read_only_latched = True
 
-    def read_identity(self) -> dict[str, Any]:
-        with self._lock:
-            data = self._f79d.read_identity()
+    async def read_identity(self) -> dict[str, Any]:
+        async with self._lock:
+            if self._closed:
+                raise YpsilonConnectionError("Client session is closed")
+            data = await self._f79d.read_identity()
             self._observe_model(data)
             data["mac"] = self.mac
             return data
 
-    def read_state(self, field52_cache: dict[str, Any]) -> dict[str, Any]:
-        with self._lock:
-            state = self._f79d.read_state()
+    async def read_state(self, field52_cache: dict[str, Any]) -> dict[str, Any]:
+        async with self._lock:
+            if self._closed:
+                raise YpsilonConnectionError("Client session is closed")
+            state = await self._f79d.read_state()
+            if self._closed:
+                raise YpsilonConnectionError("Client session is closed")
             self._observe_model(state)
 
             # Field 52 is a static filter-service setting. Keeping its slower
@@ -134,7 +143,7 @@ class YpsilonLocalClient:
             now = time.monotonic()
             if now >= field52_cache.get("next_refresh", 0.0):
                 try:
-                    extra = self._f79d.read_fields([52])
+                    extra = await self._f79d.read_fields([52])
                 except YpsilonConnectionError:
                     field52_cache["next_refresh"] = now + FIELD52_FAIL_BACKOFF
                 else:
@@ -149,17 +158,17 @@ class YpsilonLocalClient:
             state["_reauthCount"] = self.reauth_count
             return state
 
-    def write_fields(self, values: dict[int, Any]) -> None:
+    async def write_fields(self, values: dict[int, Any]) -> None:
         """Send one F79D control frame; caller must verify physical read-back."""
-        with self._lock:
+        async with self._lock:
             model = controller_model(self._controller_model)
             if (
-                self._read_only_latched
+                self._closed or self._read_only_latched
                 or model is None
                 or not set(values).issubset(self._allowed_fields())
                 or (self._model1_seen and 34 in values and values != {34: 1})
             ):
                 raise YpsilonConnectionError("Controller policy does not permit this write")
-            self._f79d.write_fields(values)
+            await self._f79d.write_fields(values)
             # Preserve the v2.3 timing contract before coordinator verification.
-            time.sleep(WRITE_SETTLE_DELAY)
+            await asyncio.sleep(WRITE_SETTLE_DELAY)

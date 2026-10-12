@@ -10,10 +10,13 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from importlib.metadata import version, PackageNotFoundError
 import logging
+import inspect
 import platform
-import threading
+import asyncio
 import time
 from typing import Any
+
+from .transport.broadlink_packet import validate_reply, PacketValidationError
 
 from .models import controller_protocol_name, is_supported_model
 from .runxin.f79d import decode_tlvs
@@ -26,7 +29,7 @@ from .runxin.semantics import (
 )
 
 _LOGGER = logging.getLogger(__name__)
-SCRIPT_VERSION = "2.0.0"
+SCRIPT_VERSION = "3.0.0"
 EXPECTED_DEVTYPE = 0x520F
 MAX_QUERIES = 80
 FIELD_SPECS = {
@@ -60,6 +63,8 @@ def safe_error(err: Exception) -> dict[str, Any]:
         result["error_code"] = code
     if isinstance(err, ProbeError):
         result["reason"] = err.reason
+    elif isinstance(err, PacketValidationError):
+        result["reason"] = str(err)
     # Never serialize exception text, args, causes, device reprs or packets.
     return result
 
@@ -178,16 +183,39 @@ def describe_field(field: int, pair: tuple[int, int], tlvs: dict[int, tuple[int,
 class ReadSession:
     """Single standard auth session with bounded reads and an outbound guard."""
 
-    def __init__(self, device: Any, timeout: float, deadline: float, cancel: threading.Event | None = None):
+    def __init__(self, device: Any, timeout: float, deadline: float, cancel: asyncio.Event | None = None):
         self.device = device
         self.timeout = timeout
         self.deadline = deadline
         self.query_count = 0
         self.transient_retries = 0
         self.cancel = cancel
+        original_exchange = device._exchange
+
+        async def checked_exchange(packet: bytes) -> bytes:
+            # 1.0.6 authentication bypasses send_packet. Validate its outbound
+            # request and reply here, before the returned session key is used.
+            if self.cancel is not None and self.cancel.is_set():
+                raise ProbeError("cancelled")
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise ProbeError("time_budget_exhausted")
+            device.timeout = min(timeout, remaining)
+            packet_type = int.from_bytes(packet[0x26:0x28], "little")
+            payload = device.decrypt(packet[0x38:])
+            if packet_type == 0x6A:
+                payload = b"\x68" if payload[:1] == b"\x68" else payload[:2 + int.from_bytes(payload[:2], "little")]
+            guard_outbound(packet_type, payload)
+            response = bytes(await original_exchange(packet))
+            try:
+                return validate_reply(response, device, int.from_bytes(packet[0x28:0x2A], "little"))
+            except PacketValidationError as err:
+                raise ProbeError(str(err)) from err
+
+        device._exchange = checked_exchange
         original_send = device.send_packet
 
-        def checked_send(packet_type: int, payload: bytes) -> bytes:
+        async def checked_send(packet_type: int, payload: bytes) -> bytes:
             if self.cancel is not None and self.cancel.is_set():
                 raise ProbeError("cancelled")
             guard_outbound(packet_type, bytes(payload))
@@ -195,24 +223,19 @@ class ReadSession:
             if remaining <= 0:
                 raise ProbeError("time_budget_exhausted")
             device.timeout = min(timeout, remaining)
-            response = bytes(original_send(packet_type, payload))
-            if len(response) < 0x38 or response[:8] != bytes.fromhex("5aa5aa555aa5aa55"):
-                raise ProbeError("invalid_broadlink_header")
-            nominal = int.from_bytes(response[0x20:0x22], "little")
-            actual = (sum(response, 0xBEAF) - sum(response[0x20:0x22])) & 0xFFFF
-            if nominal != actual:
-                raise ProbeError("invalid_broadlink_packet_checksum")
-            if int.from_bytes(response[0x28:0x2A], "little") != device.count:
-                raise ProbeError("broadlink_counter_mismatch")
-            if int.from_bytes(response[0x24:0x26], "little") != device.devtype:
-                raise ProbeError("broadlink_device_type_mismatch")
-            if response[0x2A:0x30] != bytes(device.mac)[::-1]:
-                raise ProbeError("broadlink_mac_mismatch")
+            try:
+                response = bytes(await original_send(packet_type, payload))
+            except PacketValidationError as err:
+                raise ProbeError(str(err)) from err
+            try:
+                validate_reply(response, device, device.count)
+            except PacketValidationError as err:
+                raise ProbeError(str(err)) from err
             return response
 
         device.send_packet = checked_send
 
-    def read(self, fields: list[int]) -> tuple[dict[int, tuple[int, int]], list[int]]:
+    async def read(self, fields: list[int]) -> tuple[dict[int, tuple[int, int]], list[int]]:
         request = build_read(fields)
         for attempt in range(2):
             if self.query_count >= MAX_QUERIES:
@@ -220,11 +243,11 @@ class ReadSession:
             if time.monotonic() >= self.deadline:
                 raise ProbeError("time_budget_exhausted")
             self.query_count += 1
-            response = self.device.send_packet(0x6A, len(request).to_bytes(2, "little") + request)
+            response = await self.device.send_packet(0x6A, len(request).to_bytes(2, "little") + request)
             code = int.from_bytes(response[0x22:0x24], "little", signed=True)
             if code == -5 and attempt == 0:
                 self.transient_retries += 1
-                time.sleep(min(0.3, max(0, self.deadline - time.monotonic())))
+                await asyncio.sleep(min(0.3, max(0, self.deadline - time.monotonic())))
                 continue
             if code:
                 raise ProbeError("broadlink_query_rejected", code)
@@ -252,12 +275,12 @@ def with_dependencies(fields: list[int]) -> list[int]:
     return sorted(result)
 
 
-def scan_fields(session: Any, report: dict[str, Any]) -> None:
+async def scan_fields(session: Any, report: dict[str, Any]) -> None:
     observations = report["queries"]
     latest: dict[int, dict[str, Any]] = {}
     stopped = False
 
-    def query(fields: list[int], phase: str) -> None:
+    async def query(fields: list[int], phase: str) -> None:
         nonlocal stopped
         if stopped:
             return
@@ -268,7 +291,7 @@ def scan_fields(session: Any, report: dict[str, Any]) -> None:
             "started_at_utc": started, "requested_fields": fields,
         }
         try:
-            tlvs, duplicates = session.read(fields)
+            tlvs, duplicates = await session.read(fields)
             item.update(ok=True, returned_fields=sorted(tlvs),
                         missing_requested_fields=sorted(set(fields) - set(tlvs)))
             scoped = {field: pair for field, pair in tlvs.items() if 1 <= field <= 52}
@@ -296,26 +319,26 @@ def scan_fields(session: Any, report: dict[str, Any]) -> None:
         observations.append(item)
 
     _LOGGER.debug("Reading controller identity...")
-    query([1, 34], "identity")
+    await query([1, 34], "identity")
     if 1 not in latest:
-        query([1], "identity_single_field")
+        await query([1], "identity_single_field")
     if 34 not in latest:
-        query([34], "station_single_field")
+        await query([34], "station_single_field")
     _LOGGER.debug("Reading fields 1-52...")
-    query(list(range(1, 53)), "full_read")
+    await query(list(range(1, 53)), "full_read")
     missing = sorted(set(range(1, 53)) - set(latest))
     if missing and not stopped:
         _LOGGER.debug("Recovering missing fields in smaller read-only groups...")
         for start in range(0, len(missing), 8):
             fields = [f for f in missing[start:start + 8] if f not in latest]
             if fields:
-                query(with_dependencies(fields), "fallback_group")
+                await query(with_dependencies(fields), "fallback_group")
     missing = sorted(set(range(1, 53)) - set(latest))
     if missing and not stopped:
         _LOGGER.debug("Trying remaining fields individually (with required unit/volume context)...")
         for field in missing:
             if field not in latest:
-                query(with_dependencies([field]), "fallback_single_field")
+                await query(with_dependencies([field]), "fallback_single_field")
     report["fields"] = [latest[f] for f in sorted(latest)]
     codes = sorted({r["reference_value"] for q in observations for r in q.get("fields", [])
                     if r["field_id"] == 1})
@@ -347,8 +370,8 @@ def scan_fields(session: Any, report: dict[str, Any]) -> None:
     }
 
 
-def probe(host: str, *, timeout: float = 5, max_seconds: float = 180,
-          cancel: threading.Event | None = None, identifier_sink: list[str] | None = None) -> dict[str, Any]:
+async def probe(host: str, *, timeout: float = 5, max_seconds: float = 180,
+          cancel: asyncio.Event | None = None, identifier_sink: list[str] | None = None) -> dict[str, Any]:
     report: dict[str, Any] = {
         "script_version": SCRIPT_VERSION, "started_at_utc": utc_now(),
         "python_version": platform.python_version(), "timeout_seconds": timeout,
@@ -364,17 +387,19 @@ def probe(host: str, *, timeout: float = 5, max_seconds: float = 180,
     device = None
     try:
         try:
-            report["broadlink_version"] = version("broadlink")
+            report["broadlink_version"] = version("python-broadlink")
         except PackageNotFoundError:
-            raise ProbeError("broadlink_0_19_0_required") from None
-        if report["broadlink_version"] != "0.19.0":
-            raise ProbeError("broadlink_0_19_0_required")
+            raise ProbeError("python_broadlink_1_0_6_required") from None
+        if report["broadlink_version"] != "1.0.6":
+            raise ProbeError("python_broadlink_1_0_6_required")
         import broadlink
+        if not inspect.iscoroutinefunction(broadlink.hello):
+            raise ProbeError("broadlink_async_runtime_unavailable")
         if cancel is not None and cancel.is_set():
             raise ProbeError("cancelled")
         deadline = time.monotonic() + max_seconds
         _LOGGER.debug("Discovering BroadLink device...")
-        device = broadlink.hello(host, timeout=min(timeout, max_seconds))
+        device = await broadlink.hello(host, timeout=min(timeout, max_seconds))
         if device is None:
             raise ProbeError("no_device_found")
         locked = getattr(device, "is_locked", None)
@@ -388,7 +413,7 @@ def probe(host: str, *, timeout: float = 5, max_seconds: float = 180,
         report["authentication"] = {"attempted": True, "ok": False}
         _LOGGER.debug("Performing standard authentication...")
         try:
-            if device.auth() is False:
+            if await device.auth() is False:
                 raise ProbeError("authentication_rejected")
         except Exception as err:
             report["authentication"].update(error=safe_error(err))
@@ -397,10 +422,10 @@ def probe(host: str, *, timeout: float = 5, max_seconds: float = 180,
         report["authentication"]["ok"] = True
         report["firmware"] = {"attempted": True, "ok": False}
         try:
-            report["firmware"].update(ok=True, version=int(device.get_fwversion()))
+            report["firmware"].update(ok=True, version=int(await device.get_fwversion()))
         except Exception as err:
             report["firmware"]["error"] = safe_error(err)
-        scan_fields(session, report)
+        await scan_fields(session, report)
     except KeyboardInterrupt:
         report["interrupted"] = True
         report["summary"]["status"] = "interrupted"
@@ -409,11 +434,10 @@ def probe(host: str, *, timeout: float = 5, max_seconds: float = 180,
         report["summary"]["status"] = "cancelled" if isinstance(err, ProbeError) and err.reason == "cancelled" else "failed"
     finally:
         report["finished_at_utc"] = utc_now()
-        sock = getattr(device, "sock", None) if device is not None else None
-        if sock is not None:
+        if device is not None:
             try:
-                sock.close()
-            except OSError:
+                await device.aclose()
+            except Exception:
                 pass
     code = report.get("identity", {}).get("device_model_code")
     report["controller"] = {

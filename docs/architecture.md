@@ -45,3 +45,5 @@ The pure protocol layer remains extractable inside this repository. A separate P
 See the [support matrix](model-support.md), [profile guide](adding-a-device-profile.md) and [compatibility reports](compatibility-report.md).
 
 The offline audit checks nested relative imports and transport dependencies. Exported `write_policy` distinguishes model evidence from configured/coordinator/adapter restrictions using cached metadata. For test environments and CI coverage, see [CONTRIBUTING](../CONTRIBUTING.md).
+
+From 2.10.0, device I/O is async on the HA event loop using `python-broadlink==1.0.6`. Client/transport operation locks are `asyncio.Lock`; diagnostic cancellation closes its endpoint. Unload closes the session and reload creates a new client while retaining field-52 cache. `transport/broadlink_packet.py` validates per-device auth/read replies and bypasses internal retransmission/reauthentication for writes. Its private-API use is scoped to the pinned library and tested with real AES and loopback UDP. No global patch or executor call performs device I/O. Minimum HA: 2026.10.0. See [migration](ha-2026-10.md).
