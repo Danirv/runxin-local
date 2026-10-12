@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented here.
 
-## [2.10.0] - Unreleased
+## [2.10.0] - 2026-10-12
 
 - Require Home Assistant 2026.10.0+ and replace the old `broadlink` distribution with `python-broadlink>=1.0.6`, matching Core’s async library and avoiding shared-module overwrite (issue #33).
 - Await all device I/O, migrate operation locks and delays to asyncio, and close persistent endpoints on unload/replacement/cancellation while retaining cached field 52 across reloads.
