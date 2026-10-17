@@ -14,7 +14,7 @@ from types import SimpleNamespace
 from types import MappingProxyType
 from unittest.mock import AsyncMock, Mock, patch
 
-import broadlink.exceptions
+import broadlink_async as broadlink
 import pytest
 
 pytest.importorskip("homeassistant", reason="Requires requirements-test-ha.txt")

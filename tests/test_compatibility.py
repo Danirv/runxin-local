@@ -7,7 +7,7 @@ import asyncio
 import unittest
 from unittest.mock import AsyncMock, patch
 
-from broadlink.device import Device
+from broadlink_async.device import Device
 from .helpers import load
 
 probe = load("compatibility")
@@ -74,7 +74,7 @@ class MockWireDevice(Device):
 
 
 async def run_device(device):
-    with patch("broadlink.hello", return_value=device), redirect_stderr(io.StringIO()):
+    with patch("broadlink_async.hello", return_value=device), redirect_stderr(io.StringIO()):
         return await probe.probe("192.0.2.17")
 
 
@@ -82,7 +82,7 @@ class ProbeValidation(unittest.IsolatedAsyncioTestCase):
     async def test_cancellation_stops_before_discovery(self):
         cancel = asyncio.Event()
         cancel.set()
-        with patch("broadlink.hello") as hello:
+        with patch("broadlink_async.hello") as hello:
             report = await probe.probe("192.0.2.17", cancel=cancel)
         hello.assert_not_called()
         self.assertEqual(report["summary"]["status"], "cancelled")
@@ -93,7 +93,7 @@ class ProbeValidation(unittest.IsolatedAsyncioTestCase):
             cancel.set()
             return selected, 0
         device = MockWireDevice(handler=handler)
-        with patch("broadlink.hello", return_value=device):
+        with patch("broadlink_async.hello", return_value=device):
             report = await probe.probe("192.0.2.17", cancel=cancel)
         self.assertEqual(report["summary"]["fields_observed_count"], 2)
         self.assertEqual(report["scan_stop_reason"], "cancelled")
@@ -124,7 +124,7 @@ class ProbeValidation(unittest.IsolatedAsyncioTestCase):
         values={field:(0,0) for field in range(1,53)}
         values[1]=(15,0)
         identifiers=[]
-        with patch("broadlink.hello", return_value=MockWireDevice(values)):
+        with patch("broadlink_async.hello", return_value=MockWireDevice(values)):
             report=await probe.probe("192.0.2.17", identifier_sink=identifiers)
         self.assertEqual(report["controller"]["manufacturer_protocol_name"],"F138")
         self.assertFalse(report["controller"]["supported_for_normal_use"])

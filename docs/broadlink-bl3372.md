@@ -11,7 +11,7 @@ Assistant integration today. It is intentionally separate from the F79D codec.
 - module family: BL3372
 - product controller: Runxin F79D
 - BroadLink command carrying product data: `0x6A`
-- Python dependency: `python-broadlink>=1.0.6`
+- Python dependency: `broadlink-async>=1.1.0`
 
 The Home Assistant integration still probes for the tested device type/model.
 The transport class is parameterised so research code can test a different
@@ -84,6 +84,6 @@ contract.
 
 See [`adding-a-transport.md`](adding-a-transport.md).
 
-## Async transport: 2.10.0
+## Async transport: 2.10.1
 
-Home Assistant 2026.10.0+ is required. All network methods are awaited. Reads use the library’s bounded exchange, plus bounded recovery for closed endpoints and existing outer-error policies. Writes use `broadlink_packet.send_packet_once`, with one UDP datagram and no automatic command replay or reauthentication. Auth/read replies are validated on each device instance, including the framed request counter before auth changes the key. No global methods are patched. Unload, replacement and cancellation close the persistent endpoint. The adapter uses the framing/endpoint interface tested against 1.0.6; a library change requires revalidation. See [migration, recovery and hardware validation](ha-2026-10.md).
+Home Assistant 2026.10.0+ is required. All network methods are awaited. Reads use the library’s bounded exchange, plus bounded recovery for closed endpoints and existing outer-error policies. Writes use `broadlink_packet.send_packet_once`, with one UDP datagram and no automatic command replay or reauthentication. Auth/read replies are validated on each device instance, including the framed request counter before auth changes the key. No global methods are patched. Unload, replacement and cancellation close the persistent endpoint. The adapter uses the framing/endpoint interface tested against 1.1.0; a library change requires revalidation. See [migration, recovery and hardware validation](ha-2026-10.md).

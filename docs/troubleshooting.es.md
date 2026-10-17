@@ -3,7 +3,7 @@
 # Resolución de problemas de conexión
 
 El descubrimiento, la autenticación local y las lecturas F79D son etapas distintas.
-Que `broadlink.hello()` funcione no demuestra que el dispositivo acepte control local.
+Que `broadlink_async.hello()` funcione no demuestra que el dispositivo acepte control local.
 
 ## Mensajes y registros de configuración
 
@@ -38,7 +38,7 @@ todavía no hay entrada para descargar: utiliza el aviso o el script independien
 
 ## Informe independiente
 
-Desde la raíz del repositorio, en un entorno Python que ya tenga `python-broadlink==1.0.6`,
+Desde la raíz del repositorio, en un entorno Python que ya tenga `broadlink-async==1.1.0`,
 ejecuta esto sustituyendo `DEVICE_IP` localmente:
 
 ```bash
@@ -91,4 +91,4 @@ El controlador resultante devuelve código 1; autenticar no confirma identidad G
 
 ## Conflicto de dependencia con HA 2026.10
 
-Runxin Local 2.10.0 requiere HA 2026.10.0+ y `python-broadlink>=1.0.6` asíncrona. Si HA 2026.10 ya ha ejecutado Runxin Local 2.9.3 o anterior, actualiza/elimina todas las integraciones que requieran `broadlink` antiguo y después reconstruye/recrea Core según la [guía de recuperación](ha-2026-10.es.md). Se recomienda esta recuperación aunque Runxin Local antiguo funcionara; hay que reparar los archivos ya sobrescritos, incluido el fallo de importación de `EndpointClosedError`. Una instalación limpia de HA 2026.10+/2.10.0 no necesita reconstrucción. Actualizar y reiniciar no restaura los archivos sobrescritos.
+Runxin Local 2.10.1 utiliza `broadlink-async>=1.1.0` / `broadlink_async`, el espacio de nombres de BroadLink oficial desde HA 2026.10.2. Actualiza Runxin y reinicia; el módulo nuevo se instala separado y no necesita reconstruir Core solo por esta migración. Si BroadLink oficial ya falla con HA 2026.10.0/1, actualiza HA a 2026.10.2+ o corrige todos los requisitos antiguos antes de reconstruir/recrear Core. Runxin 2.10.0 sigue importando el módulo compartido también en HA más nuevo. Consulta la [guía de migración y recuperación por versiones](ha-2026-10.es.md).

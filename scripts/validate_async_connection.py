@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Read-only validation of the async BL3372 path; no Home Assistant required.
 
-Use Python 3.13+ and python-broadlink==1.0.6 in an isolated environment.
+Use Python 3.13+ and broadlink-async==1.1.0 in an isolated environment.
 Discovery/authentication, firmware and fields 1..52 only; never writes settings,
 corrects the clock, regenerates, unlocks, provisions or resets the controller.
 """

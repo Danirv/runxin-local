@@ -11,7 +11,7 @@ la integració Home Assistant i està separat deliberadament del codec F79D.
 - mòdul: BL3372
 - controlador: Runxin F79D
 - comanda BroadLink per a dades de producte: `0x6A`
-- dependència Python: `python-broadlink>=1.0.6`
+- dependència Python: `broadlink-async>=1.1.0`
 
 Provar un altre devtype en recerca no significa que aquella combinació quedi
 suportada per Ypsilon.
@@ -72,6 +72,6 @@ Un altre transport només ha d'acceptar i retornar trames Runxin crues. TFB,
 
 Consulta [`adding-a-transport.ca.md`](adding-a-transport.ca.md).
 
-## Transport asíncron: 2.10.0
+## Transport asíncron: 2.10.1
 
-Cal HA 2026.10.0+. Totes les crides de xarxa s’esperen amb `await`. Les lectures conserven els intercanvis limitats de la biblioteca i la recuperació acotada de sessions. Les escriptures utilitzen `broadlink_packet.send_packet_once`: un sol datagrama UDP, sense reenviament ni reautenticació automàtica del comandament. Les respostes d’autenticació/lectura es validen per dispositiu contra el comptador del paquet enviat abans de canviar la clau. No es modifiquen classes globals. Descarregar, substituir o cancel·lar tanca el socket persistent. L’adaptador utilitza API internes de la interfície provada amb 1.0.6; canviar-la requereix revalidació. [Migració, recuperació i prova física](ha-2026-10.ca.md).
+Cal HA 2026.10.0+. Totes les crides de xarxa s’esperen amb `await`. Les lectures conserven els intercanvis limitats de la biblioteca i la recuperació acotada de sessions. Les escriptures utilitzen `broadlink_packet.send_packet_once`: un sol datagrama UDP, sense reenviament ni reautenticació automàtica del comandament. Les respostes d’autenticació/lectura es validen per dispositiu contra el comptador del paquet enviat abans de canviar la clau. No es modifiquen classes globals. Descarregar, substituir o cancel·lar tanca el socket persistent. L’adaptador utilitza API internes de la interfície provada amb 1.1.0; canviar-la requereix revalidació. [Migració, recuperació i prova física](ha-2026-10.ca.md).

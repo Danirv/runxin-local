@@ -1,4 +1,6 @@
-# Earlier reported HA release, not a declared minimum supported version.
+# Minimum supported HA release, still using the previous Core BroadLink namespace.
 -r requirements-test-offline.txt
 homeassistant==2026.10.0
+# Core integration requirements are not installed by the homeassistant wheel.
+python-broadlink==1.0.6
 pytest-asyncio==1.4.0

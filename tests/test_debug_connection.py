@@ -6,7 +6,7 @@ import json
 import sys
 from unittest.mock import AsyncMock, Mock
 
-import broadlink.exceptions
+import broadlink_async as broadlink
 import pytest
 
 from .helpers import io_mock

@@ -33,7 +33,7 @@ Read [`docs/architecture.md`](docs/architecture.md) before protocol work.
 
 These boundaries are enforced by the offline audit where practical.
 
-The native job runs the complete suite on HA 2026.10.1; a separate baseline job uses `requirements-test-ha-baseline.txt` for HA 2026.10.0. They cover existing mocked regressions plus real-library/AES/loopback UDP and Core BroadLink coexistence. These do not replace BL3372 hardware validation. Minimum HA is 2026.10.0, declared in HACS.
+The native job runs the complete suite on HA 2026.10.2; a separate baseline job uses `requirements-test-ha-baseline.txt` for HA 2026.10.0. They cover existing mocked regressions plus real-library/AES/loopback UDP and Core BroadLink coexistence. The offline job additionally installs legacy `broadlink==0.19.0` and repeats real-library UDP/collector regressions; the HA 2026.10.2 job also checks native BroadLink alongside that legacy package. Baseline HA 2026.10.0 explicitly installs its own `python-broadlink==1.0.6` requirement, separate from Runxin’s namespace. These do not replace BL3372 hardware validation. Minimum HA is 2026.10.0, declared in HACS.
 
 Workflow action source revisions are pinned, but the upstream HACS/hassfest actions still use floating container tags. This does not pin the entire toolchain. Import checks are static architecture checks, not a runtime sandbox.
 
