@@ -1,4 +1,4 @@
-"""BL3372 packet checks and single-send adapter for python-broadlink 1.0.6.
+"""BL3372 packet checks and single-send adapter for broadlink-async 1.1.0.
 
 Only the write path uses the library's tested framing/endpoint internals. The
 public send_packet method retries on silence and expired sessions, which is
@@ -10,7 +10,7 @@ from __future__ import annotations
 import asyncio
 from typing import Any
 
-from broadlink import exceptions as e
+from broadlink_async import exceptions as e
 
 MAGIC = bytes.fromhex("5aa5aa555aa5aa55")
 
@@ -50,7 +50,7 @@ def require_packet_interface(device: Any) -> None:
 def guard_exchange(device: Any) -> None:
     """Validate auth/firmware/read replies on this device, before key changes.
 
-    In 1.0.6 auth calls _exchange directly, bypassing send_packet. Capture the
+    In 1.1.0 auth calls _exchange directly, bypassing send_packet. Capture the
     counter from its framed request rather than assuming a counter delta across
     the library's internal reauthentication. Preserve the original async API.
     """

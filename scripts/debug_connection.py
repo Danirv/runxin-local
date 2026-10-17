@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Probe BroadLink discovery/authentication without changing device settings.
 
-Run this in a Python environment with python-broadlink==1.0.6 installed. The report
+Run this in a Python environment with broadlink-async==1.1.0 installed. The report
 deliberately omits the host, device name, MAC, control ID, session key, packets
 and exception messages. It does not require Home Assistant or query F79D state.
 """
@@ -15,7 +15,7 @@ import json
 import platform
 from typing import Any
 
-import broadlink
+import broadlink_async as broadlink
 
 
 def _error_details(err: Exception) -> dict[str, Any]:
@@ -30,7 +30,8 @@ def _error_details(err: Exception) -> dict[str, Any]:
 async def probe_connection(host: str, *, timeout: float = 5) -> dict[str, Any]:
     """Attempt one handshake and an optional firmware read, returning safe JSON."""
     report: dict[str, Any] = {
-        "broadlink_version": version("python-broadlink"),
+        "broadlink_distribution": "broadlink-async",
+        "broadlink_version": version("broadlink-async"),
         "python_version": platform.python_version(),
         "timeout_seconds": timeout,
         "discovery": {"ok": False},

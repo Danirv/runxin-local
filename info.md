@@ -1,8 +1,14 @@
-# Runxin Local 2.10.0
+# Runxin Local 2.10.1
 
 Local Home Assistant integration for compatible Runxin F79D / BroadLink BL3372 water softeners, tested with ATH/BWT Ypsilon G6 and Euro-Clear Midnight.
 
-## 2.10.0
+## 2.10.1
+
+Uses `broadlink-async>=1.1.0` / `broadlink_async`, matching official BroadLink from HA 2026.10.2. This isolates Runxin from legacy packages that share the old `broadlink` import directory. Minimum HA stays **2026.10.0**. Update the integration and restart; no Core rebuild is needed solely to install the separate namespace. Already broken official BroadLink on HA 2026.10.0/1 needs an HA update or the earlier repair. See the [version-specific migration guide](docs/ha-2026-10.md).
+
+Transport, config flow, read-only diagnostics and scripts all use the new namespace. The single-datagram write adapter is revalidated with 1.1.0; codecs, models, permissions and existing identities are preserved. CI covers HA 2026.10.0/2026.10.2 and real legacy-package coexistence. Physical G6 evidence below remains specifically attributed to 2.10.0, not a new hardware test of 2.10.1.
+
+## 2.10.0 (historical)
 
 Requires **Home Assistant 2026.10.0+** and migrates to `python-broadlink>=1.0.6`, preventing the old distribution from overwriting HA’s official BroadLink library. Device I/O and the compatibility collector are async. Persistent endpoints close on unload and reloads retain the field-52 cache. Writes use one UDP datagram without internal replay/reauthentication; independent read-back still confirms state. Models, codecs, permissions and existing entity/config-entry identities remain unchanged. See [migration and recovery](docs/ha-2026-10.md). Post-release validation on 2026-10-12 confirmed physical G6 readings and field-10 writes on HA 2026.10.1 after rebuilding Core. Other model/field evidence remains attributed to its original tests. If HA 2026.10 has already run 2.9.3 or earlier, update all old BroadLink requirements and rebuild/recreate Core even if Runxin appeared to work; a clean HA 2026.10+/2.10.0 installation does not need this recovery.
 

@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented here.
 
+## [2.10.1] - Unreleased
+
+- Migrate to `broadlink-async>=1.1.0` and the separate `broadlink_async` import/logger namespace, matching official BroadLink from HA 2026.10.2 and removing Runxin's shared-directory collision with legacy BroadLink packages. Keep minimum HA 2026.10.0.
+- Update transport, config-flow exception types, read-only compatibility collection and standalone diagnostics. Reports retain `broadlink_version` and identify `broadlink_distribution` explicitly.
+- Revalidate single-datagram writes, strict replies, cancellation and read-back recovery against 1.1.0. Test HA 2026.10.0/2026.10.2 and real legacy-package coexistence, including native Core BroadLink on 2026.10.2.
+- Update English/Catalan/Spanish migration, recovery, troubleshooting, architecture and dependency documentation. The isolated namespace installs fresh without a rebuild solely for Runxin's migration; already damaged official BroadLink on HA 2026.10.0/1 still needs version-specific recovery or an HA update.
+- Preserve codecs, conversions, model support/permissions, entity/config-entry identities, domain and the dated 2.10.0 hardware evidence. Automated validation of the renamed library is not a new physical-device test.
+
 ## [2.10.0] - 2026-10-12
 
 - Require Home Assistant 2026.10.0+ and replace the old `broadlink` distribution with `python-broadlink>=1.0.6`, matching Core’s async library and avoiding shared-module overwrite (issue #33).

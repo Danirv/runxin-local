@@ -9,8 +9,8 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock
 
-import broadlink
-from broadlink import exceptions
+import broadlink_async as broadlink
+from broadlink_async import exceptions
 import pytest
 import pytest_asyncio
 
@@ -217,18 +217,25 @@ async def test_ambiguous_adapter_write_is_not_replayed_during_fresh_read(wire, m
         await client.close()
 
 
-def test_core_and_runxin_share_the_async_distribution_without_old_package():
+def test_core_and_runxin_use_the_expected_library_namespace():
     pytest.importorskip("homeassistant")
     from homeassistant.components.broadlink.device import BroadlinkDevice
     from homeassistant.components.broadlink import device as core_broadlink
-    assert importlib.metadata.version("python-broadlink") == "1.0.6"
+    from packaging.version import Version
+    assert importlib.metadata.version("broadlink-async") == "1.1.0"
     with pytest.raises(importlib.metadata.PackageNotFoundError):
         importlib.metadata.version("broadlink")
-    assert core_broadlink.blk is broadlink
+    if Version(importlib.metadata.version("homeassistant")) >= Version("2026.10.2"):
+        assert core_broadlink.blk is broadlink
+    else:
+        assert core_broadlink.blk.__name__ == "broadlink"
+        assert core_broadlink.blk is not broadlink
+        assert importlib.metadata.version("python-broadlink") == "1.0.6"
     assert inspect.iscoroutinefunction(broadlink.hello)
     assert inspect.iscoroutinefunction(BroadlinkDevice.async_auth)
     manifest = json.loads((Path(__file__).parents[1] / "custom_components/ypsilon_local/manifest.json").read_text())
-    assert manifest["requirements"] == ["python-broadlink>=1.0.6"]
+    assert manifest["requirements"] == ["broadlink-async>=1.1.0"]
+    assert manifest["loggers"] == ["broadlink_async"]
 
 
 @pytest.mark.asyncio
@@ -243,11 +250,11 @@ async def test_read_closed_endpoint_recovery_has_one_session_budget(monkeypatch)
 
 
 @pytest.mark.asyncio
-async def test_old_overwritten_runtime_fails_before_device_io(monkeypatch):
+async def test_invalid_async_runtime_fails_before_device_io(monkeypatch):
     hello = Mock()
     monkeypatch.setattr(broadlink, "hello", hello)
     transport = transport_mod.BroadlinkBL3372Transport("192.0.2.1")
-    with pytest.raises(transport_mod.RunxinTransportError, match="Incompatible BroadLink runtime"):
+    with pytest.raises(transport_mod.RunxinTransportError, match="Incompatible broadlink-async runtime"):
         await transport.transact(b"frame")
     hello.assert_not_called()
 

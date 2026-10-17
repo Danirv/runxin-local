@@ -1,10 +1,10 @@
 # Runxin Local para Home Assistant
 
-## Home Assistant 2026.10 y transporte asíncrono: 2.10.0
+## Home Assistant 2026.10 y transporte asíncrono: 2.10.1
 
-Desde 2.10.0 se requiere **HA 2026.10.0 o posterior**. La dependencia es `python-broadlink>=1.0.6`, como BroadLink oficial de HA; se conservan entradas, entidades y políticas de los modelos. Para HA anterior, conserva 2.9.3. [Migración, recuperación y prueba en el G6](ha-2026-10.es.md).
+Desde 2.10.0 se requiere **HA 2026.10.0 o posterior**. La dependencia de 2.10.1 es `broadlink-async>=1.1.0`, como BroadLink oficial desde HA 2026.10.2; se conservan entradas, entidades y políticas de los modelos. Para HA anterior, conserva 2.9.3. [Migración, recuperación y prueba en el G6](ha-2026-10.es.md).
 
-**¿Ya has ejecutado HA 2026.10 con Runxin Local 2.9.3 o anterior?** Actualiza todas las integraciones que requieran `broadlink` antiguo y después reconstruye Core en HA OS (`ha core rebuild`) o recrea el contenedor oficial de Core. Que Runxin Local antiguo funcione no demuestra que los archivos BroadLink de Core estén intactos. Una instalación limpia de HA 2026.10+/Runxin Local 2.10.0 no necesita esta recuperación. El mantenedor confirmó lecturas en el G6 y escrituras del campo 10 después de reconstruir Core el 2026-10-12; consulta el [registro de validación](ha-2026-10.es.md#resultado-del-mantenedor-2026-10-12).
+**¿Actualizas desde la biblioteca BroadLink compartida?** Runxin Local 2.10.1 se instala en el espacio separado `broadlink_async`: actualiza y reinicia HA; no hace falta reconstruir Core solo por esta migración. BroadLink oficial utiliza ese espacio desde HA 2026.10.2. Si continúas con HA 2026.10.0/1 y BroadLink oficial ya falla, corrige todos los requisitos antiguos antes de reconstruir/recrear Core, o actualiza HA. Consulta la [migración y recuperación](ha-2026-10.es.md), que conserva la validación histórica del G6 con 2.10.0.
 
 Integración local para descalcificadores compatibles con **Runxin F79D + BroadLink BL3372**, con el Ypsilon G6 como hardware de referencia y soporte experimental para Euro-Clear Midnight.
 

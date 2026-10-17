@@ -28,6 +28,10 @@ jobs:
         run: python -m pytest -q -W error::RuntimeWarning -W error::pytest.PytestUnraisableExceptionWarning
       - name: Compile Python
         run: python -m compileall -q custom_components/ypsilon_local scripts tests
+      - name: Install legacy BroadLink alongside the isolated async namespace
+        run: python -m pip install --disable-pip-version-check broadlink==0.19.0
+      - name: Regress legacy package coexistence with real async UDP
+        run: python -m pytest -q tests/test_legacy_broadlink_coexistence.py tests/test_async_broadlink.py tests/test_compatibility.py tests/test_debug_connection.py tests/test_transport_and_client.py -W error::RuntimeWarning -W error::pytest.PytestUnraisableExceptionWarning
 
   home-assistant:
     name: Home Assistant regressions
@@ -41,6 +45,10 @@ jobs:
         run: python -m pip install --disable-pip-version-check -r requirements-test-ha.txt
       - name: Test config flow, entities, controls and diagnostics
         run: python -m pytest -q -W error::RuntimeWarning -W error::pytest.PytestUnraisableExceptionWarning
+      - name: Install legacy BroadLink alongside Core 2026.10.2
+        run: python -m pip install --disable-pip-version-check broadlink==0.19.0
+      - name: Verify Core and Runxin coexist with the legacy distribution
+        run: python -m pytest -q tests/test_legacy_broadlink_coexistence.py tests/test_async_homeassistant.py -W error::RuntimeWarning -W error::pytest.PytestUnraisableExceptionWarning
 
   home-assistant-baseline:
     name: Home Assistant baseline 2026.10.0

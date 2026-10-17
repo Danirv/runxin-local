@@ -29,7 +29,7 @@ from .runxin.semantics import (
 )
 
 _LOGGER = logging.getLogger(__name__)
-SCRIPT_VERSION = "3.0.0"
+SCRIPT_VERSION = "3.1.0"
 EXPECTED_DEVTYPE = 0x520F
 MAX_QUERIES = 80
 FIELD_SPECS = {
@@ -194,7 +194,7 @@ class ReadSession:
         original_exchange = device._exchange
 
         async def checked_exchange(packet: bytes) -> bytes:
-            # 1.0.6 authentication bypasses send_packet. Validate its outbound
+            # 1.1.0 authentication bypasses send_packet. Validate its outbound
             # request and reply here, before the returned session key is used.
             if self.cancel is not None and self.cancel.is_set():
                 raise ProbeError("cancelled")
@@ -388,10 +388,11 @@ async def probe(host: str, *, timeout: float = 5, max_seconds: float = 180,
     device = None
     try:
         try:
-            report["broadlink_version"] = version("python-broadlink")
+            report["broadlink_distribution"] = "broadlink-async"
+            report["broadlink_version"] = version("broadlink-async")
         except PackageNotFoundError:
-            raise ProbeError("python_broadlink_1_0_6_required") from None
-        import broadlink
+            raise ProbeError("broadlink_async_1_1_0_required") from None
+        import broadlink_async as broadlink
         if not inspect.iscoroutinefunction(broadlink.hello):
             raise ProbeError("broadlink_async_runtime_unavailable")
         if cancel is not None and cancel.is_set():

@@ -3,7 +3,7 @@
 This module owns every BroadLink-specific concern: discovery/authentication,
 0x6A packet transport, encryption, the two-byte TFB length envelope, outer
 response errors, session refresh and the observed transient -5 retry policy.
-The Runxin codec never imports this module or the `broadlink` package.
+The Runxin codec never imports this module or the `broadlink_async` package.
 
 Read transactions may be retried within bounded budgets. Write transactions are
 sent at most once: after a timeout/outer error the command may already have been
@@ -20,8 +20,7 @@ import random
 import asyncio
 from typing import Any
 
-import broadlink
-import broadlink.exceptions
+import broadlink_async as broadlink
 
 from .broadlink_packet import guard_exchange, send_packet_once, PacketValidationError
 
@@ -185,7 +184,7 @@ class BroadlinkBL3372Transport(RunxinTransport):
         self._is_locked = None
         _LOGGER.debug("Starting BroadLink discovery (timeout=%ss)", self.timeout)
         if not inspect.iscoroutinefunction(broadlink.hello):
-            raise RunxinTransportError("Incompatible BroadLink runtime; another integration may have overwritten python-broadlink")
+            raise RunxinTransportError("Incompatible broadlink-async runtime; check the installed dependency")
         device = await broadlink.hello(self.host, timeout=self.timeout)
         if device is None:
             raise RunxinTransportError("No BroadLink device found")
@@ -214,7 +213,7 @@ class BroadlinkBL3372Transport(RunxinTransport):
                 raise BroadlinkAuthenticationError(err.errno, self._is_locked) from err
             except ValueError as err:
                 # A short decrypted auth payload can supply an invalid AES
-                # session-key length even with python-broadlink 1.0.6. This is a malformed
+                # session-key length even with broadlink-async 1.1.0. This is a malformed
                 # response, not a proven rejection or a reason to unlock/retry.
                 raise RunxinTransportError("Invalid BroadLink authentication response") from err
             if authenticated is False:

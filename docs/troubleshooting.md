@@ -3,7 +3,7 @@
 # Connection troubleshooting
 
 Discovery, local authentication and F79D reads are separate stages. A successful
-`broadlink.hello()` does not prove that the device accepts local control.
+`broadlink_async.hello()` does not prove that the device accepts local control.
 
 ## Setup messages and logs
 
@@ -38,7 +38,7 @@ use the setup warning or standalone probe instead.
 
 ## Standalone report
 
-In a Python environment with `python-broadlink==1.0.6` already installed, run this from
+In a Python environment with `broadlink-async==1.1.0` already installed, run this from
 the repository root, replacing `DEVICE_IP` locally:
 
 ```bash
@@ -91,4 +91,4 @@ The resulting device reports controller code 1; successful authentication does n
 
 ## HA 2026.10 dependency conflict
 
-Runxin Local 2.10.0 requires HA 2026.10.0+ and async `python-broadlink>=1.0.6`. If HA 2026.10 has already run Runxin Local 2.9.3 or earlier, update/remove all integrations requiring old `broadlink`, then rebuild/recreate Core as described in [migration and recovery](ha-2026-10.md). This recovery is recommended even if the old Runxin integration worked; it is required for already overwritten files, including the `EndpointClosedError` import failure. A clean HA 2026.10+/2.10.0 installation does not need a rebuild. Updating and restarting alone does not restore overwritten module files.
+Runxin Local 2.10.1 uses `broadlink-async>=1.1.0` / `broadlink_async`, the namespace used by official BroadLink from HA 2026.10.2. Update Runxin and restart; the new module installs separately, without requiring a Core rebuild just for this migration. If official BroadLink is already broken on HA 2026.10.0/1, update HA to 2026.10.2+ or correct all legacy requirements before rebuilding/recreating Core. Runxin 2.10.0 still imports the shared module even on newer HA. See the version-specific [migration and recovery guide](ha-2026-10.md).

@@ -6,7 +6,7 @@ import json
 import logging
 from unittest.mock import AsyncMock, Mock
 
-import broadlink.exceptions
+import broadlink_async as broadlink
 import pytest
 
 from .helpers import broadlink_reply, io_mock, load
@@ -230,7 +230,7 @@ async def test_later_success_preserves_historical_error_but_reports_ready_stage(
 
 @pytest.mark.asyncio
 async def test_short_real_broadlink_auth_response_is_transport_failure_not_rejection(monkeypatch) -> None:
-    # The real 1.0.6 auth implementation passes a 12-byte session key to AES
+    # The real 1.1.0 auth implementation passes a 12-byte session key to AES
     # when given only 16 decrypted bytes; cryptography raises ValueError.
     device = transport_mod.broadlink.Device(("192.0.2.17", 80), bytes(6), 0x520F)
     auth_exchange = AsyncMock(side_effect=lambda packet: broadlink_reply(device))

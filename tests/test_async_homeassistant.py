@@ -3,11 +3,12 @@ import asyncio
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
-import broadlink
+import broadlink_async as broadlink
 import pytest
 
 pytest.importorskip("homeassistant")
 from homeassistant.components.broadlink.device import BroadlinkDevice
+from homeassistant.components.broadlink.device import blk as core_library
 
 from .helpers import io_mock, load
 from .test_homeassistant import hass
@@ -22,10 +23,12 @@ async def test_core_device_and_runxin_use_real_async_auth_without_global_patch(h
     device, peer = wire
     original_send = broadlink.Device.send_packet
     original_exchange = broadlink.Device._exchange
+    original_core_send = core_library.Device.send_packet
+    original_core_exchange = core_library.Device._exchange
     monkeypatch.setattr(broadlink, "hello", AsyncMock(return_value=device))
     client = api.YpsilonLocalClient("127.0.0.1")
     native = BroadlinkDevice(hass, SimpleNamespace(title="Core device"))
-    native.api = broadlink.Device(device.host, device.mac, device.devtype)
+    native.api = core_library.Device(device.host, device.mac, device.devtype)
     native.api.timeout = 0.08
     try:
         assert (await client.read_identity())["deviceModel"] == 9
@@ -33,6 +36,8 @@ async def test_core_device_and_runxin_use_real_async_auth_without_global_patch(h
         assert (await client.read_state({}))["resinVolume"] == 24
         assert broadlink.Device.send_packet is original_send
         assert broadlink.Device._exchange is original_exchange
+        assert core_library.Device.send_packet is original_core_send
+        assert core_library.Device._exchange is original_core_exchange
     finally:
         await client.close()
         await native.api.aclose()

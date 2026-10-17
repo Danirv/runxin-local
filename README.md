@@ -10,9 +10,9 @@ The integration communicates directly over the LAN and does not depend on the ve
 
 > **Status:** community integration, independently developed for interoperability. Not affiliated with or endorsed by ATH, BWT, Runxin or BroadLink.
 
-**From 2.10.0: Home Assistant 2026.10.0 or later is required.** The integration uses `python-broadlink>=1.0.6`, matching HA’s async BroadLink library, and preserves existing entries/entities. For older HA releases, keep 2.9.3. See [migration and recovery](docs/ha-2026-10.md).
+**From 2.10.0: Home Assistant 2026.10.0 or later is required.** From 2.10.1, the integration uses `broadlink-async>=1.1.0`, matching HA’s async BroadLink library from HA 2026.10.2, and preserves existing entries/entities. For older HA releases, keep 2.9.3. See [migration and recovery](docs/ha-2026-10.md).
 
-**Already ran HA 2026.10 with Runxin Local 2.9.3 or earlier?** Update all integrations requiring the old `broadlink` package, then rebuild Core on HA OS (`ha core rebuild`) or recreate the official Core container. An apparently working old Runxin installation does not prove that Core’s BroadLink files are intact. A clean HA 2026.10+/Runxin Local 2.10.0 installation does not require this recovery. The maintainer confirmed G6 reads and field-10 writes after rebuilding Core on 2026-10-12; see the [validation record](docs/ha-2026-10.md#maintainer-result-2026-10-12).
+**Upgrading from the shared BroadLink library?** Runxin Local 2.10.1 installs into the separate `broadlink_async` namespace: update and restart HA; no Core rebuild is required solely for this migration. Official BroadLink uses that namespace from HA 2026.10.2. If staying on HA 2026.10.0/1 with already broken official BroadLink, correct all old requirements before rebuilding/recreating Core, or upgrade HA. See [migration and recovery](docs/ha-2026-10.md), including the historical G6 validation on 2.10.0.
 
 ## Highlights
 
@@ -44,7 +44,7 @@ Supported Home Assistant targets (BroadLink BL3372 module, devtype `0x520F`):
 | Euro-Clear Midnight (ECOPRO+ head) | 12 (F105 API name) | **Experimental / Alpha**, tested on Midnight 25 | Captured state matches the controller. Writes to fields 4, 6, 10 and 43 hardware-verified; fields 7 and 47 and mechanical field-34 actions remain available for testing but are not yet hardware-verified on this model |
 | Euro-Clear Midnight (F136 / ECOPRO+ head) | 14 (F136) | **Beta**, tested on Midnight 25 | Working v2.9.1 installation; app-matched reads 4/6/7/10/43/47; controller-confirmed resin 30.0 L from U16 LE tenths. Writes 4/6/10/43 verified; writes 7/34/47 pending |
 
-**2.10.0 requires Home Assistant 2026.10.0 or later and uses its async `python-broadlink` dependency. Support status is per model:** model 1 has Alpha readings, validated manual clock controls and optional tests for other settings; model 12 remains Alpha; model 14 is Beta with confirmed resin decoding and documented pending writes. The Midnight controls and strict fresh read-back remain available; the label does not disable commands or imply that pending actions are verified. See the [model-12 evidence](docs/hardware-verification.md#euro-clear-midnight--controller-model-12) and [model-14 guide](docs/model-14-alpha.md).
+**2.10.1 requires Home Assistant 2026.10.0 or later and uses the isolated async `broadlink-async` dependency. Support status is per model:** model 1 has Alpha readings, validated manual clock controls and optional tests for other settings; model 12 remains Alpha; model 14 is Beta with confirmed resin decoding and documented pending writes. The Midnight controls and strict fresh read-back remain available; the label does not disable commands or imply that pending actions are verified. See the [model-12 evidence](docs/hardware-verification.md#euro-clear-midnight--controller-model-12) and [model-14 guide](docs/model-14-alpha.md).
 
 Diagnostics include per-model support/evidence metadata and both raw field-26 resin bytes. Model 12's observed `FA 00` still displays as **25 L**, retaining its U8 decode because that capture does not establish the high byte's meaning. Model 14's `[44, 1]` now uses **U16 little-endian × 0.1 = 30.0 L**, matching its controller photo. This is the configured resin value, distinct from nominal physical capacity; the setting is not changed.
 
@@ -209,7 +209,7 @@ Before publishing:
 python scripts/publication_check.py
 ```
 
-GitHub CI includes HACS validation, hassfest, the offline audit, the complete test suite with HA 2026.10.0/2026.10.1 and release-tag/version checks. See [development instructions](CONTRIBUTING.md).
+GitHub CI includes HACS validation, hassfest, the offline audit, the complete test suite with HA 2026.10.0/2026.10.2 and release-tag/version checks. See [development instructions](CONTRIBUTING.md).
 
 ## Branding
 

@@ -3,7 +3,7 @@
 # Resolució de problemes de connexió
 
 La descoberta, l'autenticació local i les lectures F79D són etapes diferents.
-Que `broadlink.hello()` funcioni no demostra que el dispositiu accepti control local.
+Que `broadlink_async.hello()` funcioni no demostra que el dispositiu accepti control local.
 
 ## Missatges i logs de configuració
 
@@ -38,7 +38,7 @@ per descarregar: utilitza l'avís del log o el script independent.
 
 ## Informe independent
 
-Des de l'arrel del repositori, en un entorn Python que ja tingui `python-broadlink==1.0.6`,
+Des de l'arrel del repositori, en un entorn Python que ja tingui `broadlink-async==1.1.0`,
 executa això substituint `DEVICE_IP` localment:
 
 ```bash
@@ -91,4 +91,4 @@ El controlador resultant retorna codi 1; autenticar no confirma identitat G6/mod
 
 ## Conflicte de dependència amb HA 2026.10
 
-Runxin Local 2.10.0 requereix HA 2026.10.0+ i `python-broadlink>=1.0.6` asíncrona. Si HA 2026.10 ja ha executat Runxin Local 2.9.3 o anterior, actualitza/elimina totes les integracions que requereixin `broadlink` antic i després reconstrueix/recrea Core segons la [guia de recuperació](ha-2026-10.ca.md). Es recomana aquesta recuperació encara que Runxin Local antic funcionés; cal reparar els fitxers ja sobreescrits, inclòs el falliment d’importació de `EndpointClosedError`. Una instal·lació neta de HA 2026.10+/2.10.0 no necessita reconstrucció. Actualitzar i reiniciar no restaura els fitxers sobreescrits.
+Runxin Local 2.10.1 utilitza `broadlink-async>=1.1.0` / `broadlink_async`, l’espai de noms de BroadLink oficial des de HA 2026.10.2. Actualitza Runxin i reinicia; el mòdul nou s’instal·la separat i no necessita reconstruir Core només per aquesta migració. Si BroadLink oficial ja falla amb HA 2026.10.0/1, actualitza HA a 2026.10.2+ o corregeix tots els requisits antics abans de reconstruir/recrear Core. Runxin 2.10.0 continua important el mòdul compartit també en HA més nou. Consulta la [guia de migració i recuperació per versions](ha-2026-10.ca.md).

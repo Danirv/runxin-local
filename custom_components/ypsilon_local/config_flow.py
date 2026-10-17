@@ -7,7 +7,7 @@ import asyncio
 from typing import Any
 from uuid import uuid4
 
-import broadlink.exceptions
+import broadlink_async as broadlink
 import voluptuous as vol
 
 from homeassistant import config_entries

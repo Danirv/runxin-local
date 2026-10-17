@@ -142,7 +142,7 @@ def layer_import_checks(relative: Path, source: str) -> list[str]:
             root = module.split(".")[0]
             bad = root == "homeassistant"
             if layer == "runxin":
-                bad |= root in {"broadlink", "socket", "requests", "aiohttp", "httpx", "urllib", "http", "transport", "custom_components"}
+                bad |= root in {"broadlink", "broadlink_async", "socket", "requests", "aiohttp", "httpx", "urllib", "http", "transport", "custom_components"}
             if layer == "transport":
                 bad |= root == "custom_components" or (outside_package and root != "runxin")
                 if root == "runxin":
@@ -152,7 +152,7 @@ def layer_import_checks(relative: Path, source: str) -> list[str]:
                         for allowed in ("runxin.errors", "runxin.framing")
                     )
                 if relative == Path("transport/base.py"):
-                    bad |= root == "broadlink"
+                    bad |= root in {"broadlink", "broadlink_async"}
             if bad:
                 errors.append(f"{relative} imports forbidden layer dependency {module}")
     return sorted(set(errors))

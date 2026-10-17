@@ -18,10 +18,10 @@
   "iot_class": "local_polling",
   "issue_tracker": "https://github.com/Danirv/runxin-local/issues",
   "loggers": [
-    "broadlink"
+    "broadlink_async"
   ],
   "requirements": [
-    "python-broadlink>=1.0.6"
+    "broadlink-async>=1.1.0"
   ],
-  "version": "2.10.0"
+  "version": "2.10.1"
 }

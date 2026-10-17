@@ -1,10 +1,10 @@
 # Runxin Local per a Home Assistant
 
-## Home Assistant 2026.10 i transport asíncron: 2.10.0
+## Home Assistant 2026.10 i transport asíncron: 2.10.1
 
-Des de la 2.10.0 cal **HA 2026.10.0 o posterior**. La dependència és `python-broadlink>=1.0.6`, com a BroadLink oficial de HA; es conserven entrades, entitats i polítiques dels models. Per a HA anterior, conserva la 2.9.3. [Migració, recuperació i prova al G6](ha-2026-10.ca.md).
+Des de la 2.10.0 cal **HA 2026.10.0 o posterior**. La dependència de la 2.10.1 és `broadlink-async>=1.1.0`, com a BroadLink oficial des de HA 2026.10.2; es conserven entrades, entitats i polítiques dels models. Per a HA anterior, conserva la 2.9.3. [Migració, recuperació i prova al G6](ha-2026-10.ca.md).
 
-**Ja has executat HA 2026.10 amb Runxin Local 2.9.3 o anterior?** Actualitza totes les integracions que requereixin `broadlink` antic i després reconstrueix Core a HA OS (`ha core rebuild`) o recrea el contenidor oficial de Core. Que Runxin Local antic funcioni no demostra que els fitxers BroadLink de Core estiguin intactes. Una instal·lació neta de HA 2026.10+/Runxin Local 2.10.0 no necessita aquesta recuperació. El mantenidor va confirmar lectures al G6 i escriptures del camp 10 després de reconstruir Core el 2026-10-12; consulta el [registre de validació](ha-2026-10.ca.md#resultat-del-mantenidor-2026-10-12).
+**Actualitzes des de la biblioteca BroadLink compartida?** Runxin Local 2.10.1 s’instal·la en l’espai separat `broadlink_async`: actualitza i reinicia HA; no cal reconstruir Core només per aquesta migració. BroadLink oficial utilitza aquest espai des de HA 2026.10.2. Si continues amb HA 2026.10.0/1 i BroadLink oficial ja falla, corregeix tots els requisits antics abans de reconstruir/recrear Core, o actualitza HA. Consulta la [migració i recuperació](ha-2026-10.ca.md), que conserva la validació històrica del G6 amb la 2.10.0.
 
 Integració local per a descalcificadors compatibles amb **Runxin F79D + BroadLink BL3372**, amb el Ypsilon G6 com a maquinari de referència i suport experimental per al Euro-Clear Midnight.
 
