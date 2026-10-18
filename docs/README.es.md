@@ -1,14 +1,20 @@
 # Runxin Local para Home Assistant
 
+## Modelos 1 y 12 en Beta — 2.10.2
+
+El modelo 1 / F150 pasa a **Beta**. El consumo diario contrastado con el controlador usa `total_increasing` y se puede seleccionar en el panel de Energía. Las demás lecturas recuperan las estadísticas normales; solo resina y capacidad por ciclo siguen sin unidad confirmada ni estadísticas. La media semanal no es un contador acumulativo. Se conservan entradas, entidades y todos los permisos de escritura. No se piden más pruebas al colaborador de la issue #17.
+
+El modelo 12 / F105 (Euro-Clear Midnight 25) también pasa a **Beta**, a partir de las lecturas capturadas y las escrituras 4/6/10/43 ya verificadas. Las escrituras 7/34/47 siguen pendientes; se conservan controles, permisos y conversión de resina.
+
 ## Home Assistant 2026.10 y transporte asíncrono: 2.10.1
 
 Desde 2.10.0 se requiere **HA 2026.10.0 o posterior**. La dependencia de 2.10.1 es `broadlink-async>=1.1.0`, como BroadLink oficial desde HA 2026.10.2; se conservan entradas, entidades y políticas de los modelos. Para HA anterior, conserva 2.9.3. [Migración, recuperación y prueba en el G6](ha-2026-10.es.md).
 
 **¿Actualizas desde la biblioteca BroadLink compartida?** Runxin Local 2.10.1 se instala en el espacio separado `broadlink_async`: actualiza y reinicia HA; no hace falta reconstruir Core solo por esta migración. BroadLink oficial utiliza ese espacio desde HA 2026.10.2. Si continúas con HA 2026.10.0/1 y BroadLink oficial ya falla, corrige todos los requisitos antiguos antes de reconstruir/recrear Core, o actualiza HA. Consulta la [migración y recuperación](ha-2026-10.es.md), que conserva la validación histórica del G6 con 2.10.0.
 
-Integración local para descalcificadores compatibles con **Runxin F79D + BroadLink BL3372**, con el Ypsilon G6 como hardware de referencia y soporte experimental para Euro-Clear Midnight.
+Integración local para descalcificadores compatibles con **Runxin F79D + BroadLink BL3372**, con el Ypsilon G6 como hardware de referencia y soporte Beta para Euro-Clear Midnight.
 
-El **modelo 1 / F150** tiene una Alpha de lecturas con reloj manual validado en 2.9.3: sensores periódicos, sin escrituras automáticas, con pruebas manuales opcionales en 2.9.1. Las lecturas son provisionales, sin estadísticas a largo plazo; la resina y la cantidad por ciclo no tienen unidad asumida. [Guia](model-1-alpha.es.md).
+El **modelo 1 / F150** tiene lecturas Beta desde 2.10.2; empezó con una Alpha de lecturas con reloj manual validado en 2.9.3: sensores periódicos, sin escrituras automáticas, con pruebas manuales opcionales en 2.9.1. Desde 2.10.2 las estadísticas son normales; resina y cantidad por ciclo siguen sin unidad asumida ni estadísticas. [Guia](model-1-alpha.es.md).
 
 
 En **2.9.3**, el modelo 1 tiene opciones desactivadas por defecto para probar ajustes adicionales 6/10/43/47 y una segunda opción para iniciar una regeneración prevista. Las escrituras manuales del reloj y la restauración mediante sincronización manual (campo 4) están verificadas; las demás siguen pendientes. El reloj automático, el campo 7 y el avance de fases siguen bloqueados. [Instrucciones](model-1-alpha.es.md).
@@ -39,11 +45,11 @@ La tabla del fabricante asocia 9 con F79D, 12 con F105 y 14 con F136; solo descr
 
 El botón de regeneración solo inicia el ciclo tras una lectura nueva que confirme servicio y vacaciones desactivadas, y rechaza peticiones simultáneas. Envía la misma orden una sola vez y comprueba la fase resultante. Los enums sin correspondencia muestran el código decimal y conservan `raw_code`; las etiquetas conocidas se mantienen y los datos ausentes son `unknown`. El reloj admite un minuto de avance dentro de los 60 segundos posteriores a la escritura, también a medianoche, solo si una lectura previa nueva demuestra que el valor del minuto siguiente ha cambiado; la hora de regeneración exige coincidencia exacta.
 
-## Nueva compatibilidad en la 2.7.0
+## Euro-Clear Midnight / modelo 12
 
-El **Euro-Clear Midnight (controlador modelo 12)** tiene soporte **experimental / Alpha**, probado con un Midnight 25 con cabezal ECOPRO+ y BroadLink BL3372 (`0x520F`). Las capturas coinciden con la pantalla del controlador; las escrituras de los campos 4, 6, 10 y 43 están verificadas físicamente. Los campos 7 y 47 y las acciones mecánicas del campo 34 siguen disponibles para pruebas, pero todavía no están verificados en este modelo.
+El **Euro-Clear Midnight (controlador modelo 12)** tiene soporte **Beta desde 2.10.2**, probado con un Midnight 25 con cabezal ECOPRO+ y BroadLink BL3372 (`0x520F`). Las capturas coinciden con la pantalla del controlador; las escrituras de los campos 4, 6, 10 y 43 están verificadas físicamente. Los campos 7 y 47 y las acciones mecánicas del campo 34 siguen disponibles para pruebas, pero todavía no están verificados en este modelo.
 
-El modelo 12 conserva el soporte Alpha y los controles existentes. Se conservan los controles y la verificación estricta del PR original; el soporte del G6 no cambia. Los diagnósticos incluyen la evidencia por modelo y los dos bytes originales del campo 26. `FA 00` sigue mostrándose como **25 L**; esta captura no determina el significado del segundo byte ni el códec de volúmenes superiores a 25,5 L.
+El modelo 12 pasa a Beta sin cambiar los controles existentes ni añadir verificaciones físicas nuevas. Se conservan los controles y la verificación estricta del PR original; el soporte del G6 no cambia. Los diagnósticos incluyen la evidencia por modelo y los dos bytes originales del campo 26. `FA 00` sigue mostrándose como **25 L**; esta captura no determina el significado del segundo byte ni el códec de volúmenes superiores a 25,5 L.
 
 Consulta las [pruebas pendientes del modelo 12](hardware-verification.es.md#euro-clear-midnight--modelo-de-controlador-12).
 
@@ -82,7 +88,7 @@ Consulta la [guía de resolución de problemas](troubleshooting.es.md) para dist
 
 ## Seguridad
 
-La integración puede cambiar parámetros e iniciar movimientos de válvula. No es un controlador de seguridad certificado ni debe ser la única protección contra fugas o inundaciones. Conocer el códec no equivale a verificar la acción física. En la compatibilidad Alpha del modelo 12, los controles pendientes siguen disponibles con esta limitación documentada.
+La integración puede cambiar parámetros e iniciar movimientos de válvula. No es un controlador de seguridad certificado ni debe ser la única protección contra fugas o inundaciones. Conocer el códec no equivale a verificar la acción física. En el soporte Beta del modelo 12, los controles pendientes siguen disponibles con esta limitación documentada.
 
 Consulta el [README principal](../README.md), [`waterdevice-audit.es.md`](waterdevice-audit.es.md), [`f79d.es.md`](f79d.es.md), [`hardware-verification.es.md`](hardware-verification.es.md), [SECURITY](../SECURITY.md) y [LEGAL](../LEGAL.md).
 

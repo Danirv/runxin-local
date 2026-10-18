@@ -110,7 +110,9 @@ async def test_test_controls_preserve_reference_sensors_and_exclude_flow_cutoff(
     await sensor_mod.async_setup_entry(hass, entry, lambda group: references.extend(group))
     assert {e.entity_description.key for e in references} >= {"reference_clock", "reference_hardness"}
     for sensor in references:
-        assert sensor.state_class is None
+        desc = sensor.entity_description
+        expected = None if desc.key in ("resin_volume", "periodic_water") else desc.state_class
+        assert sensor.state_class == expected
         assert sensor.extra_state_attributes["read_only"] is False
     assert len({e.unique_id for e in (*entities, *references)}) == len(entities) + len(references)
     client.write_fields.assert_not_called()

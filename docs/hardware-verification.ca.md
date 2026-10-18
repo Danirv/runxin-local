@@ -82,7 +82,7 @@ El camp 43 té SET/read-back local verificat i canvi observat per cloud. La seva
 
 ## Euro-Clear Midnight / model de controlador 12
 
-**Suport experimental / Alpha, limitat al model 12 i provat inicialment amb Midnight 25.** Els controls continuen disponibles per validar-los i conserven el read-back estricte; aquest estat no certifica les ordres pendents. L'evidència del G6 no es transfereix automàticament al model 12. El catàleg compartit `FieldSpec` descriu l'evidència del G6 de referència; l'evidència per model és a `models.py` i als diagnòstics.
+**Suport Beta des de 2.10.2, limitat al model 12 i provat inicialment amb Midnight 25.** La promoció es basa en les lectures capturades i les escriptures verificades de sota; no afegeix proves físiques noves. Els controls continuen disponibles per validar-los i conserven el read-back estricte; aquest estat no certifica les ordres pendents. L'evidència del G6 no es transfereix automàticament al model 12. El catàleg compartit `FieldSpec` descriu l'evidència del G6 de referència; l'evidència per model és a `models.py` i als diagnòstics.
 
 Maquinari: Euro-Clear Midnight 25 (capçal ECOPRO+) amb mòdul BroadLink BL3372 (devtype `0x520F`), que informa `deviceModel` 12. Provat el 2026-10-04 amb la vàlvula en servei i les vacances desactivades.
 

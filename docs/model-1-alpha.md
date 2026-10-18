@@ -1,18 +1,22 @@
-# Controller model 1 / F150: Alpha readings, validated manual clock
+# Controller model 1 / F150: Beta readings, validated manual clock
 
 [English](model-1-alpha.md) | [Català](model-1-alpha.ca.md) | [Español](model-1-alpha.es.md)
 
+## Beta readings in 2.10.2
+
+Model 1 / F150 now uses normal reading statistics, with daily consumption available to the Energy dashboard as `total_increasing`. Only resin and per-cycle capacity retain unconfirmed units and no statistics. Weekly average remains a non-cumulative value without a state class. Existing entities, setup defaults, manual clock and optional-write policies are preserved. No further tests are requested from the issue #17 contributor.
+
 Controller code **1** has been supported since **2.9.0** with continuous reference sensors; **2.9.3** adds validated manual clock controls without experimental options. The public manufacturer's enumeration calls this code **F150**; the commercial product and valve identity in issue #17 are unconfirmed. This does not claim support for every F150-branded product or firmware.
 
-The integration release is stable; Alpha describes support for this particular model.
+The integration release is stable; model-1 support is Beta from 2.10.2. Pending writes and unresolved units remain documented separately.
 
-## Install and compare
+## Installation
 
-1. Install version 2.9.3 or later through HACS, or download the release ZIP and copy only `custom_components/ypsilon_local` to `/config/custom_components/ypsilon_local`. Keep a backup of the previous integration folder and restart Home Assistant. Do not install `runxin_local`; the domain-migration pilot is separate.
+1. Install version 2.10.2 or later through HACS, or download the release ZIP and copy only `custom_components/ypsilon_local` to `/config/custom_components/ypsilon_local`. Keep a backup of the previous integration folder and restart Home Assistant. Do not install `runxin_local`; the domain-migration pilot is separate.
 2. If you saved a diagnostic-only entry for this device, download its report first, then delete that entry before adding the device normally. Diagnostic entries have no operational entities and are not silently converted.
-3. Add **Runxin Local**, enter the local IP, and accept the **Alpha with validated manual clock controls** explanation. Default polling is once per minute, with adaptive polling off. Automatic clock correction remains blocked even if an old option is enabled. Manual clock controls are available.
-4. Open the device and compare its sensors with the working vendor app. Some reference/diagnostic entities are disabled by default; enable them in the entity list if useful. No settings need to be changed to make a comparison.
-5. From the integration entry menu, **Download diagnostics** and attach the JSON to the existing issue. This exports the last cached state and does not trigger another scan. Include a few app readings with their units and approximate comparison time; redact account/device identifiers in screenshots.
+3. Add **Runxin Local**, enter the local IP, and accept the **Model-1 Beta readings and manual clock controls** explanation. Default polling is once per minute, with adaptive polling off. Automatic clock correction remains blocked even if an old option is enabled. Manual clock controls are available.
+4. Open the device to view its sensors. Optional comparisons can use the working vendor app. Some reference/diagnostic entities are disabled by default; enable them in the entity list if useful. No settings need to be changed to make a comparison.
+5. If reporting a new problem, **Download diagnostics** from the integration entry menu. It exports cached state without another scan. No additional report or comparison is needed from the issue #17 contributor. Redact identifiers from any screenshots.
 
 The domain, config-entry version and G6/Midnight entity identities stay unchanged. A normal integration setup authenticates and polls, so it is a small amount of active LAN traffic. If the app and HA interfere, pause HA polling or disable the entry temporarily while collecting app screenshots; it does not need to be unpaired.
 
@@ -25,7 +29,7 @@ The domain, config-entry version and G6/Midnight entity identities stay unchange
 
 From **2.9.3**, **Device clock** and the **manual Sync clock button** are validated controls available without experimental options. Their existing unique IDs and strict fresh read-back are preserved. Setup, polling and reloads do not initiate clock writes. The other settings require the optional experimental mode described below, and regeneration start has a separate opt-in. Administrator services, the coordinator and adapter enforce the same field-level permissions; granting field 4 does not allow arbitrary writes or automatic clock correction.
 
-Numeric model-1 readings remain provisional: these entities have **no long-term statistics state class**. Ordinary recorder history can still be retained. Known enum labels use the reference table except the physically confirmed language code 7 → Dutch; unmapped values retain their numeric codes.
+From **2.10.2**, model-1 readings are **Beta** and use ordinary sensor statistics. Daily consumption is a `total_increasing` water counter and can be added to the Energy dashboard. Only resin and per-cycle quantity retain unconfirmed units and no long-term statistics. The weekly average remains without a state class, like the other models. Known enum labels use the reference table except the physically confirmed language code 7 → Dutch; unmapped values retain their numeric codes.
 
 ## Optional experimental settings
 
@@ -44,24 +48,24 @@ Open **Settings → Devices & services → Runxin Local → Configure** for the 
 
 **Automatic clock correction stays off**, even if an old option says otherwise. **Field 7 / flow cutoff stays blocked**, even if the unit changes: this unit reported code 1, while the established writable cutoff is calibrated for code 2. Vacation writes and resin/capacity writes are not enabled.
 
-Turning the experimental settings option off removes only the additional test controls and also disables regeneration tests. Device clock and manual Sync clock remain available. The old write session is revoked/replaced; reference sensors, unique IDs, raw bytes, unconfirmed units and absence of provisional long-term statistics are preserved across upgrades, restarts and option changes.
+Turning the experimental settings option off removes only the additional test controls and also disables regeneration tests. Device clock and manual Sync clock remain available. The old write session is revoked/replaced; reference sensors, unique IDs, raw bytes, unconfirmed units and statistics exclusions for uncalibrated fields are preserved across upgrades, restarts and option changes.
 
 Diagnostics report model-default evidence separately from the effective `write_policy` (enabled test options, permitted fields, adapter restrictions and automatic-clock permission). Download them after each completed test sequence; exporting diagnostics does not query or write the device. G6/model-12/model-14 policy and conversions are unaffected.
 
-## Priority comparisons from issue #17
+## Field-specific calibration backlog
 
 | Field | Reported reference | Compare with the app |
 |---|---|---|
 | 26, resin | Raw `F0 00`, first byte 240 | Resin volume/capacity and unit. HA shows 240 **without L**, with no guessed multiplier. |
 | 41–42, per-cycle quantity | Reference 15 | The contributor changed 24 → 15 under Runxin Advanced → Water treatment capacity. The manufacturer distinguishes this from resin volume; confirm its unit and local-field correspondence. HA keeps 15 **without an assumed unit**. |
 | 35–36, remaining quantity | Reference 1304 L | Remaining capacity and unit, close to the HA snapshot time. |
-| 37–40, daily/weekly quantities | Reference 215 / 192 L | Daily consumption and the controller's weekly average, not necessarily an app history total. |
+| 37–40, daily/weekly quantities | Reference 215 / 192 L | Daily consumption now agrees with controller history (issue #17); weekly average remains distinct from an app history total. |
 | 47, hardness | Reference 280 mg/L | Exact label, value and hardness scale. |
 | 43, added salt | Reference 25 kg | Bookkeeping amount, not a measured tank level. |
 | 4/5/10, clocks/schedule | 20:38 / 00:00 / 00:00 | Clock and visible regeneration schedule; values naturally change over time. |
 | 6/7/15/17/19/21/23 | Raw values and programme times | Protection settings, programme durations and maximum interval, wherever visible. |
 
-Resin and per-cycle capacity are uncalibrated. Other displayed units/scales are reference candidates, not independently validated measurements. The second resin byte is preserved without assuming a U16 codec. Field 52 remains cached separately; its raw bytes may be older than the rest of the snapshot.
+Resin and per-cycle capacity are uncalibrated. Daily consumption has been compared with the physical controller; other fields retain the shared F79D interpretation with the evidence recorded below. The second resin byte is preserved without assuming a U16 codec. Field 52 remains cached separately; its raw bytes may be older than the rest of the snapshot.
 
 ## Confirmed comparisons in 2.9.3
 
@@ -81,7 +85,7 @@ At 19:41:45 local time, HA reported brine draw and slow rinse while the controll
 
 After the cycle, HA showed remaining capacity **3429 L**, compared with **1267 L** reported on 8 October. This records a capacity recovery after regeneration; it is not an independent calibration of its units. Reported hardness remained 280 mg/L, resin `F0 00` / reference 240 and per-cycle reference 15. Assuming hardness expressed as CaCO₃, `3.429 m³ × 28 °f ≈ 96 °f·m³`, or about `4 °f·m³/L` for nominal 24 L resin. This is a consistency check, not a configured-resin comparison or proof of the 0.1 conversion. The contributor recalls an L label beside the old setting but is unsure; its unit and exact local-field correspondence remain pending.
 
-These observations add operational and phase-reading evidence without changing the model's Alpha status, codecs, permissions or provisional units. The remaining comparisons above are a calibration backlog; no further tests, screenshots or diagnostic reports are requested from this contributor. The original connection/setup issue can be closed independently of those pending validations.
+These observations add operational and phase-reading evidence without changing codecs or permissions. The later 2.10.2 Beta promotion enables normal reading statistics while preserving unresolved units. The remaining comparisons above are a calibration backlog; no further tests, screenshots or diagnostic reports are requested from this contributor. The original connection/setup issue can be closed independently of those pending validations.
 
 ## Evidence and next steps
 

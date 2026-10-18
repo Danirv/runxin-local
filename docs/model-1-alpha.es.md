@@ -1,22 +1,26 @@
-# Controlador modelo 1 / F150: lecturas Alpha y reloj manual validado
+# Controlador modelo 1 / F150: lecturas Beta y reloj manual validado
 
 [English](model-1-alpha.md) | [Català](model-1-alpha.ca.md) | [Español](model-1-alpha.es.md)
 
+## Lecturas Beta del modelo 1 — 2.10.2
+
+El modelo 1 / F150 pasa a **Beta**. El consumo diario contrastado con el controlador usa `total_increasing` y se puede seleccionar en el panel de Energía. Las demás lecturas recuperan las estadísticas normales; solo resina y capacidad por ciclo siguen sin unidad confirmada ni estadísticas. La media semanal no es un contador acumulativo. Se conservan entradas, entidades y todos los permisos de escritura. No se piden más pruebas al colaborador de la issue #17.
+
 **2.9.0** admite el código **1** con sensores de lectura periódica. El fabricante llama a este código **F150**, pero la identidad comercial del equipo de la issue #17 no está confirmada. No es soporte general para cualquier producto F150.
 
-La release de la integración es estable; Alpha describe solo el soporte de este modelo.
+La release de la integración es estable. Desde 2.10.2 este modelo tiene soporte Beta; las escrituras pendientes y unidades inciertas se documentan por separado.
 
-1. Instala la versión 2.9.3 o posterior con HACS, o descarga el ZIP de la release y copia solo `custom_components/ypsilon_local` a `/config/custom_components/ypsilon_local`. Conserva una copia de la carpeta anterior y reinicia HA. Esta Alpha conserva el dominio; no requiere migrar a `runxin_local`.
+1. Instala la versión 2.10.2 o posterior con HACS, o descarga el ZIP de la release y copia solo `custom_components/ypsilon_local` a `/config/custom_components/ypsilon_local`. Conserva una copia de la carpeta anterior y reinicia HA. Este soporte conserva el dominio; no requiere migrar a `runxin_local`.
 2. Si existe una entrada exclusivamente de diagnóstico del mismo dispositivo, descarga primero su informe y elimina esa entrada antes de añadir el equipo normalmente.
-3. Añade **Runxin Local**, introduce la IP y acepta la explicación **Alpha con controles manuales del reloj validados**. Consulta cada minuto por defecto, sin cadencia adaptativa. La corrección automática del reloj queda bloqueada aunque una opción antigua esté activada.
-4. Compara los sensores con la app. Puedes habilitar las entidades de diagnóstico que estén desactivadas por defecto. No cambies ajustes para tomar capturas.
-5. Descarga los diagnósticos desde el menú de la entrada y adjunta el JSON a la issue existente con algunos valores/capturas, unidades y hora aproximada. La descarga exporta el estado guardado y no inicia otra exploración. Oculta identificadores en las capturas.
+3. Añade **Runxin Local**, introduce la IP y acepta la explicación **Lecturas Beta del modelo 1 y controles manuales del reloj**. Consulta cada minuto por defecto, sin cadencia adaptativa. La corrección automática del reloj queda bloqueada aunque una opción antigua esté activada.
+4. Consulta los sensores; opcionalmente puedes compararlos con la app. Puedes habilitar las entidades de diagnóstico que estén desactivadas por defecto. No cambies ajustes para tomar capturas.
+5. Si informas de un problema nuevo, descarga los diagnósticos desde el menú de la entrada. Exporta datos guardados sin otra exploración. No hace falta ningún otro informe o comparación del colaborador de la issue #17. Oculta identificadores de las capturas.
 
 En **2.9.3**, el **reloj del dispositivo** y el **botón de sincronización manual** son controles validados disponibles sin activar ajustes experimentales. Conservan sus identificadores y la comprobación con lectura nueva. El alta, las consultas y las recargas no inician escrituras del reloj. Los demás ajustes requieren el modo experimental y la regeneración tiene una segunda opción. Servicios administrativos, coordinador y adaptador imponen los mismos permisos por campo; habilitar el campo 4 no permite otras escrituras ni corrección automática.
 
-Las lecturas numéricas usan interpretaciones **F79D de referencia pendientes de validación con la app**. No generan estadísticas de largo plazo; el historial ordinario puede conservarse. Los atributos y diagnósticos incluyen los dos bytes recibidos por campo (`state._rawFieldBytes`), sin paquetes completos, claves ni sesiones. Recibir zero/false no demuestra aplicabilidad.
+Desde **2.10.2** las lecturas Beta usan las estadísticas normales de los sensores. El consumo diario contrastado con el controlador tiene `total_increasing` y se puede añadir al panel de Energía. Solo resina y capacidad por ciclo mantienen unidades pendientes y ninguna estadística; la media semanal sigue sin clase estadística como en los demás modelos. Los atributos y diagnósticos incluyen los dos bytes recibidos por campo (`state._rawFieldBytes`), sin paquetes completos, claves ni sesiones. Recibir zero/false no demuestra aplicabilidad.
 
-Comparaciones prioritarias:
+Puntos de calibración por campo:
 
 | Campo | Referencia del informe | Pendiente |
 |---|---|---|
@@ -50,7 +54,7 @@ A las 19:41:45, hora local, HA mostraba aspiración de salmuera y enjuague lento
 
 Después del ciclo, HA mostraba capacidad restante **3429 L**, frente a los **1267 L** reportados el 8 de octubre. Se registra una recuperación de capacidad tras regenerar, sin calibración independiente de la unidad. Se mantienen dureza 280 mg/L, resina `F0 00` / referencia 240 y referencia por ciclo 15. Suponiendo dureza expresada como CaCO₃, `3,429 m³ × 28 °f ≈ 96 °f·m³`, unos `4 °f·m³/L` para los 24 L nominales de resina. Es una comprobación de coherencia, no una comparación con la resina configurada ni una prueba de la escala 0,1. El usuario recuerda una etiqueta L junto al ajuste antiguo, pero no está seguro; la unidad y correspondencia exacta con el campo local siguen pendientes.
 
-Se incorpora evidencia de funcionamiento y de una fase, sin cambiar Alpha, códecs, permisos ni unidades provisionales. Las comparaciones anteriores son puntos de calibración pendientes: no se piden más pruebas, capturas ni diagnósticos a este contribuyente. La incidencia original de conexión/alta puede cerrarse independientemente de estas validaciones.
+Se incorpora evidencia de funcionamiento y de una fase, sin cambiar códecs ni permisos; la posterior 2.10.2 promueve lecturas a Beta manteniendo las dos unidades pendientes. Las comparaciones anteriores son puntos de calibración pendientes: no se piden más pruebas, capturas ni diagnósticos a este contribuyente. La incidencia original de conexión/alta puede cerrarse independientemente de estas validaciones.
 
 ## Ajustes experimentales opcionales
 
@@ -62,4 +66,4 @@ Una **segunda opción** permite iniciar una regeneración prevista y requiere ta
 
 El **reloj automático**, el **campo 7**, vacaciones y escrituras de resina/capacidad siguen bloqueados. El dispositivo devolvió unidad 1; el control del umbral de caudal está calibrado para unidad 2. Las lecturas de resina y capacidad siguen siendo provisionales.
 
-Desactivar los ajustes experimentales elimina solo los controles adicionales y desactiva también la prueba de regeneración. El reloj y la sincronización manuales siguen disponibles. Se revoca y sustituye la sesión anterior; se conservan sensores de referencia, identificadores, bytes y ausencia de estadísticas provisionales, también tras actualizar o reiniciar. Los diagnósticos separan evidencia del modelo y permisos efectivos. Exportarlos no inicia lecturas ni escrituras. G6 y modelos 12/14 mantienen su política.
+Desactivar los ajustes experimentales elimina solo los controles adicionales y desactiva también la prueba de regeneración. El reloj y la sincronización manuales siguen disponibles. Se revoca y sustituye la sesión anterior; se conservan sensores de referencia, identificadores, bytes y exclusión estadística de campos sin unidades confirmadas, también tras actualizar o reiniciar. Los diagnósticos separan evidencia del modelo y permisos efectivos. Exportarlos no inicia lecturas ni escrituras. G6 y modelos 12/14 mantienen su política.

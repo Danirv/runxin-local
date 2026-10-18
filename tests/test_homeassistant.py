@@ -454,7 +454,7 @@ async def test_diagnostics_include_model_evidence_and_raw_resin_bytes(hass):
     entry.runtime_data = coordinator
     diagnostics = await diagnostics_mod.async_get_config_entry_diagnostics(hass, entry)
     support = diagnostics["protocol"]["model_support"]
-    assert support["support_level"] == "alpha"
+    assert support["support_level"] == "beta"
     assert support["hardware_verified_write_fields"] == [4, 6, 10, 43]
     assert support["pending_write_fields"] == [7, 34, 47]
     assert diagnostics["state"]["_raw_resinVolumeBytes"] == (250, 0)
