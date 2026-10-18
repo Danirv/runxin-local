@@ -78,6 +78,10 @@ def test_models_default_to_read_only_and_evidence_does_not_enable_writes():
         assert not models.controller_model(code).read_only
     assert models.controller_model(True) is None
     assert models.controller_protocol_name(1) == 'F150'
+    model = models.controller_model(1)
+    assert model.support_level == 'beta'
+    assert not model.provisional_readings
+    assert model.unconfirmed_unit_fields == {'resinVolume', 'periodicWaterProduction'}
 
 
 @pytest.mark.asyncio

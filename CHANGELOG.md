@@ -2,7 +2,15 @@
 
 All notable changes to this project are documented here.
 
-## [2.10.1] - Unreleased
+## [2.10.2] - Unreleased
+
+- Promote controller model 1 / F150 to Beta following issue #17's normal setup, polling/restart recovery, manual clock and daily-consumption comparisons with the physical controller.
+- Enable ordinary model-1 sensor statistics, including the daily water counter (`total_increasing`) for the Energy dashboard. Keep the controller weekly average and per-cycle quantity without a state class, as on other models.
+- Limit conversion uncertainty to resin volume and per-cycle capacity: preserve raw values, no assumed units, no long-term statistics and explicit per-field diagnostic markers. Do not change codecs or infer a resin multiplier.
+- Preserve model-1 reference sensor IDs, setup defaults, manual clock controls and all existing write restrictions/opt-ins. Models 9/12/14, transport and dependency requirements are unchanged.
+- Update English/Catalan/Spanish setup and documentation. No further contributor tests are required to resolve issue #17.
+
+## [2.10.1] - 2026-10-17
 
 - Migrate to `broadlink-async>=1.1.0` and the separate `broadlink_async` import/logger namespace, matching official BroadLink from HA 2026.10.2 and removing Runxin's shared-directory collision with legacy BroadLink packages. Keep minimum HA 2026.10.0.
 - Update transport, config-flow exception types, read-only compatibility collection and standalone diagnostics. Reports retain `broadlink_version` and identify `broadlink_distribution` explicitly.

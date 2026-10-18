@@ -155,7 +155,7 @@ Raw resin 240 and per-cycle reference 15 remain distinct, uncalibrated readings.
 
 The [later issue #17 report](https://github.com/Danirv/runxin-local/issues/17#issuecomment-6101162421) confirms normal polling and reading recovery after HA restarts, plus agreement with the physical display for brine draw / slow up-flow rinse. It does not validate all regeneration phases or configured durations: earlier aborted attempts are excluded, and the approximate refill observation used 60-second polling. The HA regeneration option stayed off, so field-34 write verification remains pending.
 
-HA reported remaining capacity 3429 L after the cycle, with resin raw 240 and per-cycle reference 15 unchanged. These are reported readings and a consistency check, not an independent confirmation of resin scaling or capacity units. The old setting's L label is recalled with uncertainty. Alpha and pending writes remain unchanged; no additional contributor tests or reports are requested. The original connection/setup issue may be closed independently. See [the detailed operation record](model-1-alpha.md#operation-reported-after-regeneration-on-293).
+HA reported remaining capacity 3429 L after the cycle, with resin raw 240 and per-cycle reference 15 unchanged. These are reported readings and a consistency check, not an independent confirmation of resin scaling or capacity units. The old setting's L label is recalled with uncertainty. At the time of that report Alpha and pending writes were unchanged; 2.10.2 subsequently promotes readings to Beta. No additional contributor tests or reports are requested. The original connection/setup issue may be closed independently. See [the detailed operation record](model-1-alpha.md#operation-reported-after-regeneration-on-293).
 
 ## Euro-Clear Midnight / controller model 14 (F136)
 
@@ -172,3 +172,9 @@ Field 52 is intentionally not part of the normal 1..51 state block. The Ypsilon 
 Evidence from one controller/firmware must not be silently generalised to all Runxin devices. Before extending support to another transport, rebrand or firmware, verify the field codec and the physical semantics independently.
 
 See also [`waterdevice-audit.md`](waterdevice-audit.md) for the complete legacy-app/device evidence summary.
+
+## Model 1 / F150: daily consumption and Beta readings in 2.10.2
+
+In [issue #17's controller comparison](https://github.com/Danirv/runxin-local/issues/17#issuecomment-6176732533), the contributor confirms daily consumption agrees with the physical controller and supplies history/photos. Completed days show matching readings (including 136, 228, 95 and 172 L). The [follow-up](https://github.com/Danirv/runxin-local/issues/17#issuecomment-6248768660) confirms setup, polling and clock sync work and requests the daily sensor in the Energy dashboard.
+
+Version 2.10.2 promotes model-1 readings to Beta and uses the ordinary sensor state classes. Daily consumption uses `total_increasing`, which accepts daily resets. Weekly average and per-cycle quantity remain without a state class. Resin/per-cycle values are still uncalibrated and unitless, with no statistics; no resin conversion is inferred from nominal capacity. Existing write permissions and pending evidence are unchanged. The software regression uses synthetic daily increases/reset values to check HA metadata, not a new hardware test. No further contributor tests are requested.

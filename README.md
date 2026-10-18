@@ -39,12 +39,12 @@ Supported Home Assistant targets (BroadLink BL3372 module, devtype `0x520F`):
 
 | Product | Runxin controller model (field 1) | Support | Evidence |
 |---|---|---|---|
-| Unbranded device reported in issue #17 | 1 (F150 API name) | **Alpha readings; validated manual clock controls** | All 52 fields received; optional manual configuration/start tests in 2.9.1; manual clock writes/sync verified; other writes and numeric app conversions pending |
+| Unbranded device reported in issue #17 | 1 (F150 API name) | **Beta readings; validated manual clock controls** | Normal polling/restart recovery, manual clock and daily consumption confirmed; ordinary sensor statistics; resin/per-cycle units and other writes remain pending |
 | ATH/BWT Ypsilon G6 | 9 (F79D) | Reference hardware | Per-field read/write evidence documented in the hardware verification guide |
 | Euro-Clear Midnight (ECOPRO+ head) | 12 (F105 API name) | **Experimental / Alpha**, tested on Midnight 25 | Captured state matches the controller. Writes to fields 4, 6, 10 and 43 hardware-verified; fields 7 and 47 and mechanical field-34 actions remain available for testing but are not yet hardware-verified on this model |
 | Euro-Clear Midnight (F136 / ECOPRO+ head) | 14 (F136) | **Beta**, tested on Midnight 25 | Working v2.9.1 installation; app-matched reads 4/6/7/10/43/47; controller-confirmed resin 30.0 L from U16 LE tenths. Writes 4/6/10/43 verified; writes 7/34/47 pending |
 
-**2.10.1 requires Home Assistant 2026.10.0 or later and uses the isolated async `broadlink-async` dependency. Support status is per model:** model 1 has Alpha readings, validated manual clock controls and optional tests for other settings; model 12 remains Alpha; model 14 is Beta with confirmed resin decoding and documented pending writes. The Midnight controls and strict fresh read-back remain available; the label does not disable commands or imply that pending actions are verified. See the [model-12 evidence](docs/hardware-verification.md#euro-clear-midnight--controller-model-12) and [model-14 guide](docs/model-14-alpha.md).
+**2.10.2 requires Home Assistant 2026.10.0 or later and uses the isolated async `broadlink-async` dependency. Support status is per model:** model 1 has Beta readings, daily-consumption statistics, validated manual clock controls and optional tests for other settings; model 12 remains Alpha; model 14 is Beta with confirmed resin decoding and documented pending writes. The Midnight controls and strict fresh read-back remain available; the label does not disable commands or imply that pending actions are verified. See the [model-12 evidence](docs/hardware-verification.md#euro-clear-midnight--controller-model-12) and [model-14 guide](docs/model-14-alpha.md).
 
 Diagnostics include per-model support/evidence metadata and both raw field-26 resin bytes. Model 12's observed `FA 00` still displays as **25 L**, retaining its U8 decode because that capture does not establish the high byte's meaning. Model 14's `[44, 1]` now uses **U16 little-endian × 0.1 = 30.0 L**, matching its controller photo. This is the configured resin value, distinct from nominal physical capacity; the setting is not changed.
 
@@ -52,7 +52,7 @@ Other rebranded devices using the same controller/module may work, but compatibi
 
 Device-language labels follow confirmed controller observations where available: model 1/code 7 is Dutch, and G6 model 9/code 3 is Spanish. Other pairs keep the reference mapping and unknown codes remain visible. See [language evidence](docs/f79d-settings.md#controller-language-evidence-293).
 
-For model 1, see the [Alpha comparison and write-testing guide](docs/model-1-alpha.md). Numeric readings are provisional; resin and per-cycle quantity have no assumed units, and provisional numeric readings do not generate long-term statistics. Device clock and manual Sync clock are validated and available without experimental options. Other model-1 write tests are off by default and can be enabled in the integration options; regeneration start has a separate opt-in. Automatic clock correction, flow-cutoff writes and phase advancement stay blocked. The policy preserves G6/Midnight controls and conversions.
+For model 1, see the [Beta readings and scoped controls guide](docs/model-1-alpha.md). Readings use ordinary sensor statistics, including daily consumption for the Energy dashboard. Only resin and per-cycle quantity retain unconfirmed units and no long-term statistics. Device clock and manual Sync clock are validated and available without experimental options. Other model-1 write tests are off by default and can be enabled in the integration options; regeneration start has a separate opt-in. Automatic clock correction, flow-cutoff writes and phase advancement stay blocked. The policy preserves G6/Midnight controls and conversions.
 
 ## Installation
 
@@ -107,7 +107,7 @@ The raw **Operating status** entity remains available independently. Adaptive po
 
 The integration intentionally distinguishes controller counters from derived/history views:
 
-For provisional model-1 readings, long-term statistics are disabled until the conversions are calibrated. The following semantics apply to the existing validated presentation.
+These sensor definitions apply to all supported models, including model 1 from 2.10.2. Keep the existing entry/entity, restart after updating, and add Daily consumption under the Energy dashboard water sources once HA has collected statistics. This change does not backfill statistics for earlier recorder history. Model-1 resin and per-cycle quantity remain unitless and excluded from long-term statistics; other readings are not blocked by those two unresolved conversions.
 
 - **Daily consumption** (fields 37–38) is the controller's within-day cumulative counter. Observed hardware history confirms it rises during the day and resets around the day boundary. It therefore uses Home Assistant `TOTAL_INCREASING` semantics so resets are treated as meter-cycle resets rather than negative consumption.
 - **Controller weekly average consumption** (fields 39–40) is the current average value reported by the controller. It is **not** the same quantity as the vendor app's week-by-week history chart, which is obtained from a separate statistics service. It deliberately has no Home Assistant `state_class`.

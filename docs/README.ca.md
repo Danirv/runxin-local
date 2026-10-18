@@ -1,5 +1,9 @@
 # Runxin Local per a Home Assistant
 
+## Lectures Beta del model 1 — 2.10.2
+
+El model 1 / F150 passa a **Beta**. El consum diari contrastat amb el controlador utilitza `total_increasing` i es pot seleccionar al panell d’Energia. Les altres lectures recuperen les estadístiques normals; només resina i capacitat per cicle continuen sense unitat confirmada ni estadístiques. La mitjana setmanal no és un comptador acumulatiu. Es conserven entrades, entitats i tots els permisos d’escriptura. No es demanen més proves al col·laborador de la issue #17.
+
 ## Home Assistant 2026.10 i transport asíncron: 2.10.1
 
 Des de la 2.10.0 cal **HA 2026.10.0 o posterior**. La dependència de la 2.10.1 és `broadlink-async>=1.1.0`, com a BroadLink oficial des de HA 2026.10.2; es conserven entrades, entitats i polítiques dels models. Per a HA anterior, conserva la 2.9.3. [Migració, recuperació i prova al G6](ha-2026-10.ca.md).
@@ -8,7 +12,7 @@ Des de la 2.10.0 cal **HA 2026.10.0 o posterior**. La dependència de la 2.10.1 
 
 Integració local per a descalcificadors compatibles amb **Runxin F79D + BroadLink BL3372**, amb el Ypsilon G6 com a maquinari de referència i suport experimental per al Euro-Clear Midnight.
 
-El **model 1 / F150** té una Alpha de lectures amb rellotge manual validat a la 2.9.3: sensors periòdics, sense escriptures automàtiques, amb proves manuals opcionals a la 2.9.1. Les lectures són provisionals, sense estadístiques de llarg termini; la resina i la quantitat per cicle no tenen unitat assumida. [Guia](model-1-alpha.ca.md).
+El **model 1 / F150** té lectures Beta des de 2.10.2; va començar amb una Alpha de lectures amb rellotge manual validat a la 2.9.3: sensors periòdics, sense escriptures automàtiques, amb proves manuals opcionals a la 2.9.1. Des de 2.10.2 les estadístiques són normals; resina i quantitat per cicle continuen sense unitat assumida ni estadístiques. [Guia](model-1-alpha.ca.md).
 
 
 A la **2.9.3**, el model 1 té opcions desactivades per defecte per provar els ajustos addicionals 6/10/43/47 i una segona opció per iniciar una regeneració prevista. Les escriptures manuals del rellotge i la restauració amb sincronització manual (camp 4) estan verificades; la resta continuen pendents. El rellotge automàtic, el camp 7 i l’avanç de fases continuen bloquejats. [Instruccions](model-1-alpha.ca.md).

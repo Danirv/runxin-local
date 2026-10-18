@@ -90,7 +90,9 @@ class YpsilonLocalConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self, host: str, identity: dict[str, Any]
     ) -> config_entries.ConfigFlowResult:
         model = controller_model(identity.get("deviceModel"))
-        if model is not None and (model.read_only or model.provisional_readings):
+        if model is not None and (
+            model.read_only or model.provisional_readings or model.unconfirmed_unit_fields
+        ):
             self._alpha_host = host
             self._alpha_identity = identity
             return await self.async_step_readonly_alpha()
@@ -99,7 +101,10 @@ class YpsilonLocalConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_readonly_alpha(
         self, user_input: dict[str, Any] | None = None
     ) -> config_entries.ConfigFlowResult:
-        """Explain provisional readings and the scoped manual-clock permission."""
+        """Explain scoped reading uncertainty and manual-clock permissions.
+
+        Retain the existing step ID for setup-flow compatibility.
+        """
         if user_input is not None:
             return self.async_create_entry(
                 title=_entry_title(self._alpha_identity),

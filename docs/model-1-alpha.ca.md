@@ -1,18 +1,22 @@
-# Controlador model 1 / F150: lectures Alpha i rellotge manual validat
+# Controlador model 1 / F150: lectures Beta i rellotge manual validat
 
 [English](model-1-alpha.md) | [Català](model-1-alpha.ca.md) | [Español](model-1-alpha.es.md)
 
+## Lectures Beta del model 1 — 2.10.2
+
+El model 1 / F150 passa a **Beta**. El consum diari contrastat amb el controlador utilitza `total_increasing` i es pot seleccionar al panell d’Energia. Les altres lectures recuperen les estadístiques normals; només resina i capacitat per cicle continuen sense unitat confirmada ni estadístiques. La mitjana setmanal no és un comptador acumulatiu. Es conserven entrades, entitats i tots els permisos d’escriptura. No es demanen més proves al col·laborador de la issue #17.
+
 La versió **2.9.0** admet el codi de controlador **1** amb sensors de lectura periòdica. El fabricant anomena aquest codi **F150**, però no tenim confirmat el producte comercial ni la vàlvula de la issue #17. No és suport general per a qualsevol equip F150.
 
-La release de la integració és estable; Alpha descriu només el suport d’aquest model.
+La release de la integració és estable. Des de la 2.10.2, aquest model té suport Beta; les escriptures pendents i les unitats incertes es documenten per separat.
 
-## Instal·lació i comparació
+## Instal·lació
 
-1. Instal·la la versió 2.9.3 o posterior amb HACS, o descarrega el ZIP de la release i copia només `custom_components/ypsilon_local` a `/config/custom_components/ypsilon_local`. Desa una còpia de la carpeta anterior i reinicia HA. Aquesta Alpha conserva `ypsilon_local`; no necessita la migració a `runxin_local`.
+1. Instal·la la versió 2.10.2 o posterior amb HACS, o descarrega el ZIP de la release i copia només `custom_components/ypsilon_local` a `/config/custom_components/ypsilon_local`. Desa una còpia de la carpeta anterior i reinicia HA. Aquest suport conserva `ypsilon_local`; no necessita la migració a `runxin_local`.
 2. Si tens una entrada de només diagnòstic del mateix dispositiu, descarrega primer el seu informe i elimina aquesta entrada abans de donar d'alta el dispositiu normalment. No es transforma automàticament en una entrada amb sensors.
-3. Afegeix **Runxin Local**, indica la IP local i accepta l'explicació **Alpha amb controls manuals del rellotge validats**. Per defecte llegeix cada minut, sense cadència adaptativa. La correcció automàtica del rellotge està bloquejada encara que hi hagi una opció antiga activada.
-4. Compara els sensors amb l'app que funciona. Algunes entitats de diagnòstic estan desactivades per defecte; activa les que necessitis des de la llista d'entitats. No cal canviar ajustos per comparar-los.
-5. Des del menú de l'entrada de la integració, **Descarrega els diagnòstics** i adjunta el JSON a la issue existent, juntament amb uns valors o captures de l'app, les unitats i l'hora aproximada. Exportar el diagnòstic no inicia una altra exploració. Oculta dades identificatives a les captures.
+3. Afegeix **Runxin Local**, indica la IP local i accepta l'explicació **Lectures Beta del model 1 i controls manuals del rellotge**. Per defecte llegeix cada minut, sense cadència adaptativa. La correcció automàtica del rellotge està bloquejada encara que hi hagi una opció antiga activada.
+4. Consulta els sensors; opcionalment pots comparar-los amb l’app que funciona. Algunes entitats de diagnòstic estan desactivades per defecte; activa les que necessitis des de la llista d'entitats. No cal canviar ajustos per comparar-los.
+5. Si informes d’un problema nou, **Descarrega els diagnòstics** des del menú de l’entrada. Exporta dades guardades sense cap exploració nova. No cal cap altre informe o comparació del col·laborador de la issue #17. Oculta identificadors de les captures.
 
 L'entrada normal autentica i fa lectures LAN periòdiques; no és una captura passiva. Si l'app i HA interfereixen, pausa les lectures o desactiva temporalment l'entrada mentre fas les captures, sense tornar a aparellar l'equip. Es conserven el domini, la versió de config entry i les identitats existents del G6 i Midnight.
 
@@ -25,9 +29,9 @@ L'entrada normal autentica i fa lectures LAN periòdiques; no és una captura pa
 
 A la **2.9.3**, el **rellotge del dispositiu** i el **botó de sincronització manual** són controls validats disponibles sense activar ajustos experimentals. Conserven els identificadors i la comprovació amb lectura nova. L’alta, les lectures i les recàrregues no inicien escriptures del rellotge. Els altres ajustos requereixen el mode experimental i la regeneració té una segona opció. Serveis administratius, coordinador i adaptador imposen els mateixos permisos per camp; habilitar el camp 4 no permet altres escriptures ni correcció automàtica.
 
-Les lectures numèriques són provisionals i no generen **estadístiques de llarg termini**. HA encara pot desar l'historial ordinari. Les etiquetes enum són de referència, excepte l’idioma confirmat codi 7 → neerlandès; els codis desconeguts es mantenen visibles.
+Des de la **2.10.2**, les lectures Beta utilitzen les estadístiques normals dels sensors. El consum diari té `total_increasing` i es pot afegir com a font d’aigua al panell d’Energia. Només resina i capacitat per cicle mantenen unitats pendents i cap estadística; la mitjana setmanal continua sense classe estadística com als altres models. Les etiquetes enum són de referència, excepte l’idioma confirmat codi 7 → neerlandès; els codis desconeguts es mantenen visibles.
 
-## Comparacions prioritàries
+## Punts de calibració per camp
 
 | Camp | Referència del JSON | Què falta confirmar |
 |---|---|---|
@@ -40,11 +44,11 @@ Les lectures numèriques són provisionals i no generen **estadístiques de llar
 | 4/5/10, hores | 20:38 / 00:00 / 00:00 | Rellotge i horari de regeneració visibles. |
 | 6/7/15/17/19/21/23 | Proteccions i durades | Comparar els ajustos que l'app mostri, sense modificar-los. |
 
-Totes les unitats són interpretacions de referència pendents de contrast. La resina i la quantitat per cicle no tenen unitat confirmada. Es conserva el segon byte de resina sense deduir un còdec U16. El camp 52 es llegeix amb memòria cau independent i pot ser anterior a la resta de la instantània.
+El consum diari s’ha contrastat amb el controlador físic; la resta conserva la interpretació F79D compartida segons l’evidència disponible. La resina i la quantitat per cicle no tenen unitat confirmada. Es conserva el segon byte de resina sense deduir un còdec U16. El camp 52 es llegeix amb memòria cau independent i pot ser anterior a la resta de la instantània.
 
 La [issue #17](https://github.com/Danirv/runxin-local/issues/17#issuecomment-6044822202) confirma BL3372 `0x520F`, firmware 62016, autenticació amb l'app tancada, model 1 estable i resposta dels 52 camps en dues consultes sense errors. La fixture conserva només els parells publicats: les trames reconstruïdes són sintètiques. Les proves de programari no validen conversions físiques.
 
-Una calibració futura es farà al model 1, sense canviar les conversions del G6/Midnight. Aquesta Alpha no explora camps superiors al 52; el rellotge manual (camp 4) està verificat a l’equip reportat; la resta d’escriptures opcionals continuen pendents.
+Una calibració futura es farà al model 1, sense canviar les conversions del G6/Midnight. Aquest suport no explora camps superiors al 52; el rellotge manual (camp 4) està verificat a l’equip reportat; la resta d’escriptures opcionals continuen pendents.
 
 ## Confirmacions incorporades a la 2.9.3
 
@@ -64,7 +68,7 @@ A les 19:41:45, hora local, HA mostrava aspiració de salmorra i esbandida lenta
 
 Després del cicle, HA mostrava capacitat restant **3429 L**, davant dels **1267 L** reportats el 8 d’octubre. Es registra una recuperació de capacitat després de regenerar, sense calibració independent de la unitat. Es mantenen duresa 280 mg/L, resina `F0 00` / referència 240 i referència per cicle 15. Si la duresa és expressada com CaCO₃, `3,429 m³ × 28 °f ≈ 96 °f·m³`, uns `4 °f·m³/L` per als 24 L nominals de resina. És una comprovació de coherència, no un contrast amb la resina configurada ni una prova de l’escala 0,1. L’usuari recorda una etiqueta L al costat de l’ajust antic, però no n’està segur; la unitat i la correspondència exacta amb el camp local continuen pendents.
 
-S’incorpora evidència de funcionament i d’una fase, sense canviar Alpha, còdecs, permisos ni unitats provisionals. Les comparacions anteriors són punts de calibració pendents: no es demanen més proves, captures ni diagnòstics a aquest contribuent. La incidència original de connexió/alta es pot tancar independentment d’aquestes validacions.
+Aquest informe incorpora evidència de funcionament i d’una fase. La 2.10.2 promou les lectures a Beta, sense canviar còdecs, permisos ni les dues unitats pendents. Les comparacions anteriors són punts de calibració pendents: no es demanen més proves, captures ni diagnòstics a aquest contribuent. La incidència original de connexió/alta es pot tancar independentment d’aquestes validacions.
 
 ## Ajustos experimentals opcionals
 
@@ -76,4 +80,4 @@ Una **segona opció** permet iniciar una regeneració prevista i requereix tamb�
 
 El **rellotge automàtic**, el **camp 7**, vacances i escriptures de resina/capacitat continuen bloquejats. El dispositiu va retornar unitat 1; el control de llindar de cabal està calibrat per a unitat 2. Les lectures de resina i capacitat encara són provisionals.
 
-Desactivar els ajustos experimentals elimina només els controls addicionals i desactiva també la prova de regeneració. El rellotge i la sincronització manuals continuen disponibles. Es revoca i substitueix la sessió anterior; es conserven sensors de referència, identificadors, bytes crus i absència d’estadístiques provisionals, també després d’actualitzar o reiniciar. Els diagnòstics separen evidència del model i permisos efectius. Exportar-los no inicia lectures ni escriptures. G6 i models 12/14 mantenen la política.
+Desactivar els ajustos experimentals elimina només els controls addicionals i desactiva també la prova de regeneració. El rellotge i la sincronització manuals continuen disponibles. Es revoca i substitueix la sessió anterior; es conserven sensors de referència, identificadors, bytes crus i exclusió estadística dels camps sense unitats confirmades, també després d’actualitzar o reiniciar. Els diagnòstics separen evidència del model i permisos efectius. Exportar-los no inicia lectures ni escriptures. G6 i models 12/14 mantenen la política.

@@ -22,7 +22,7 @@ diagnostics_mod = load('diagnostics')
 
 
 @pytest.mark.asyncio
-async def test_model1_flow_explains_alpha_and_persists_blocked_automatic_clock(hass):
+async def test_model1_beta_flow_preserves_scoped_options_and_controller_identity(hass):
     flow = _flow(hass)
     flow._async_probe = AsyncMock(return_value=({'deviceModel': 1}, '02:00:00:00:00:01'))
     result = await flow.async_step_user({'host': '192.0.2.1'})
@@ -30,7 +30,7 @@ async def test_model1_flow_explains_alpha_and_persists_blocked_automatic_clock(h
     result = await flow.async_step_readonly_alpha({})
     assert result['data'] == {'host': '192.0.2.1', 'controller_model': 1}
     assert result['options'] == {'auto_sync_clock': False, 'adaptive_polling': False}
-    assert 'Alpha' in result['title']
+    assert 'Beta' in result['title']
 
 
 @pytest.mark.asyncio
@@ -163,18 +163,24 @@ async def test_advanced_services_reject_loaded_model1_entries(hass, monkeypatch)
 @pytest.mark.asyncio
 @pytest.mark.parametrize('key,expected,unit', [('resin_volume', 240, None), ('periodic_water', 15, None),
     ('daily_water', 215, 'L'), ('residual_water', 1304, 'L'), ('reference_hardness', 280, 'mg/L')])
-async def test_model1_sensor_states_keep_uncertainty_and_disable_statistics(hass, key, expected, unit):
+async def test_model1_sensor_states_limit_uncertainty_to_uncalibrated_fields(hass, key, expected, unit):
     coordinator, entry = _entity_context(hass, reported_state())
     desc = next(desc for desc in (*sensor_mod.SENSORS, *sensor_mod.READ_ONLY_SETTINGS) if desc.key == key)
     sensor = sensor_mod.YpsilonSensor(coordinator, entry, desc)
     assert sensor.native_value == expected
     assert sensor.native_unit_of_measurement == unit
-    assert sensor.state_class is None
-    assert sensor.extra_state_attributes['interpretation'] == 'reference_f79d_pending_app_validation'
+    uncertain = key in ('resin_volume', 'periodic_water')
+    expected_class = None if uncertain else desc.state_class
+    assert sensor.state_class == expected_class
+    if uncertain:
+        assert sensor.extra_state_attributes['interpretation'] == 'unit_pending_validation'
+        assert sensor.extra_state_attributes['unit_confirmed'] is False
+    else:
+        assert 'interpretation' not in sensor.extra_state_attributes
     state = await _add_sensor(hass, sensor, f'sensor.model1_{key}')
     assert state.state == str(expected)
     assert state.attributes.get('unit_of_measurement') == unit
-    assert 'state_class' not in state.attributes
+    assert state.attributes.get('state_class') == expected_class
     assert state.attributes['raw_field_bytes']
 
 
@@ -303,12 +309,55 @@ async def test_dhcp_model1_uses_the_same_read_only_confirmation(hass):
 
 
 @pytest.mark.asyncio
-async def test_missing_or_changed_identity_does_not_promote_provisional_sensor_statistics(hass):
+@pytest.mark.parametrize('key', ['resin_volume', 'periodic_water'])
+async def test_missing_or_changed_identity_keeps_uncalibrated_quantities_unitless(hass, key):
     coordinator, entry = _entity_context(hass, reported_state())
     entry.data = {'controller_model': 1}
-    desc = next(desc for desc in sensor_mod.SENSORS if desc.key == 'daily_water')
+    desc = next(desc for desc in sensor_mod.SENSORS if desc.key == key)
     sensor = sensor_mod.YpsilonSensor(coordinator, entry, desc)
     for code in (1, None, 9):
         coordinator.data['deviceModel'] = code
         assert sensor.state_class is None
-        assert sensor.extra_state_attributes['interpretation'] == 'reference_f79d_pending_app_validation'
+        assert sensor.native_unit_of_measurement is None
+        assert sensor.extra_state_attributes['interpretation'] == 'unit_pending_validation'
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('code', [1, 9, 12, 14])
+async def test_all_models_expose_daily_water_as_a_resetting_water_counter(hass, code):
+    coordinator, entry = _entity_context(hass, {**reported_state(), 'deviceModel': code})
+    desc = next(desc for desc in sensor_mod.SENSORS if desc.key == 'daily_water')
+    sensor = sensor_mod.YpsilonSensor(coordinator, entry, desc)
+    original_id = sensor.unique_id
+    await _add_sensor(hass, sensor, f'sensor.daily_model_{code}')
+    # Ordinary increases, a daily reset and the first consumption of the new day
+    # must retain water-counter metadata and the original entity identity.
+    for amount in (215, 236, 0, 17):
+        coordinator.data['dailyWaterConsumption'] = amount
+        sensor.async_write_ha_state()
+        state = hass.states.get(sensor.entity_id)
+        assert state.state == str(amount)
+        assert state.attributes['device_class'] == 'water'
+        assert state.attributes['state_class'] == 'total_increasing'
+        assert state.attributes['unit_of_measurement'] == 'L'
+        assert sensor.unique_id == original_id
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('code', [1, 9, 12, 14])
+async def test_reading_metadata_uses_shared_statistics_without_promoting_averages(hass, code):
+    coordinator, entry = _entity_context(hass, {**reported_state(), 'deviceModel': code})
+    for desc in sensor_mod.SENSORS:
+        sensor = sensor_mod.YpsilonSensor(coordinator, entry, desc)
+        expected = None if code == 1 and desc.key in ('resin_volume', 'periodic_water') else desc.state_class
+        assert sensor.state_class == expected
+
+
+@pytest.mark.asyncio
+async def test_model1_beta_binary_readings_retain_raw_bytes_without_alpha_marker(hass):
+    coordinator, entry = _entity_context(hass, reported_state())
+    binary_mod = load('binary_sensor')
+    desc = next(desc for desc in binary_mod.BINARY_SENSORS if desc.key == 'salt_shortage_alarm')
+    sensor = binary_mod.YpsilonBinarySensor(coordinator, entry, desc)
+    assert sensor.extra_state_attributes['raw_bytes'] == coordinator.data['_rawFieldBytes'][31]
+    assert 'interpretation' not in sensor.extra_state_attributes

@@ -1,5 +1,9 @@
 # Runxin Local para Home Assistant
 
+## Lecturas Beta del modelo 1 — 2.10.2
+
+El modelo 1 / F150 pasa a **Beta**. El consumo diario contrastado con el controlador usa `total_increasing` y se puede seleccionar en el panel de Energía. Las demás lecturas recuperan las estadísticas normales; solo resina y capacidad por ciclo siguen sin unidad confirmada ni estadísticas. La media semanal no es un contador acumulativo. Se conservan entradas, entidades y todos los permisos de escritura. No se piden más pruebas al colaborador de la issue #17.
+
 ## Home Assistant 2026.10 y transporte asíncrono: 2.10.1
 
 Desde 2.10.0 se requiere **HA 2026.10.0 o posterior**. La dependencia de 2.10.1 es `broadlink-async>=1.1.0`, como BroadLink oficial desde HA 2026.10.2; se conservan entradas, entidades y políticas de los modelos. Para HA anterior, conserva 2.9.3. [Migración, recuperación y prueba en el G6](ha-2026-10.es.md).
@@ -8,7 +12,7 @@ Desde 2.10.0 se requiere **HA 2026.10.0 o posterior**. La dependencia de 2.10.1 
 
 Integración local para descalcificadores compatibles con **Runxin F79D + BroadLink BL3372**, con el Ypsilon G6 como hardware de referencia y soporte experimental para Euro-Clear Midnight.
 
-El **modelo 1 / F150** tiene una Alpha de lecturas con reloj manual validado en 2.9.3: sensores periódicos, sin escrituras automáticas, con pruebas manuales opcionales en 2.9.1. Las lecturas son provisionales, sin estadísticas a largo plazo; la resina y la cantidad por ciclo no tienen unidad asumida. [Guia](model-1-alpha.es.md).
+El **modelo 1 / F150** tiene lecturas Beta desde 2.10.2; empezó con una Alpha de lecturas con reloj manual validado en 2.9.3: sensores periódicos, sin escrituras automáticas, con pruebas manuales opcionales en 2.9.1. Desde 2.10.2 las estadísticas son normales; resina y cantidad por ciclo siguen sin unidad asumida ni estadísticas. [Guia](model-1-alpha.es.md).
 
 
 En **2.9.3**, el modelo 1 tiene opciones desactivadas por defecto para probar ajustes adicionales 6/10/43/47 y una segunda opción para iniciar una regeneración prevista. Las escrituras manuales del reloj y la restauración mediante sincronización manual (campo 4) están verificadas; las demás siguen pendientes. El reloj automático, el campo 7 y el avance de fases siguen bloqueados. [Instrucciones](model-1-alpha.es.md).

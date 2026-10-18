@@ -312,7 +312,9 @@ async def async_setup_entry(
     coordinator = entry.runtime_data
     async_add_entities(YpsilonSensor(coordinator, entry, desc) for desc in SENSORS)
     model = controller_model((coordinator.data or {}).get("deviceModel"))
-    if model is not None and (model.read_only or model.provisional_readings):
+    if model is not None and (
+        model.read_only or model.provisional_readings or model.unconfirmed_unit_fields
+    ):
         async_add_entities(YpsilonSensor(coordinator, entry, desc) for desc in READ_ONLY_SETTINGS)
 
 
@@ -345,14 +347,21 @@ class YpsilonSensor(YpsilonEntity, SensorEntity):
     @property
     def _model(self) -> ControllerModel | None:
         configured = controller_model(getattr(self._entry, "data", {}).get(CONF_CONTROLLER_MODEL))
-        if configured is not None and configured.provisional_readings:
+        if configured is not None and (
+            configured.provisional_readings or configured.unconfirmed_unit_fields
+        ):
             return configured
         return controller_model((self.coordinator.data or {}).get("deviceModel"))
 
     @property
     def state_class(self) -> SensorStateClass | None:
-        # Provisional water conversions must not become long-term statistics.
-        if self._model is not None and self._model.provisional_readings:
+        # Uncalibrated quantities stay out of statistics without suppressing
+        # ordinary readings on a model with only a few unresolved units.
+        model = self._model
+        if model is not None and (
+            model.provisional_readings
+            or self.entity_description.field in model.unconfirmed_unit_fields
+        ):
             return None
         return self.entity_description.state_class
 
@@ -438,13 +447,16 @@ class YpsilonSensor(YpsilonEntity, SensorEntity):
                 resin_volume_scale_confirmed=False,
                 interpretation="midnight_scale_pending_direct_comparison",
             )
-        if self._model is not None and self._model.provisional_readings:
+        if self._model is not None and (
+            self._model.provisional_readings or self._model.unconfirmed_unit_fields
+        ):
             attributes.update(
-                interpretation="reference_f79d_pending_app_validation",
                 controller_model=self._model.code,
                 read_only=bool(getattr(self.coordinator, "read_only", True)),
                 reference_value=(self.coordinator.data or {}).get(self.entity_description.field),
             )
+            if self._model.provisional_readings:
+                attributes["interpretation"] = "reference_f79d_pending_app_validation"
             raw = (self.coordinator.data or {}).get("_rawFieldBytes", {})
             # Paired field IDs use an en dash in the description (e.g. 35–36).
             ids = (self.entity_description.protocol_field or "").split("–")
@@ -452,6 +464,7 @@ class YpsilonSensor(YpsilonEntity, SensorEntity):
             if pairs:
                 attributes["raw_field_bytes"] = pairs
             if self.entity_description.field in self._model.unconfirmed_unit_fields:
+                attributes["interpretation"] = "unit_pending_validation"
                 attributes["unit_confirmed"] = False
             if self.entity_description.key == "reference_flow_cutoff":
                 attributes["reference_display_candidate"] = (

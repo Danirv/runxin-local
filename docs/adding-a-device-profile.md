@@ -4,7 +4,7 @@ Do not copy the F79D table and rename it. Treat another controller as unverified
 
 ## Controller policy versus wire profile
 
-First check whether the new controller shares a demonstrated existing map. If it does, reuse the codec and add a `ControllerModel` entry with evidence, explicit `allowed_write_fields`, conversion uncertainty and applicable entities. The default write set is empty. A read-only Alpha can expose provisional readings before unit calibration, but must block clock correction, services and direct adapter writes and suppress provisional statistics. Do not inherit G6 write evidence.
+First check whether the new controller shares a demonstrated existing map. If it does, reuse the codec and add a `ControllerModel` entry with evidence, explicit `allowed_write_fields`, conversion uncertainty and applicable entities. The default write set is empty. A read-only Alpha can expose provisional readings before unit calibration, but must block clock correction, services and direct adapter writes and suppress statistics for provisional or uncalibrated fields. A few unconfirmed units must not suppress ordinary statistics for all readings once the model has operational evidence; use `unconfirmed_unit_fields` for that scope. Do not inherit G6 write evidence.
 
 If bytes/enums/scales differ, add proven model-specific overrides and fixtures without changing G6/Midnight defaults. If the frame/map is different, add a separate profile and explicit selector; `protocol_profile` currently documents the shared path and is not a general codec factory. Tests must cover missing fields, unmapped values, permission bypasses, restarts and legacy identities.
 

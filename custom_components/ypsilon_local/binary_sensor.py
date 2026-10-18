@@ -112,8 +112,9 @@ class YpsilonBinarySensor(YpsilonEntity, BinarySensorEntity):
     def extra_state_attributes(self) -> dict[str, Any]:
         attributes: dict[str, Any] = {}
         model = controller_model((self.coordinator.data or {}).get("deviceModel"))
-        if model is not None and model.provisional_readings:
-            attributes.update(interpretation="reference_f79d_pending_app_validation", read_only=True)
+        if model is not None and (model.provisional_readings or model.unconfirmed_unit_fields):
+            if model.provisional_readings:
+                attributes.update(interpretation="reference_f79d_pending_app_validation", read_only=True)
             raw = (self.coordinator.data or {}).get("_rawFieldBytes", {})
             field = self.entity_description.protocol_field
             if field is not None:

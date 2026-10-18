@@ -67,16 +67,15 @@ MODEL1_TEST_FIELDS = frozenset({6, 10, 43, 47})
 CONTROLLER_MODELS: dict[int, ControllerModel] = {
     1: ControllerModel(
         code=1,
-        title="Runxin F150 · Alpha",
-        model_name="F150 / model 1 (Alpha)",
+        title="Runxin F150 · Beta",
+        model_name="F150 / model 1 (Beta)",
         manufacturer="Runxin",
         # Manual clock controls are independently hardware-verified. Automatic
         # correction remains a separate coordinator policy and stays blocked.
         allowed_write_fields=frozenset({4}),
         resin_volume_scale=None,
         resin_volume_scale_confirmed=False,
-        support_level="alpha",
-        provisional_readings=True,
+        support_level="beta",
         unconfirmed_unit_fields=frozenset({"resinVolume", "periodicWaterProduction"}),
         tested_hardware="Unbranded softener reported in issue #17",
         hardware_verified_write_fields=(4,),
@@ -85,7 +84,10 @@ CONTROLLER_MODELS: dict[int, ControllerModel] = {
             "Issue #17: BL3372 0x520F firmware 62016, stable model code 1, all "
             "fields 1..52 received in two read-only queries with no failures. "
             "F150 is the manufacturer's API enum name, not a confirmed product "
-            "identity. App comparisons and field applicability are pending; "
+            "identity. Normal polling/restart recovery and daily consumption "
+            "against the controller are confirmed in issue #17; Beta readings "
+            "use ordinary sensor statistics. Individual field applicability "
+            "and conversions may still differ; "
             "resin raw 240 and periodic-water reference 15 have no confirmed units. "
             "On 2026-10-10, the contributor confirmed two manual field-4 clock "
             "writes and restoration via manual sync against the controller and "
