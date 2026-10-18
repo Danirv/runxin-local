@@ -5,7 +5,7 @@ This is the current model policy for **2.10.2**. A commercial brand, valve refer
 | Controller code | Manufacturer enum name | Integration policy | Field evidence | Writes |
 |---|---|---|---|---|
 | 9 | F79D | Reference ATH/BWT Ypsilon G6 | Reference hardware and per-field checks | Existing fields 4/6/7/10/34/43/47; field 34 remains pending physical verification |
-| 12 | F105 | Alpha Euro-Clear Midnight 25 | Captured state/app comparison; resin scale 0.1 | Existing fields 4/6/7/10/34/43/47; 4/6/10/43 hardware-verified, 7/34/47 pending |
+| 12 | F105 | Beta Euro-Clear Midnight 25 | Captured state/app comparison; resin scale 0.1 | Existing fields 4/6/7/10/34/43/47; 4/6/10/43 hardware-verified, 7/34/47 pending |
 | 1 | F150 | Beta readings, validated manual clock, issue #17 | All 52 field IDs received; polling/restart recovery, manual clock, daily consumption and one phase/display comparison confirmed; resin/per-cycle units pending | Manual clock/sync (4) verified and available by default; opt-in tests 6/10/43/47 and separate start 34; 6/10/34/43/47 pending. Field 7, auto clock, phase advancement and vacation blocked |
 | 14 | F136 | Beta Euro-Clear Midnight 25 | Working v2.9.1; app comparisons for 4/6/7/10/43/47; field 26 U16 LE tenths matches controller 30.0 L | Existing fields 4/6/7/10/34/43/47; contributor reports writes 4/6/10/43 verified, writes 7/34/47 pending |
 | Other codes | Descriptive API names, where known | One-time diagnostic report only | No automatic support from the name table | None through a diagnostic entry |
@@ -14,7 +14,7 @@ This is the current model policy for **2.10.2**. A commercial brand, valve refer
 
 A periodic operational entry with scoped controls is distinct from a saved diagnostic-only entry. The operational entry authenticates/polls and creates sensors; a diagnostic-only entry loads a saved one-time report without polling or entities. Diagnostic-only entries never permit writes. Model 1 permits only manual field-4 clock writes by default. Other settings and regeneration require explicit test options; automatic clock correction remains blocked.
 
-The integration release is stable; Alpha and Beta status apply to individual models. Model 1 is Beta from 2.10.2: normal sensor statistics are enabled, independently of the pending optional writes. Model 14 is Beta on the reported F136 / BL3372 0x520F / firmware 62016 unit; this does not certify other hardware variants or pending writes. Reported model-14 write evidence is attributed to [issue #22](https://github.com/Danirv/runxin-local/issues/22), not to a new maintainer hardware test.
+The integration release is stable; Alpha and Beta status apply to individual models. Model 1 is Beta from 2.10.2: normal sensor statistics are enabled, independently of the pending optional writes. Model 12 is also Beta from 2.10.2, based on the captured Midnight 25 readings and existing write evidence for 4/6/10/43; writes to 7/34/47 remain pending, without changing permissions or conversions. Model 14 is Beta on the reported F136 / BL3372 0x520F / firmware 62016 unit; this does not certify other hardware variants or pending writes. Reported model-14 write evidence is attributed to [issue #22](https://github.com/Danirv/runxin-local/issues/22), not to a new maintainer hardware test.
 
 ## Shared maps and model-specific behavior
 

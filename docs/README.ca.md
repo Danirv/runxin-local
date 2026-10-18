@@ -1,8 +1,10 @@
 # Runxin Local per a Home Assistant
 
-## Lectures Beta del model 1 — 2.10.2
+## Models 1 i 12 en Beta — 2.10.2
 
 El model 1 / F150 passa a **Beta**. El consum diari contrastat amb el controlador utilitza `total_increasing` i es pot seleccionar al panell d’Energia. Les altres lectures recuperen les estadístiques normals; només resina i capacitat per cicle continuen sense unitat confirmada ni estadístiques. La mitjana setmanal no és un comptador acumulatiu. Es conserven entrades, entitats i tots els permisos d’escriptura. No es demanen més proves al col·laborador de la issue #17.
+
+El model 12 / F105 (Euro-Clear Midnight 25) també passa a **Beta**, a partir de les lectures capturades i les escriptures 4/6/10/43 ja verificades. Les escriptures 7/34/47 continuen pendents; es conserven controls, permisos i conversió de resina.
 
 ## Home Assistant 2026.10 i transport asíncron: 2.10.1
 
@@ -10,7 +12,7 @@ Des de la 2.10.0 cal **HA 2026.10.0 o posterior**. La dependència de la 2.10.1 
 
 **Actualitzes des de la biblioteca BroadLink compartida?** Runxin Local 2.10.1 s’instal·la en l’espai separat `broadlink_async`: actualitza i reinicia HA; no cal reconstruir Core només per aquesta migració. BroadLink oficial utilitza aquest espai des de HA 2026.10.2. Si continues amb HA 2026.10.0/1 i BroadLink oficial ja falla, corregeix tots els requisits antics abans de reconstruir/recrear Core, o actualitza HA. Consulta la [migració i recuperació](ha-2026-10.ca.md), que conserva la validació històrica del G6 amb la 2.10.0.
 
-Integració local per a descalcificadors compatibles amb **Runxin F79D + BroadLink BL3372**, amb el Ypsilon G6 com a maquinari de referència i suport experimental per al Euro-Clear Midnight.
+Integració local per a descalcificadors compatibles amb **Runxin F79D + BroadLink BL3372**, amb el Ypsilon G6 com a maquinari de referència i suport Beta per al Euro-Clear Midnight.
 
 El **model 1 / F150** té lectures Beta des de 2.10.2; va començar amb una Alpha de lectures amb rellotge manual validat a la 2.9.3: sensors periòdics, sense escriptures automàtiques, amb proves manuals opcionals a la 2.9.1. Des de 2.10.2 les estadístiques són normals; resina i quantitat per cicle continuen sense unitat assumida ni estadístiques. [Guia](model-1-alpha.ca.md).
 
@@ -43,11 +45,11 @@ La taula del fabricant associa 9 amb F79D, 12 amb F105 i 14 amb F136; només des
 
 El botó de regeneració només inicia el cicle després que una lectura nova confirmi servei i vacances desactivades, i rebutja peticions simultànies. Envia la mateixa ordre una sola vegada i comprova la fase resultant. Els enums sense correspondència mostren el codi decimal i conserven `raw_code`; les etiquetes conegudes es mantenen i les dades absents són `unknown`. El rellotge admet un minut d’avanç dins dels 60 segons posteriors a l’escriptura, també a mitjanit, només si una lectura prèvia nova demostra que el valor del minut següent ha canviat; l’hora de regeneració exigeix coincidència exacta.
 
-## Compatibilitat nova a la 2.7.0
+## Euro-Clear Midnight / model 12
 
-El **Euro-Clear Midnight (controlador model 12)** té suport **experimental / Alpha**, provat amb un Midnight 25 amb capçal ECOPRO+ i BroadLink BL3372 (`0x520F`). Les captures concorden amb la pantalla del controlador; les escriptures dels camps 4, 6, 10 i 43 estan verificades físicament. Els camps 7 i 47 i les accions mecàniques del camp 34 continuen disponibles per fer proves, però encara no estan verificats en aquest model.
+El **Euro-Clear Midnight (controlador model 12)** té suport **Beta des de 2.10.2**, provat amb un Midnight 25 amb capçal ECOPRO+ i BroadLink BL3372 (`0x520F`). Les captures concorden amb la pantalla del controlador; les escriptures dels camps 4, 6, 10 i 43 estan verificades físicament. Els camps 7 i 47 i les accions mecàniques del camp 34 continuen disponibles per fer proves, però encara no estan verificats en aquest model.
 
-El model 12 conserva el suport Alpha i els controls existents. Es conserven els controls i la verificació estricta del PR original; el suport del G6 no canvia. Els diagnòstics inclouen l'evidència per model i els dos bytes crus del camp 26. `FA 00` es continua mostrant com **25 L**; aquesta captura no determina el significat del segon byte ni el còdec de volums superiors a 25,5 L.
+El model 12 passa a Beta sense canviar els controls existents ni afegir verificacions físiques noves. Es conserven els controls i la verificació estricta del PR original; el suport del G6 no canvia. Els diagnòstics inclouen l'evidència per model i els dos bytes crus del camp 26. `FA 00` es continua mostrant com **25 L**; aquesta captura no determina el significat del segon byte ni el còdec de volums superiors a 25,5 L.
 
 Consulta les [proves pendents del model 12](hardware-verification.ca.md#euro-clear-midnight--model-de-controlador-12).
 
@@ -86,7 +88,7 @@ Consulta la [guia de resolució de problemes](troubleshooting.ca.md) per disting
 
 ## Seguretat
 
-La integració pot canviar paràmetres i iniciar moviments de vàlvula. No és un controlador de seguretat certificat ni ha de ser l'única protecció contra fuites o inundacions. Conèixer el còdec no equival a verificar l'acció física. En la compatibilitat Alpha del model 12, els controls pendents es mantenen disponibles amb aquesta limitació documentada.
+La integració pot canviar paràmetres i iniciar moviments de vàlvula. No és un controlador de seguretat certificat ni ha de ser l'única protecció contra fuites o inundacions. Conèixer el còdec no equival a verificar l'acció física. En el suport Beta del model 12, els controls pendents es mantenen disponibles amb aquesta limitació documentada.
 
 Consulta el [README principal](../README.md), [`waterdevice-audit.ca.md`](waterdevice-audit.ca.md), [`f79d.ca.md`](f79d.ca.md), [`hardware-verification.ca.md`](hardware-verification.ca.md), [SECURITY](../SECURITY.md) i [LEGAL](../LEGAL.md).
 

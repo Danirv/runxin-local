@@ -82,7 +82,7 @@ El campo 43 tiene SET/read-back local verificado y cambio observado por cloud. S
 
 ## Euro-Clear Midnight / modelo de controlador 12
 
-**Soporte experimental / Alpha, limitado al modelo 12 y probado inicialmente con Midnight 25.** Los controles siguen disponibles para validarlos y conservan el read-back estricto; este estado no certifica las órdenes pendientes. La evidencia del G6 no se transfiere automáticamente al modelo 12. El catálogo compartido `FieldSpec` describe la evidencia del G6 de referencia; la evidencia por modelo está en `models.py` y en los diagnósticos.
+**Soporte Beta desde 2.10.2, limitado al modelo 12 y probado inicialmente con Midnight 25.** La promoción se basa en las lecturas capturadas y las escrituras verificadas de abajo; no añade pruebas físicas nuevas. Los controles siguen disponibles para validarlos y conservan el read-back estricto; este estado no certifica las órdenes pendientes. La evidencia del G6 no se transfiere automáticamente al modelo 12. El catálogo compartido `FieldSpec` describe la evidencia del G6 de referencia; la evidencia por modelo está en `models.py` y en los diagnósticos.
 
 Hardware: Euro-Clear Midnight 25 (cabezal ECOPRO+) con módulo BroadLink BL3372 (devtype `0x520F`), que informa `deviceModel` 12. Probado el 2026-10-04 con la válvula en servicio y vacaciones desactivado.
 

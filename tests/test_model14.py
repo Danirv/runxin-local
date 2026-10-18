@@ -85,5 +85,5 @@ def test_model12_adds_f105_name_without_changing_entry_title_or_policy():
     model = models.controller_model(12)
     assert model.title == "Euro-Clear Midnight"
     assert "F105" in model.model_name
-    assert model.support_level == "alpha"
+    assert model.support_level == "beta"
     assert model.allowed_write_fields == models.EXISTING_CONTROL_FIELDS

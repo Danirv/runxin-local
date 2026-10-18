@@ -117,7 +117,7 @@ CONTROLLER_MODELS: dict[int, ControllerModel] = {
         allowed_write_fields=EXISTING_CONTROL_FIELDS,
         # A Midnight 25 (25 L resin) reports raw 250, i.e. tenths of a litre.
         resin_volume_scale=0.1,
-        support_level="alpha",
+        support_level="beta",
         tested_hardware="Euro-Clear Midnight 25 (ECOPRO+ head)",
         hardware_verified_write_fields=(4, 6, 10, 43),
         pending_write_fields=(7, 34, 47),

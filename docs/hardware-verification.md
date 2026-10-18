@@ -107,7 +107,7 @@ Field 43 has full local SET/read-back verification and a cloud-side observed cha
 
 ## Euro-Clear Midnight / controller model 12
 
-**Support level: experimental / Alpha, scoped to model 12 and initially tested on Midnight 25.** Existing controls remain available for validation and retain strict fresh read-back; this status does not certify pending commands. G6 evidence is not automatically model-12 evidence. The shared `FieldSpec` evidence records the reference G6; per-model evidence is in `models.py` and diagnostics.
+**Support level: Beta from 2.10.2, scoped to model 12 and initially tested on Midnight 25.** Promotion uses the existing captured readings and verified writes below; it does not add new physical test evidence. Existing controls remain available for validation and retain strict fresh read-back; this status does not certify pending commands. G6 evidence is not automatically model-12 evidence. The shared `FieldSpec` evidence records the reference G6; per-model evidence is in `models.py` and diagnostics.
 
 Hardware: Euro-Clear Midnight 25 (ECOPRO+ head) with a BroadLink BL3372 module (devtype `0x520F`), which reports `deviceModel` 12. Tested 2026-10-04 over the existing transport, with the valve in service and vacation off.
 

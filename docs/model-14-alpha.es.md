@@ -2,7 +2,7 @@
 
 [English](model-14-alpha.md) | [Català](model-14-alpha.ca.md) | [Español](model-14-alpha.es.md)
 
-Runxin Local **2.9.2** pasa el **modelo 14 / F136 a Beta** y corrige la lectura de resina. Hardware contrastado en la [issue #22](https://github.com/Danirv/runxin-local/issues/22): Euro-Clear Midnight 25 Plug&Play / ECOPRO+, BroadLink BL3372 (`0x520F`), firmware **62016**. La release es estable; los modelos 1 y 12 siguen Alpha.
+Runxin Local **2.9.2** pasa el **modelo 14 / F136 a Beta** y corrige la lectura de resina. Hardware contrastado en la [issue #22](https://github.com/Danirv/runxin-local/issues/22): Euro-Clear Midnight 25 Plug&Play / ECOPRO+, BroadLink BL3372 (`0x520F`), firmware **62016**. La release es estable; en 2.9.2 los modelos 1 y 12 seguían Alpha; ambos pasan a Beta en 2.10.2. Consulta la [matriz actual](model-support.md).
 
 ## Evidencia confirmada
 

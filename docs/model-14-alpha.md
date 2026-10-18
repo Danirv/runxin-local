@@ -2,7 +2,7 @@
 
 [English](model-14-alpha.md) | [Català](model-14-alpha.ca.md) | [Español](model-14-alpha.es.md)
 
-Runxin Local **2.9.2** promotes controller **14 / F136** to **Beta** and corrects its resin reading. Hardware scope: Euro-Clear Midnight 25 Plug&Play / ECOPRO+ head, BroadLink BL3372 (`0x520F`), firmware **62016**, reported in [issue #22](https://github.com/Danirv/runxin-local/issues/22). The integration release is stable; support status is per model. Models 1 and 12 remain Alpha.
+Runxin Local **2.9.2** promotes controller **14 / F136** to **Beta** and corrects its resin reading. Hardware scope: Euro-Clear Midnight 25 Plug&Play / ECOPRO+ head, BroadLink BL3372 (`0x520F`), firmware **62016**, reported in [issue #22](https://github.com/Danirv/runxin-local/issues/22). The integration release is stable; support status is per model. At 2.9.2, models 1 and 12 remained Alpha; both move to Beta in 2.10.2. See the [current support matrix](model-support.md).
 
 ## Confirmed evidence
 

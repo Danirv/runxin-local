@@ -6,6 +6,8 @@ Local Home Assistant integration for compatible Runxin F79D / BroadLink BL3372 w
 
 Model 1 / F150 moves to **Beta**. Daily consumption now has `total_increasing` statistics and can be selected as a water source in Home Assistant's Energy dashboard. Other readings use the same statistics definitions as models 9/12/14. Resin and per-cycle capacity remain raw/unitless and excluded from statistics; the controller weekly average is still not a cumulative water meter.
 
+Model 12 / F105 (Euro-Clear Midnight 25) also moves to **Beta**, based on the existing captured readings and hardware-verified writes to 4/6/10/43. Writes to 7/34/47 remain explicitly pending. Its controls and resin conversion are unchanged.
+
 Existing entries, entities and write permissions are retained. Manual clock controls remain available; the other model-1 settings and regeneration still require explicit opt-ins. No new physical action or conversion is introduced. See the [model-1 guide](docs/model-1-alpha.md).
 
 ## 2.10.1

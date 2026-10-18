@@ -87,7 +87,7 @@ Un usuari amb Runxin/润新 iOS 2.0.0 va observar bloqueig anunciat i autenticac
 
 És un cas documentat, no una regla per a totes les versions. Reaparellar pot substituir el vincle de l'app anterior; no és simplement afegir un segon client. No implementem claus cloud ni desbloqueig automàtic. No cal repetir el procediment en un dispositiu que ja funciona.
 
-El controlador resultant retorna codi 1; autenticar no confirma identitat G6/model 9. [Issue #17](https://github.com/Danirv/runxin-local/issues/17) i [Alpha de lectura](model-1-alpha.ca.md).
+El controlador resultant retorna codi 1; autenticar no confirma identitat G6/model 9. [Issue #17](https://github.com/Danirv/runxin-local/issues/17) i [lectures Beta i rellotge manual validat](model-1-alpha.ca.md).
 
 ## Conflicte de dependència amb HA 2026.10
 

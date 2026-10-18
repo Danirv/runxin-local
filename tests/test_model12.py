@@ -87,7 +87,7 @@ def test_support_evidence_is_scoped_to_the_physical_model() -> None:
     assert g6["support_level"] == "reference"
     assert g6["hardware_verified_write_fields"] == [4, 6, 7, 10, 43, 47]
     assert g6["pending_write_fields"] == [34]
-    assert midnight["support_level"] == "alpha"
+    assert midnight["support_level"] == "beta"
     assert midnight["tested_hardware"] == "Euro-Clear Midnight 25 (ECOPRO+ head)"
     assert midnight["hardware_verified_write_fields"] == [4, 6, 10, 43]
     assert midnight["pending_write_fields"] == [7, 34, 47]
