@@ -1,5 +1,9 @@
 # Runxin Local per a Home Assistant
 
+## Descobriment automàtic — 2.10.3
+
+El descobriment DHCP descarta els dispositius BroadLink que no són mòduls BL3372 (`0x520F`), també en confirmar l’alta. Els comandaments RM i endolls SP ja no apareixen com a descobertes Runxin Local. El descart es fa abans d’autenticar o enviar ordres Runxin i no genera avisos de configuració fallida. La configuració manual conserva l’informe opcional; els BL3372 bloquejats i models Runxin desconeguts continuen tenint ajuda de diagnòstic. Les entrades existents, controls i conversions es mantenen.
+
 ## Models 1 i 12 en Beta — 2.10.2
 
 El model 1 / F150 passa a **Beta**. El consum diari contrastat amb el controlador utilitza `total_increasing` i es pot seleccionar al panell d’Energia. Les altres lectures recuperen les estadístiques normals; només resina i capacitat per cicle continuen sense unitat confirmada ni estadístiques. La mitjana setmanal no és un comptador acumulatiu. Es conserven entrades, entitats i tots els permisos d’escriptura. No es demanen més proves al col·laborador de la issue #17.

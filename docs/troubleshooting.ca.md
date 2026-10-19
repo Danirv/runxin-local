@@ -7,6 +7,8 @@ Que `broadlink_async.hello()` funcioni no demostra que el dispositiu accepti con
 
 ## Missatges i logs de configuració
 
+Des de **2.10.3**, `not_supported_device` indica un altre tipus de dispositiu BroadLink, no un BL3372 (`0x520F`) compatible. El descobriment DHCP i la confirmació es descarten abans d’autenticar o consultar Runxin. Aquestes coincidències de prefix només es registren en depuració. La configuració manual conserva l’informe opcional; les fallades d’autenticació BL3372 i els models Runxin desconeguts mantenen les vies de diagnòstic.
+
 Des de la 2.7.1, la configuració distingeix el rebuig d'autenticació (`invalid_auth`),
 el rebuig amb bloqueig anunciat (`device_locked`) i altres fallades (`cannot_connect`).
 El bit de bloqueig és una observació de la descoberta, no una causa demostrada.

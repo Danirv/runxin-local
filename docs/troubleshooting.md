@@ -7,6 +7,8 @@ Discovery, local authentication and F79D reads are separate stages. A successful
 
 ## Setup messages and logs
 
+From **2.10.3**, `not_supported_device` means discovery returned a different BroadLink device type, not a supported BL3372 (`0x520F`). DHCP discovery and its confirmation abort before authentication or Runxin queries. These shared-prefix matches are logged only at debug level. Manual setup still offers an optional read-only report; BL3372 authentication failures and unknown Runxin model codes retain their existing diagnostic paths.
+
 Since 2.7.1, setup distinguishes a rejected local handshake (`invalid_auth`), a
 rejected handshake with an advertised lock (`device_locked`), and other failures
 (`cannot_connect`). The lock bit is a discovery observation, not proof of the

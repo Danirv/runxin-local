@@ -1,6 +1,12 @@
-# Runxin Local 2.10.2
+# Runxin Local 2.10.3
 
 Local Home Assistant integration for compatible Runxin F79D / BroadLink BL3372 water softeners, tested with ATH/BWT Ypsilon G6 and Euro-Clear Midnight.
+
+## 2.10.3
+
+DHCP discovery now discards BroadLink devices whose reported type is not BL3372 (`0x520F`), including RM remotes and SP plugs. This check also runs when confirming discovery. These expected prefix matches do not produce setup warnings, authenticate or send Runxin requests.
+
+Manual setup retains the optional read-only compatibility report. BL3372 authentication troubleshooting and reports for unknown Runxin controller models remain available. Existing entries, model support levels, readings, controls and dependencies are unchanged.
 
 ## 2.10.2
 

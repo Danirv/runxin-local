@@ -14,6 +14,7 @@
       "invalid_auth": "The device responded but rejected local authentication. Check the connection troubleshooting guide and debug logs.",
       "device_locked": "The device rejected local authentication and advertised a local-control lock. Check whether the vendor app offers a lock or local-control setting; see the troubleshooting guide before resetting it.",
       "cannot_connect": "Failed to connect to the device.",
+      "not_supported_device": "This BroadLink device is not a supported BL3372 module.",
       "unsupported_device": "Unsupported controller model."
     },
     "abort": {
@@ -22,6 +23,7 @@
       "already_configured": "Device is already configured.",
       "wrong_device": "That IP belongs to a different device.",
       "reconfigure_successful": "Address updated.",
+      "not_supported_device": "This BroadLink device is not a supported BL3372 module.",
       "unsupported_device": "This controller model is not supported. You can collect a read-only compatibility report.",
       "cannot_connect": "Could not connect to the device.",
       "diagnostic_in_progress": "A diagnostic report is already being collected for this address. Wait for it to finish.",

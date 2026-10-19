@@ -19,6 +19,7 @@ from .transport.broadlink_bl3372 import (
     BroadlinkAuthenticationError,
     BroadlinkBL3372Transport,
     BroadlinkOuterError,
+    BroadlinkUnsupportedDeviceError,
 )
 
 # Keep the exception surface used by the coordinator/config flow. Every codec
@@ -28,6 +29,7 @@ from .transport.broadlink_bl3372 import (
 YpsilonConnectionError = RunxinError
 YpsilonOuterError = BroadlinkOuterError
 YpsilonAuthenticationError = BroadlinkAuthenticationError
+YpsilonUnsupportedDeviceError = BroadlinkUnsupportedDeviceError
 
 
 class YpsilonWriteNotConfirmed(YpsilonConnectionError):

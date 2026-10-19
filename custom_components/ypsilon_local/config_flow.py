@@ -16,7 +16,12 @@ from homeassistant.core import callback
 from homeassistant.helpers.device_registry import format_mac
 from homeassistant.helpers.service_info.dhcp import DhcpServiceInfo
 
-from .api import YpsilonAuthenticationError, YpsilonConnectionError, YpsilonLocalClient
+from .api import (
+    YpsilonAuthenticationError,
+    YpsilonConnectionError,
+    YpsilonLocalClient,
+    YpsilonUnsupportedDeviceError,
+)
 from .const import (
     CONF_ACTIVE_SCAN_INTERVAL,
     CONF_ADAPTIVE_POLLING,
@@ -48,7 +53,9 @@ _LOGGER = logging.getLogger(__name__)
 
 
 def _probe_error(err: Exception) -> str:
-    """Classify a rejected handshake, without inferring its underlying cause."""
+    """Classify setup failures using structured transport errors."""
+    if isinstance(err, YpsilonUnsupportedDeviceError):
+        return "not_supported_device"
     if isinstance(
         err, (YpsilonAuthenticationError, broadlink.exceptions.AuthenticationError)
     ):
@@ -137,6 +144,11 @@ class YpsilonLocalConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             identity = await client.read_identity()
             mac = identity.get("mac") or client.mac
             return identity, mac
+        except YpsilonUnsupportedDeviceError as err:
+            # Shared MAC prefixes are only discovery hints. Other BroadLink
+            # products are expected matches and should not produce warnings.
+            _LOGGER.debug("Unsupported BroadLink device (devtype=0x%04x)", err.devtype)
+            raise
         except PROBE_ERRORS as err:
             details = client.connection_diagnostics
             last_error = details.get("last_error") or {}
@@ -167,6 +179,8 @@ class YpsilonLocalConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         try:
             identity, _ = await self._async_probe(self.discovered_host)
+        except YpsilonUnsupportedDeviceError:
+            return self.async_abort(reason="not_supported_device")
         except PROBE_ERRORS as err:
             return await self._diagnostic_offer(self.discovered_host, _probe_error(err))
         if not is_supported_model(identity.get("deviceModel")):
@@ -183,6 +197,8 @@ class YpsilonLocalConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             assert self.discovered_host is not None
             try:
                 identity, _ = await self._async_probe(self.discovered_host)
+            except YpsilonUnsupportedDeviceError:
+                return self.async_abort(reason="not_supported_device")
             except PROBE_ERRORS as err:
                 return await self._diagnostic_offer(self.discovered_host, _probe_error(err))
             else:

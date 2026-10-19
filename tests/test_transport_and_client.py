@@ -29,6 +29,33 @@ def _empty_write_response() -> bytes:
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("devtype", [0x2712, 0x2711])  # RM2 remote, SP2 plug
+@pytest.mark.parametrize("operation", ["transact", "transact_write"])
+async def test_other_broadlink_types_are_closed_before_authentication(
+    monkeypatch, devtype, operation
+) -> None:
+    device = io_mock(devtype=devtype, is_locked=False)
+    hello = AsyncMock(return_value=device)
+    monkeypatch.setattr(transport_mod.broadlink, "hello", hello)
+    transport = transport_mod.BroadlinkBL3372Transport("192.0.2.17")
+    with pytest.raises(transport_mod.BroadlinkUnsupportedDeviceError) as caught:
+        await getattr(transport, operation)(b"frame")
+    assert caught.value.devtype == devtype
+    assert isinstance(caught.value, transport_mod.RunxinTransportError)
+    assert transport.diagnostics["stage"] == "device_type"
+    assert transport.diagnostics["devtype"] == devtype
+    assert transport.diagnostics["last_error"]["error_type"] == "BroadlinkUnsupportedDeviceError"
+    assert transport.transient_retries == transport.reauth_count == 0
+    assert transport.identifier is None
+    hello.assert_awaited_once()
+    device.aclose.assert_awaited_once_with()
+    device.auth.assert_not_awaited()
+    device.get_fwversion.assert_not_awaited()
+    device.send_packet.assert_not_awaited()
+    device.set_lock.assert_not_called()
+
+
+@pytest.mark.asyncio
 async def test_client_prefers_write_specific_hook() -> None:
     class Fake:
         def __init__(self) -> None:
