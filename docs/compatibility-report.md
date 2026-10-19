@@ -2,6 +2,8 @@
 
 Runxin Local can prepare a one-time report for a controller that is not yet supported, without installing Python, changing the model registry or enabling controls. It can also report discovery/authentication failures. Reports remain on your Home Assistant instance until you choose to share them.
 
+From **2.10.3**, automatic DHCP discovery rejects other BroadLink module types instead of offering a Runxin report for them. You can still open manual setup to collect a report explicitly. A BL3372 (`0x520F`) with an unknown Runxin controller model or a rejected handshake retains the diagnostic offer. A non-BL3372 discovery is stopped before authentication or field queries.
+
 ## Collect and download
 
 1. Install/update Runxin Local using HACS and restart Home Assistant.

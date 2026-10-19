@@ -2,7 +2,14 @@
 
 All notable changes to this project are documented here.
 
-## [2.10.2] - Unreleased
+## [2.10.3] - Unreleased
+
+- Abort DHCP discovery and discovery confirmation with `not_supported_device` when BroadLink reports a device type other than BL3372 (`0x520F`). Shared MAC prefixes no longer offer Runxin compatibility reports for RM remotes or SP plugs.
+- Preserve a typed unsupported-device error from the transport through the composition API; reject the module before authentication and close its socket. Log these expected prefix matches at debug level rather than as failed-setup warnings.
+- Keep manual diagnostic offers, BL3372 authentication troubleshooting and unknown Runxin controller reports. Add English/Catalan/Spanish messages and discovery documentation. Existing entries, model policies, protocol codecs, controls and dependencies are unchanged.
+- Add transport and real HA flow regressions for RM/SP discovery, a changed device at confirmation, manual setup/reconfiguration, socket cleanup and no authentication, firmware reads, scans or device commands on rejected discovery.
+
+## [2.10.2] - 2026-10-18
 
 - Promote controller model 1 / F150 to Beta following issue #17's normal setup, polling/restart recovery, manual clock and daily-consumption comparisons with the physical controller.
 - Enable ordinary model-1 sensor statistics, including the daily water counter (`total_increasing`) for the Energy dashboard. Keep the controller weekly average and per-cycle quantity without a state class, as on other models.

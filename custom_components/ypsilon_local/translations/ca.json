@@ -14,6 +14,7 @@
       "invalid_auth": "El dispositiu ha respost però ha rebutjat l'autenticació local. Consulta la guia de resolució de problemes de connexió i els logs de depuració.",
       "device_locked": "El dispositiu ha rebutjat l'autenticació local i ha anunciat un bloqueig del control local. Comprova si l'app del fabricant ofereix alguna opció de bloqueig o control local; consulta la guia abans de restablir-lo.",
       "cannot_connect": "No s'ha pogut connectar amb el dispositiu.",
+      "not_supported_device": "Aquest dispositiu BroadLink no és un mòdul BL3372 compatible.",
       "unsupported_device": "Model de controlador no compatible."
     },
     "abort": {
@@ -22,6 +23,7 @@
       "already_configured": "Aquest dispositiu ja està configurat.",
       "wrong_device": "Aquesta IP correspon a un altre dispositiu.",
       "reconfigure_successful": "Adreça actualitzada.",
+      "not_supported_device": "Aquest dispositiu BroadLink no és un mòdul BL3372 compatible.",
       "unsupported_device": "Aquest model de controlador no està admès. Pots recollir un informe de compatibilitat de només lectura.",
       "cannot_connect": "No s'ha pogut connectar amb el dispositiu.",
       "diagnostic_in_progress": "Ja s’està recollint un informe de diagnòstic per a aquesta adreça. Espera que acabi.",

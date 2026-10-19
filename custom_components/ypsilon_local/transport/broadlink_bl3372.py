@@ -51,6 +51,14 @@ class BroadlinkOuterError(RunxinTransportError):
         super().__init__(f"BroadLink outer error {code}")
 
 
+class BroadlinkUnsupportedDeviceError(RunxinTransportError):
+    """Discovery found a different BroadLink type, before authentication."""
+
+    def __init__(self, devtype: int) -> None:
+        self.devtype = devtype
+        super().__init__(f"Unexpected devtype 0x{devtype:04x}")
+
+
 class BroadlinkAuthenticationError(RunxinTransportError):
     """Local authentication was rejected, before any Runxin request was sent.
 
@@ -201,9 +209,7 @@ class BroadlinkBL3372Transport(RunxinTransport):
                 self.expected_devtype is not None
                 and int(device.devtype) != self.expected_devtype
             ):
-                raise RunxinTransportError(
-                    f"Unexpected devtype 0x{int(device.devtype):04x}"
-                )
+                raise BroadlinkUnsupportedDeviceError(self._devtype)
             guard_exchange(device)
             device.timeout = self.timeout
             self._stage = "authentication"

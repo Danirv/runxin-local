@@ -1,6 +1,6 @@
 # Controller support and evidence
 
-This is the current model policy for **2.10.2**. A commercial brand, valve reference, BroadLink device type and Runxin `deviceModel` code are different identifiers.
+This is the current model policy for **2.10.3**. A commercial brand, valve reference, BroadLink device type and Runxin `deviceModel` code are different identifiers.
 
 | Controller code | Manufacturer enum name | Integration policy | Field evidence | Writes |
 |---|---|---|---|---|

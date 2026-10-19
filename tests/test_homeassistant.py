@@ -291,6 +291,77 @@ async def test_discovery_rejects_model_that_changes_before_confirmation(hass):
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("devtype", [0x2712, 0x2711])
+@pytest.mark.parametrize("step", ["dhcp", "discovery_confirm", "user", "reconfigure"])
+async def test_real_probe_discards_other_broadlink_types_only_in_discovery(
+    hass, monkeypatch, caplog, devtype, step
+):
+    transport_mod = load("transport.broadlink_bl3372")
+    device = io_mock(devtype=devtype, is_locked=False)
+    hello = AsyncMock(return_value=device)
+    monkeypatch.setattr(transport_mod.broadlink, "hello", hello)
+    collect = AsyncMock()
+    monkeypatch.setattr(flow_mod, "probe", collect)
+    flow = _flow(hass, source=(
+        config_entries.SOURCE_DHCP if step in ("dhcp", "discovery_confirm")
+        else config_entries.SOURCE_USER
+    ))
+    if step == "discovery_confirm":
+        # The first device was compatible; the address now answers as another
+        # BroadLink product. Re-run the real probe when the user confirms.
+        real_probe = flow._async_probe
+        flow._async_probe = AsyncMock(return_value=({"deviceModel": 12}, TEST_MAC))
+        first = await flow.async_step_dhcp(
+            DhcpServiceInfo(ip=TEST_HOST, hostname="test", macaddress=TEST_MAC)
+        )
+        assert first["step_id"] == "discovery_confirm"
+        flow._async_probe = real_probe
+    elif step == "reconfigure":
+        flow._get_reconfigure_entry = Mock(return_value=SimpleNamespace(data={"host": TEST_HOST}))
+    with caplog.at_level(logging.DEBUG):
+        if step == "dhcp":
+            result = await flow.async_step_dhcp(
+                DhcpServiceInfo(ip=TEST_HOST, hostname="test", macaddress=TEST_MAC)
+            )
+        else:
+            result = await getattr(flow, f"async_step_{step}")({"host": TEST_HOST})
+    if step in ("dhcp", "discovery_confirm"):
+        assert result["type"] is FlowResultType.ABORT
+        assert result["reason"] == "not_supported_device"
+        assert flow._diagnostic_host is None
+    else:
+        assert result["type"] is FlowResultType.FORM
+        assert result["step_id"] == ("diagnostic_offer" if step == "user" else step)
+        assert result["errors"] == {"base": "not_supported_device"}
+    assert not any(record.levelno >= logging.WARNING for record in caplog.records)
+    assert TEST_HOST not in caplog.text
+    assert TEST_MAC not in caplog.text
+    collect.assert_not_awaited()
+    hello.assert_awaited_once()
+    device.aclose.assert_awaited_once_with()
+    device.auth.assert_not_awaited()
+    device.get_fwversion.assert_not_awaited()
+    device.send_packet.assert_not_awaited()
+    device.set_lock.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_dhcp_unknown_runxin_model_keeps_optional_diagnostic_offer(hass, monkeypatch):
+    flow = _flow(hass, source=config_entries.SOURCE_DHCP)
+    flow._async_probe = AsyncMock(return_value=({"deviceModel": 15}, TEST_MAC))
+    collect = AsyncMock()
+    monkeypatch.setattr(flow_mod, "probe", collect)
+    result = await flow.async_step_dhcp(
+        DhcpServiceInfo(ip=TEST_HOST, hostname="test", macaddress=TEST_MAC)
+    )
+    assert result["type"] is FlowResultType.FORM
+    assert result["step_id"] == "diagnostic_offer"
+    assert result["errors"]["base"] == "unsupported_device"
+    assert result["description_placeholders"]["controller"] == "F138 (15)"
+    collect.assert_not_awaited()
+
+
+@pytest.mark.asyncio
 @pytest.mark.parametrize("fails", [False, True])
 async def test_probe_always_closes_temporary_client(hass, monkeypatch, fails):
     client = io_mock(mac=TEST_MAC)

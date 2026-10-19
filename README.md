@@ -16,7 +16,7 @@ The integration communicates directly over the LAN and does not depend on the ve
 
 ## Highlights
 
-- DHCP discovery for known compatible BroadLink module prefixes.
+- DHCP discovery using BroadLink MAC prefixes, with BL3372 device-type validation.
 - Local polling with adaptive fast polling while water is flowing or the valve is mechanically moving.
 - Real device-state reconciliation after writes: a transport ACK is never treated as proof that the requested state was physically adopted.
 - Water consumption, remaining treatment capacity and instantaneous flow entities with unit-aware F79D decoding.
@@ -44,9 +44,11 @@ Supported Home Assistant targets (BroadLink BL3372 module, devtype `0x520F`):
 | Euro-Clear Midnight (ECOPRO+ head) | 12 (F105 API name) | **Beta**, tested on Midnight 25 | Captured state matches the controller. Writes to fields 4, 6, 10 and 43 hardware-verified; fields 7 and 47 and mechanical field-34 actions remain available for testing but are not yet hardware-verified on this model |
 | Euro-Clear Midnight (F136 / ECOPRO+ head) | 14 (F136) | **Beta**, tested on Midnight 25 | Working v2.9.1 installation; app-matched reads 4/6/7/10/43/47; controller-confirmed resin 30.0 L from U16 LE tenths. Writes 4/6/10/43 verified; writes 7/34/47 pending |
 
-**2.10.2 requires Home Assistant 2026.10.0 or later and uses the isolated async `broadlink-async` dependency. Support status is per model:** model 1 has Beta readings, daily-consumption statistics, validated manual clock controls and optional tests for other settings; model 12 is Beta with captured readings and verified writes to 4/6/10/43; model 14 is Beta with confirmed resin decoding and documented pending writes. The Midnight controls and strict fresh read-back remain available; the label does not disable commands or imply that pending actions are verified. See the [model-12 evidence](docs/hardware-verification.md#euro-clear-midnight--controller-model-12) and [model-14 guide](docs/model-14-alpha.md).
+**2.10.3 requires Home Assistant 2026.10.0 or later and uses the isolated async `broadlink-async` dependency. Support status is per model:** model 1 has Beta readings, daily-consumption statistics, validated manual clock controls and optional tests for other settings; model 12 is Beta with captured readings and verified writes to 4/6/10/43; model 14 is Beta with confirmed resin decoding and documented pending writes. The Midnight controls and strict fresh read-back remain available; the label does not disable commands or imply that pending actions are verified. See the [model-12 evidence](docs/hardware-verification.md#euro-clear-midnight--controller-model-12) and [model-14 guide](docs/model-14-alpha.md).
 
 Diagnostics include per-model support/evidence metadata and both raw field-26 resin bytes. Model 12's observed `FA 00` still displays as **25 L**, retaining its U8 decode because that capture does not establish the high byte's meaning. Model 14's `[44, 1]` now uses **U16 little-endian × 0.1 = 30.0 L**, matching its controller photo. This is the configured resin value, distinct from nominal physical capacity; the setting is not changed.
+
+From **2.10.3**, DHCP discovery discards devices whose BroadLink type is not BL3372 (`0x520F`), so RM remotes and SP plugs do not appear as Runxin Local discoveries. Manual setup retains optional compatibility reports; BL3372 connection problems and unknown Runxin models remain diagnosable.
 
 Other rebranded devices using the same controller/module may work, but compatibility must be verified per model and firmware. Separating protocol and transport does **not** imply that every Runxin or non-BroadLink device is supported.
 
