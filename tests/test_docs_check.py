@@ -50,8 +50,17 @@ def test_legacy_entry_point_can_keep_anchor_without_being_indexed(tmp_path):
     assert docs.check(tmp_path) == []
 
 
-def test_root_relative_link_and_encoded_fragment(tmp_path):
+def test_repository_relative_link_and_encoded_fragment(tmp_path):
     (tmp_path / 'docs').mkdir()
-    (tmp_path / 'README.md').write_text('[Ús](/docs/guide.md#%C3%BAs)')
+    (tmp_path / 'README.md').write_text('[Ús](docs/guide.md#%C3%BAs)')
     (tmp_path / 'docs/guide.md').write_text('# Ús')
     assert docs.check(tmp_path) == []
+
+
+def test_site_root_link_is_rejected_even_when_local_target_exists(tmp_path):
+    (tmp_path / 'docs').mkdir()
+    (tmp_path / 'README.md').write_text('[Guide](/docs/guide.md) [Valid](docs/guide.md)')
+    (tmp_path / 'docs/guide.md').write_text('# Guide')
+    assert docs.check(tmp_path) == [
+        'README.md: site-root link requires a repository-relative path: /docs/guide.md'
+    ]

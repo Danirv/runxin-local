@@ -75,7 +75,10 @@ def check(root: Path) -> list[str]:
             if link.scheme or link.netloc:
                 continue
             raw = unquote(link.path)
-            target = (root / raw.lstrip("/") if raw.startswith("/") else page.parent / raw).resolve() if raw else page
+            if raw.startswith("/"):
+                errors.append(f"{label}: site-root link requires a repository-relative path: {raw}")
+                continue
+            target = (page.parent / raw).resolve() if raw else page
             if not target.is_relative_to(root):
                 errors.append(f"{label}: link leaves repository: {raw}")
             elif not target.exists():
