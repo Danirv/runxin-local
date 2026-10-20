@@ -1,4 +1,4 @@
-[English](broadlink-bl3372.md) | [Español](broadlink-bl3372.es.md) | [Català](broadlink-bl3372.ca.md)
+[English](broadlink-bl3372.md) | [Español](broadlink-bl3372.es.md) | [Català](broadlink-bl3372.ca.md) · [Documentació](index.md)
 
 # Transport BroadLink BL3372
 
@@ -14,7 +14,7 @@ la integració Home Assistant i està separat deliberadament del codec F79D.
 - dependència Python: `broadlink-async>=1.1.0`
 
 Provar un altre devtype en recerca no significa que aquella combinació quedi
-suportada per Ypsilon.
+suportada per Runxin Local.
 
 ## Ruta de transacció
 

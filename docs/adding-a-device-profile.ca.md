@@ -1,4 +1,4 @@
-[English](adding-a-device-profile.md) | [Español](adding-a-device-profile.es.md) | [Català](adding-a-device-profile.ca.md)
+[English](adding-a-device-profile.md) | [Español](adding-a-device-profile.es.md) | [Català](adding-a-device-profile.ca.md) · [Documentació](index.md)
 
 # Afegir un altre perfil de dispositiu Runxin
 
@@ -6,11 +6,11 @@ No copiïs la taula F79D canviant-li el nom. Tracta un altre controlador com a n
 
 ## Política de controlador i perfil de protocol
 
-Si el mapa compartit està demostrat, reutilitza el còdec i afegeix una entrada `ControllerModel` amb evidència, permisos explícits, incertesa de conversions i entitats aplicables. `allowed_write_fields` és buit per defecte. Una Alpha de lectura pot mostrar referències provisionals, però ha de bloquejar rellotge, serveis i escriptures directes i desactivar les estadístiques provisionals.
+Si el mapa compartit està demostrat, reutilitza el còdec i afegeix una entrada `ControllerModel` amb evidència, permisos explícits, incertesa de conversions i entitats aplicables. `allowed_write_fields` és buit per defecte. Una Alpha de lectura pot mostrar referències provisionals, però ha de bloquejar rellotge, serveis i escriptures directes i desactivar les estadístiques provisionals. Quan el model ja té evidència operativa, limita la incertesa d’unitats a `unconfirmed_unit_fields`; no desactivis les estadístiques de totes les lectures per dos camps pendents.
 
 Les diferències demostrades necessiten overrides i fixtures per model, sense modificar els valors per defecte del G6/Midnight. Un mapa diferent requereix un perfil i selector explícits; `protocol_profile` encara no és una fàbrica genèrica. Cal provar absències, enums desconeguts, intents de saltar permisos, reinicis i identitats existents.
 
-Consulta la [política de suport](model-support.md) i el [model 1](model-1-alpha.ca.md).
+Consulta la [política de suport](model-support.md) i el [model 1](models/model-1.ca.md).
 
 
 ## Flux de treball recomanat

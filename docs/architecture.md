@@ -1,6 +1,6 @@
 # Architecture
 
-[English](architecture.md) | [Català](architecture.ca.md) | [Español](architecture.es.md)
+[English](architecture.md) | [Català](architecture.ca.md) | [Español](architecture.es.md) · [Documentation](index.md)
 
 Runxin Local separates transport, wire profile, controller policy and Home Assistant presentation. **Controller model is not protocol profile**: multiple models can share a proven codec with different units, permissions or applicability; an unrelated family needs a different profile.
 
@@ -45,6 +45,8 @@ The pure protocol layer remains extractable inside this repository. A separate P
 See the [support matrix](model-support.md), [profile guide](adding-a-device-profile.md) and [compatibility reports](compatibility-report.md).
 
 The offline audit checks nested relative imports and transport dependencies. Exported `write_policy` distinguishes model evidence from configured/coordinator/adapter restrictions using cached metadata. For test environments and CI coverage, see [CONTRIBUTING](../CONTRIBUTING.md).
+
+## Runtime lifecycle
 
 Device I/O has been async since 2.10.0; 2.10.1 uses `broadlink-async>=1.1.0`. Client/transport operation locks are `asyncio.Lock`; diagnostic cancellation closes its endpoint. Unload closes the session and reload creates a new client while retaining field-52 cache. `transport/broadlink_packet.py` validates per-device auth/read replies and bypasses internal retransmission/reauthentication for writes. Its private-API use is scoped to the tested library and tested with real AES and loopback UDP. No global patch or executor call performs device I/O. Minimum HA: 2026.10.0. See [migration](ha-2026-10.md).
 

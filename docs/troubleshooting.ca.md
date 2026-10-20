@@ -1,4 +1,4 @@
-[English](troubleshooting.md) | [Español](troubleshooting.es.md) | [Català](troubleshooting.ca.md)
+[English](troubleshooting.md) | [Español](troubleshooting.es.md) | [Català](troubleshooting.ca.md) · [Documentació](index.md)
 
 # Resolució de problemes de connexió
 
@@ -35,8 +35,10 @@ Per a entrades configurades, descarrega els diagnòstics al menú de la integrac
 o del dispositiu. `connection.transport` conté l'última etapa, el tipus descobert,
 el bloqueig anunciat i les metadades de l'última fallada. `last_error` es conserva
 encara que després hi hagi una transacció correcta; `available` indica l'estat
-actual del coordinador. Si la configuració inicial falla, encara no hi ha entrada
-per descarregar: utilitza l'avís del log o el script independent.
+actual del coordinador. Si falla l’alta normal, encara no hi ha una entrada operativa. Pots acceptar
+l’[informe de lectura integrat](compatibility-report.md), desar l’entrada només
+de diagnòstic i descarregar-ne l’informe. Alternativament, recull l’avís del log
+o utilitza el script independent.
 
 ## Informe independent
 
@@ -89,7 +91,7 @@ Un usuari amb Runxin/润新 iOS 2.0.0 va observar bloqueig anunciat i autenticac
 
 És un cas documentat, no una regla per a totes les versions. Reaparellar pot substituir el vincle de l'app anterior; no és simplement afegir un segon client. No implementem claus cloud ni desbloqueig automàtic. No cal repetir el procediment en un dispositiu que ja funciona.
 
-El controlador resultant retorna codi 1; autenticar no confirma identitat G6/model 9. [Issue #17](https://github.com/Danirv/runxin-local/issues/17) i [lectures Beta i rellotge manual validat](model-1-alpha.ca.md).
+El controlador resultant retorna codi 1; autenticar no confirma identitat G6/model 9. [Issue #17](https://github.com/Danirv/runxin-local/issues/17) i [lectures Beta i rellotge manual validat](models/model-1.ca.md).
 
 ## Conflicte de dependència amb HA 2026.10
 

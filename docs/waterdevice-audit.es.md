@@ -1,6 +1,8 @@
 # Auditoría de WaterDevice antiguo / F79D
 
-Este documento recoge la evidencia utilizada por Ypsilon Local para separar **conocimiento del códec**, **estado observado del controlador** y **escrituras verificadas físicamente**. El objetivo es evitar que un campo recuperado de la aplicación se confunda con un control seguro en firmware actual.
+[Documentación](index.md)
+
+Este documento recoge la evidencia utilizada por Runxin Local para separar **conocimiento del códec**, **estado observado del controlador** y **escrituras verificadas físicamente**. El objetivo es evitar que un campo recuperado de la aplicación se confunda con un control seguro en firmware actual.
 
 ## Política de evidencia
 
@@ -52,7 +54,7 @@ Para unidades 0/1 los volúmenes 35/37/39/41 se reconstruyen como un entero LE d
 
 ## Sal
 
-El campo 43 `addSalt` es una **cantidad de sal añadida** de 0 a 100 kg. La escritura local se ha verificado físicamente y también se ha observado el cambio por la vía del fabricante. No es un sensor físico de sal restante y Ypsilon Local no lo decrementa después de una regeneración.
+El campo 43 `addSalt` es una **cantidad de sal añadida** de 0 a 100 kg. La escritura local se ha verificado físicamente y también se ha observado el cambio por la vía del fabricante. No es un sensor físico de sal restante y Runxin Local no lo decrementa después de una regeneración.
 
 ## Vacaciones
 

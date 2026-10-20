@@ -1,4 +1,4 @@
-[English](troubleshooting.md) | [Español](troubleshooting.es.md) | [Català](troubleshooting.ca.md)
+[English](troubleshooting.md) | [Español](troubleshooting.es.md) | [Català](troubleshooting.ca.md) · [Documentation](index.md)
 
 # Connection troubleshooting
 
@@ -35,8 +35,10 @@ For configured entries, download diagnostics from the integration/device menu.
 `connection.transport` includes the last transport stage, discovered type,
 advertised lock and most recent failure metadata. `last_error` retains the last
 failure even after a later successful transaction; `available` indicates the
-coordinator's current status. Failed initial setup has no entry to download, so
-use the setup warning or standalone probe instead.
+coordinator's current status. A failed normal setup has no operational entry to download. You can still accept
+the [built-in read-only report](compatibility-report.md), save its diagnostic-only
+entry and download that report. Alternatively, collect the setup warning or use
+the standalone probe below.
 
 ## Standalone report
 
@@ -89,7 +91,7 @@ One contributor using iOS Runxin/润新 2.0.0 reported an advertised lock and re
 
 This is one documented result, not a rule for every app version or firmware. Re-pairing can replace the existing app binding; do not describe it as merely adding a second client. No cloud-issued key or automatic unlock command is implemented. There is no need to repeat this procedure or re-lock a working device for evidence.
 
-The resulting device reports controller code 1; successful authentication does not imply G6/model-9 identity. See [issue #17](https://github.com/Danirv/runxin-local/issues/17) and [model-1 Beta readings and validated manual clock](model-1-alpha.md).
+The resulting device reports controller code 1; successful authentication does not imply G6/model-9 identity. See [issue #17](https://github.com/Danirv/runxin-local/issues/17) and [model-1 Beta readings and validated manual clock](models/model-1.md).
 
 ## HA 2026.10 dependency conflict
 

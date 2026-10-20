@@ -1,5 +1,7 @@
 # Controller support and evidence
 
+[Documentation](index.md)
+
 This is the current model policy for **2.10.3**. A commercial brand, valve reference, BroadLink device type and Runxin `deviceModel` code are different identifiers.
 
 | Controller code | Manufacturer enum name | Integration policy | Field evidence | Writes |
@@ -24,7 +26,7 @@ The catalogue's hardware-write evidence is reference G6 evidence, not a blanket 
 
 Field-2 labels have two physical-display exceptions: model 1/code 7 → Dutch and reference G6 model 9/code 3 → Spanish. Every other pair retains the reference DeviceLanguage table, including models 12/14. This table is distinct from app/account language preferences; no complete local/cloud enum equivalence is inferred. BroadLink firmware 62016 identifies the Wi-Fi module, not the valve firmware. See [language evidence](f79d-settings.md#controller-language-evidence-293).
 
-The [model-1 operation report on 2.9.3](https://github.com/Danirv/runxin-local/issues/17#issuecomment-6101162421) confirms polling, recovery after HA restarts and the brine draw / slow up-flow rinse reading against the controller. It does not validate the HA regeneration-start command, all phases/durations or resin/capacity conversions. Remaining model calibration is independent of closing the resolved connection/setup issue; no further tests or reports are requested from this contributor. See [the detailed operation record](model-1-alpha.md#operation-reported-after-regeneration-on-293).
+The [model-1 operation report on 2.9.3](https://github.com/Danirv/runxin-local/issues/17#issuecomment-6101162421) confirms polling, recovery after HA restarts and the brine draw / slow up-flow rinse reading against the controller. It does not validate the HA regeneration-start command, all phases/durations or resin/capacity conversions. Remaining model calibration is independent of closing the resolved connection/setup issue; no further tests or reports are requested from this contributor. See [the detailed operation record](evidence/model-1.md#operation-reported-after-regeneration-on-293).
 
 ## Beyond field 52
 
@@ -37,4 +39,4 @@ The [model-1 operation report on 2.9.3](https://github.com/Danirv/runxin-local/i
 - Controls: per-field write encoding, range and baseline/set/fresh-read/restore evidence. Metadata must distinguish verified and pending actions.
 - Beta/release: sustained real HA operation, reload/restart checks, missing-field/unknown-enum handling and documented hardware/firmware scope. Software tests do not replace those hardware checks.
 
-See [model 1 comparison](model-1-alpha.md), [hardware evidence](hardware-verification.md) and [adding a profile](adding-a-device-profile.md).
+See [model 1 comparison](models/model-1.md), [hardware evidence](hardware-verification.md) and [adding a profile](adding-a-device-profile.md).

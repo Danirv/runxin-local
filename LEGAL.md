@@ -1,6 +1,8 @@
 # Legal and interoperability note
 
-Ypsilon is an independent community project implementing local interoperability with compatible water-softener hardware.
+[English](LEGAL.md) | [Català](LEGAL.ca.md) | [Español](LEGAL.es.md)
+
+Runxin Local is an independent community project implementing local interoperability with compatible water-softener hardware.
 
 The implementation was independently developed from observed device behavior and interoperability research. This repository does not distribute the vendor application, firmware, proprietary binaries, pairing/private keys, credentials, or substantial portions of vendor source/decompiled code.
 

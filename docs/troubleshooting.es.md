@@ -1,4 +1,4 @@
-[English](troubleshooting.md) | [Español](troubleshooting.es.md) | [Català](troubleshooting.ca.md)
+[English](troubleshooting.md) | [Español](troubleshooting.es.md) | [Català](troubleshooting.ca.md) · [Documentación](index.md)
 
 # Resolución de problemas de conexión
 
@@ -35,8 +35,10 @@ Para entradas configuradas, descarga los diagnósticos desde el menú de la
 integración o dispositivo. `connection.transport` contiene la última etapa,
 el tipo descubierto, el bloqueo anunciado y los metadatos del último fallo.
 `last_error` se conserva aunque después haya una transacción correcta; `available`
-indica el estado actual del coordinador. Si falla la configuración inicial,
-todavía no hay entrada para descargar: utiliza el aviso o el script independiente.
+indica el estado actual del coordinador. Si falla el alta normal, todavía no hay una entrada operativa. Puedes aceptar
+el [informe de lectura integrado](compatibility-report.md), guardar la entrada solo
+de diagnóstico y descargar su informe. Alternativamente, recoge el aviso del
+registro o utiliza el script independiente.
 
 ## Informe independiente
 
@@ -89,7 +91,7 @@ Un usuario con Runxin/润新 iOS 2.0.0 observó bloqueo anunciado y autenticaci�
 
 Es un caso documentado, no una regla para todas las versiones. Reemparejar puede reemplazar el vínculo de la app anterior; no es añadir otro cliente. No implementamos claves cloud ni desbloqueo automático. No hace falta repetir el procedimiento en un dispositivo que funciona.
 
-El controlador resultante devuelve código 1; autenticar no confirma identidad G6/modelo 9. [Issue #17](https://github.com/Danirv/runxin-local/issues/17) y [lecturas Beta y reloj manual validado](model-1-alpha.es.md).
+El controlador resultante devuelve código 1; autenticar no confirma identidad G6/modelo 9. [Issue #17](https://github.com/Danirv/runxin-local/issues/17) y [lecturas Beta y reloj manual validado](models/model-1.es.md).
 
 ## Conflicto de dependencia con HA 2026.10
 

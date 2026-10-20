@@ -1,4 +1,4 @@
-[English](broadlink-bl3372.md) | [Español](broadlink-bl3372.es.md) | [Català](broadlink-bl3372.ca.md)
+[English](broadlink-bl3372.md) | [Español](broadlink-bl3372.es.md) | [Català](broadlink-bl3372.ca.md) · [Documentation](index.md)
 
 # BroadLink BL3372 transport
 
@@ -16,7 +16,7 @@ Assistant integration today. It is intentionally separate from the F79D codec.
 The Home Assistant integration still probes for the tested device type/model.
 The transport class is parameterised so research code can test a different
 BroadLink devtype without changing the Runxin codec, but that does not make the
-new combination supported by Ypsilon.
+new combination supported by Runxin Local.
 
 ## Transaction path
 

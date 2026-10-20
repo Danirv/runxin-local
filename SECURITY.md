@@ -1,5 +1,7 @@
 # Security policy
 
+[English](SECURITY.md) | [Català](SECURITY.ca.md) | [Español](SECURITY.es.md)
+
 ## Supported versions
 
 Security fixes are applied to the latest released version.

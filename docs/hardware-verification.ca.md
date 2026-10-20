@@ -1,4 +1,4 @@
-[English](hardware-verification.md) | [Español](hardware-verification.es.md) | [Català](hardware-verification.ca.md)
+[English](hardware-verification.md) | [Español](hardware-verification.es.md) | [Català](hardware-verification.ca.md) · [Documentació](index.md)
 
 # Verificació d'escriptures sobre maquinari
 
@@ -88,7 +88,7 @@ Maquinari: Euro-Clear Midnight 25 (capçal ECOPRO+) amb mòdul BroadLink BL3372 
 
 Una lectura completa dels camps 1–52 es descodifica de manera coherent amb el mapa F79D i la pantalla del controlador. Diferències: el camp 26 informa dècimes de litre (250 en una unitat de 25 L), i els camps 24 (valor 2) i 9 (valor 255) queden fora dels enums recuperats.
 
-Verificat localment d'extrem a extrem (GET base → un SET → GET nou → restauració → GET nou, sense efectes secundaris en altres camps): camp 43 `saltAddition` 23 → 24 → 23, camp 10 `regeneratingTriggerTime` 00:00 → 00:01 → 00:00, camp 6 `continuousWaterTime` 0 → 120 → 0 i camp 4 `currentTime` (sincronització 16:31 → 16:32).
+Comprovacions locals reportades: els camps 6/10/43 inclouen valor inicial, SET, lectura nova i restauració, sense canvis reportats en altres camps. El camp 4 registra una sincronització, sense restauració documentada: camp 43 `saltAddition` 23 → 24 → 23, camp 10 `regeneratingTriggerTime` 00:00 → 00:01 → 00:00, camp 6 `continuousWaterTime` 0 → 120 → 0 i camp 4 `currentTime` (sincronització 16:31 → 16:32).
 
 Encara sense verificació física al model 12: camp 7 (`flowRateOff`, llegeix `00 C8` = 2,00 m³/h en big-endian), camp 47 (`rawWaterHardness`) i la regeneració forçada del camp 34.
 
@@ -104,8 +104,10 @@ El manual Midnight, pàgina impresa 16, indica multiplicar la duresa alemanya me
 
 ### Validacions pendents
 
+Són aportacions d’evidència futures i opcionals, no condicions per al suport Beta ni una petició de repetir comparacions completades.
+
 - Camps 7 i 47: GET inicial → un SET adequat → GET nou → comparació amb pantalla/app → restauració → GET nou. Incloure els dos bytes, el valor demanat i qualsevol error de confirmació.
-- Camp 26: informar dels dos bytes i del volum de resina mostrat a pantalla/app. No cal una altra unitat; els volums més grans queden pendents fins obtenir evidència.
+- Camp 26: `FA 00` → 25 L ja està confirmat a l’equip reportat; no cal repetir el contrast. Una captura independent futura que utilitzi el byte alt podria demostrar el còdec de volums més grans, encara pendent.
 - Durant una regeneració prevista, comprovar que el botó HA inicia el cicle físic i que les fases llegides concorden. L'avanç de fase és una acció pendent separada; no cal saltar fases per completar aquestes proves.
 - Confirmar 25 L a HA, els codis decimals `2`/`255` amb `raw_code` per als enums sense correspondència i possibles errors recurrents durant l'ús normal.
 
@@ -127,16 +129,20 @@ La [resposta del 10-10-2026 a la issue #17](https://github.com/Danirv/runxin-loc
 
 El codi d’idioma 7 és neerlandès a la pantalla. El G6 model 9 del projecte retorna codi 3 amb menús en castellà; consulta [les correspondències limitades per model](f79d-settings.ca.md). No és una validació de tot l’enum ni de l’idioma de l’app/compte.
 
-Resina crua 240 i referència per cicle 15 són lectures diferents sense conversió confirmada. L’usuari va modificar 24 → 15 sota l’etiqueta Water treatment capacity de l’app antiga; falten unitat i correspondència exacta amb el camp local. Els 24 L nominals fan plausible una escala 0,1 però no confirmen el paràmetre configurat. No cal repetir rellotge/diagnòstics ni aplicar el còdec del model 14. [Guia del model 1](model-1-alpha.ca.md).
+Resina crua 240 i referència per cicle 15 són lectures diferents sense conversió confirmada. L’usuari va modificar 24 → 15 sota l’etiqueta Water treatment capacity de l’app antiga; falten unitat i correspondència exacta amb el camp local. Els 24 L nominals fan plausible una escala 0,1 però no confirmen el paràmetre configurat. No cal repetir rellotge/diagnòstics ni aplicar el còdec del model 14. [Guia del model 1](models/model-1.ca.md).
 
 ### Funcionament del model 1 i observació d’una fase amb la 2.9.3
 
 La [resposta posterior de la issue #17](https://github.com/Danirv/runxin-local/issues/17#issuecomment-6101162421) confirma lectures periòdiques normals, recuperació després dels reinicis de HA i coincidència amb la pantalla en aspiració de salmorra / esbandida lenta ascendent. No valida totes les fases ni les durades configurades: s’exclouen els intents avortats i l’observació aproximada de l’ompliment es va fer amb lectures cada 60 segons. L’opció de regeneració de HA estava desactivada; l’escriptura del camp 34 continua pendent.
 
-HA va mostrar capacitat restant 3429 L després del cicle, mantenint resina crua 240 i referència per cicle 15. Són lectures reportades i una comprovació de coherència, no una confirmació independent de l’escala de resina o les unitats de capacitat. L’etiqueta L de l’ajust antic es recorda amb incertesa. Alpha i escriptures pendents es mantenen; no es demanen més proves ni informes al contribuent. La incidència original de connexió/alta es pot tancar independentment. [Registre detallat](model-1-alpha.ca.md#funcionament-reportat-després-de-regenerar-amb-la-293).
+HA va mostrar capacitat restant 3429 L després del cicle, mantenint resina crua 240 i referència per cicle 15. Són lectures reportades i una comprovació de coherència, no una confirmació independent de l’escala de resina o les unitats de capacitat. L’etiqueta L de l’ajust antic es recorda amb incertesa. En aquell informe encara era Alpha; des de 2.10.2 les lectures són Beta, sense canviar les escriptures pendents; no es demanen més proves ni informes al contribuent. La incidència original de connexió/alta es pot tancar independentment. [Registre detallat](evidence/model-1.ca.md#funcionament-reportat-després-de-regenerar-amb-la-293).
+
+### Consum diari i lectures Beta
+
+Les [captures del controlador](https://github.com/Danirv/runxin-local/issues/17#issuecomment-6176732533) confirmen el consum diari, amb dies complets de 136, 228, 95 i 172 L. La [resposta posterior](https://github.com/Danirv/runxin-local/issues/17#issuecomment-6248768660) confirma alta, lectura i rellotge i demana usar el sensor a Energia. La 2.10.2 habilita `total_increasing` i lectures Beta; resina i capacitat per cicle continuen sense unitat ni estadístiques. No es demanen proves noves.
 
 ## Euro-Clear Midnight / controlador model 14 (F136)
 
 **Beta a la 2.9.2**, contrastada al Euro-Clear Midnight 25 Plug&Play / F136 / ECOPRO+, BL3372 `0x520F`, firmware **62016**. La [issue #22](https://github.com/Danirv/runxin-local/issues/22) confirma funcionament amb 2.9.1 després d’actualitzar/reiniciar, sense modificar models localment. Les lectures **4/6/7/10/43/47** coincideixen amb l’app (camp 7: 3,5 m³/h; camp 47: 260 mg/L). Les escriptures **4/6/10/43** estan verificades per l’usuari; **les escriptures 7/47 i les accions mecàniques de 34 continuen pendents**.
 
-El camp 26 `[44, 1]` coincideix als diagnòstics i a l’informe independent de lectura. La [foto del controlador](https://github.com/Danirv/runxin-local/issues/22#issuecomment-6084624961) mostra **30,0 L** configurats. U16 little-endian dona `0x012C = 300`, amb escala 0,1 per obtenir 30,0 L. La 2.9.2 aplica l’excepció només al model 14 i marca `resin_volume_scale_confirmed=true`; G6/model 12 mantenen els seus còdecs. Els 25 L nominals són diferents del paràmetre configurat; no es canvia cap ajust. És una comparació de bytes reportats i pantalla, no una trama completa capturada ni una nova prova d’escriptura del mantenidor. No cal més comparació de resina ni repetir l’informe. [Guia del model 14](model-14-alpha.ca.md).
+El camp 26 `[44, 1]` coincideix als diagnòstics i a l’informe independent de lectura. La [foto del controlador](https://github.com/Danirv/runxin-local/issues/22#issuecomment-6084624961) mostra **30,0 L** configurats. U16 little-endian dona `0x012C = 300`, amb escala 0,1 per obtenir 30,0 L. La 2.9.2 aplica l’excepció només al model 14 i marca `resin_volume_scale_confirmed=true`; G6/model 12 mantenen els seus còdecs. Els 25 L nominals són diferents del paràmetre configurat; no es canvia cap ajust. És una comparació de bytes reportats i pantalla, no una trama completa capturada ni una nova prova d’escriptura del mantenidor. No cal més comparació de resina ni repetir l’informe. [Guia del model 14](models/model-14.ca.md).

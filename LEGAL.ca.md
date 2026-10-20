@@ -2,7 +2,7 @@
 
 # Nota legal i d'interoperabilitat
 
-Ypsilon és un projecte comunitari independent que implementa interoperabilitat local amb maquinari de descalcificació compatible.
+Runxin Local és un projecte comunitari independent que implementa interoperabilitat local amb maquinari de descalcificació compatible.
 
 La implementació es va desenvolupar de manera independent a partir de comportament observat del dispositiu i recerca d'interoperabilitat. Aquest repositori no distribueix l'aplicació del fabricant, firmware, binaris propietaris, claus privades/d'aparellament, credencials ni parts substancials de codi font o codi descompilat del fabricant.
 

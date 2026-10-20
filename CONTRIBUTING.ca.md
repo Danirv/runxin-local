@@ -6,7 +6,7 @@ Les contribucions són benvingudes. El projecte prioritza control local fiable, 
 
 ## Abans d'obrir un pull request
 
-1. Instal·la `requirements-test-offline.txt` en un entorn Python aïllat i executa `python -m pytest -q`, `python scripts/audit.py` i `python scripts/field_surface_audit.py`.
+1. Instal·la `requirements-test-offline.txt` en un entorn Python aïllat i executa `python -m pytest -q`, `python scripts/audit.py` i `python scripts/field_surface_audit.py`. Executa també `python scripts/docs_check.py` per comprovar enllaços i navegació.
 2. Executa `python scripts/publication_check.py` en un clon públic configurat.
 3. Executa `python -m compileall -q custom_components/ypsilon_local scripts tests`.
 4. Mantén els textos visibles per a l'usuari als fitxers de traducció (`en`, `es`, `ca`).
@@ -30,7 +30,7 @@ Llegeix [`docs/architecture.ca.md`](docs/architecture.ca.md) abans de treballar 
 - Home Assistant decideix quines escriptures conegudes són segures d'exposar.
 - `protocol.py` és una façana de compatibilitat, no el lloc per a lògica nova.
 
-La feina nativa executa tota la suite amb HA 2026.9.4; una altra usa `requirements-test-ha-baseline.txt` amb HA 2026.9.3. Són versions provades amb E/S simulada, no una versió mínima declarada.
+La feina nativa executa tota la suite amb HA 2026.10.2; una altra usa `requirements-test-ha-baseline.txt` amb HA 2026.10.0. Els entorns han de ser separats. Les proves combinen E/S simulada, AES/biblioteca reals i UDP local; també comproven convivència amb BroadLink antic. No substitueixen la verificació física. La versió mínima HA 2026.10.0 es declara a `hacs.json`.
 
 Les revisions del codi de les accions estan fixades, però HACS/hassfest encara utilitzen etiquetes de contenidors que poden canviar. Això no fixa tota la cadena d'eines. Les comprovacions d'imports són estàtiques; no aïllen el codi durant l'execució.
 
@@ -46,7 +46,7 @@ Quan documentis un fet d'enginyeria inversa, diferencia evidència recuperada de
 
 ## Nous transports
 
-Consulta [`docs/adding-a-transport.ca.md`](docs/adding-a-transport.ca.md). Un transport ha d'implementar el contracte `transact(frame: bytes) -> bytes` i retirar únicament la seva pròpia envolupant abans de retornar la resposta.
+Consulta [`docs/adding-a-transport.ca.md`](docs/adding-a-transport.ca.md). Un transport ha d'implementar el contracte asíncron `await transact(frame: bytes) -> bytes` i retirar únicament la seva pròpia envolupant abans de retornar la resposta.
 
 ## Nous dispositius Runxin
 
@@ -59,3 +59,7 @@ La capa pura de protocol està preparada per poder-se extreure més endavant a u
 ## Llicència
 
 En contribuir acceptes que la teva contribució es publica sota la llicència Apache 2.0 del repositori.
+
+## Documentació
+
+Consulta les [regles de manteniment](docs/documentation.md): guies actuals separades de l’historial, evidència datada i traduccions coherents. Un canvi només documental no necessita una release.
