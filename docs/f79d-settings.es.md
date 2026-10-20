@@ -1,5 +1,7 @@
 # Semántica de los ajustes F79D recuperados
 
+[Documentación](index.md)
+
 Este documento recoge los ajustes recuperados de la pantalla avanzada de la antigua WaterDevice y deja explícita su representación en Home Assistant. Complementa `f79d.es.md`; que el códec pueda codificar un campo no implica que sea seguro exponerlo como control de escritura.
 
 ## Campos enum

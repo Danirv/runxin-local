@@ -1,5 +1,7 @@
 # Collect a Runxin compatibility report in Home Assistant
 
+[Documentation](index.md)
+
 Runxin Local can prepare a one-time report for a controller that is not yet supported, without installing Python, changing the model registry or enabling controls. It can also report discovery/authentication failures. Reports remain on your Home Assistant instance until you choose to share them.
 
 From **2.10.3**, automatic DHCP discovery rejects other BroadLink module types instead of offering a Runxin report for them. You can still open manual setup to collect a report explicitly. A BL3372 (`0x520F`) with an unknown Runxin controller model or a rejected handshake retains the diagnostic offer. A non-BL3372 discovery is stopped before authentication or field queries.
@@ -43,4 +45,4 @@ The integration's report excludes IP/MAC, names, serial numbers, keys, session I
 
 If Home Assistant cannot run the report, the separate [connection diagnostic](../scripts/debug_connection.py) remains available. Contact us with the displayed error and your environment; there is no need to alter Home Assistant's managed dependencies.
 
-A periodic **model-1 Alpha** is a separate operational mode: it creates reference sensors and polls, with validated manual clock controls available from 2.9.3. Other writes require explicit test options and automatic clock correction stays blocked. See [its comparison guide](model-1-alpha.md). Downloading diagnostics from a normal entry exports cached state, including raw field pairs; it does not run the one-time collector.
+A periodic **model-1 Beta** entry is a separate operational mode: it creates reference sensors and polls, with validated manual clock controls available from 2.9.3. Other writes require explicit test options and automatic clock correction stays blocked. See [its comparison guide](models/model-1.md). Downloading diagnostics from a normal entry exports cached state, including raw field pairs; it does not run the one-time collector.

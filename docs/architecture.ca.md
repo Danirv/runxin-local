@@ -1,6 +1,6 @@
 # Arquitectura
 
-[English](architecture.md) | [Català](architecture.ca.md) | [Español](architecture.es.md)
+[English](architecture.md) | [Català](architecture.ca.md) | [Español](architecture.es.md) · [Documentació](index.md)
 
 Runxin Local separa transport, perfil de protocol, política del controlador i presentació HA. **Un model de controlador no és un perfil de protocol**: diversos models poden compartir còdec i tenir unitats, permisos o camps aplicables diferents.
 
@@ -37,12 +37,14 @@ Un transport nou implementarà el contracte de trama crua i s'habilitarà només
 - Es manté la lectura 1–51 i el camp 52 amb memòria cau independent; no són necessàriament una instantània simultània.
 - Es conserven `ypsilon_local`, config-entry v2, identitats MAC, unique IDs i façanes. La migració de la PR #24 és un pilot separat.
 
-El protocol es manté preparat per extreure's a una llibreria quan un altre consumidor real ho justifiqui. La [matriu de suport](model-support.md), la [guia d'Alpha](model-1-alpha.ca.md) concreten l'estat actual.
+El protocol es manté preparat per extreure's a una llibreria quan un altre consumidor real ho justifiqui. La [matriu de suport](model-support.md), la [guia del model 1](models/model-1.ca.md) concreten l'estat actual.
 
 L’auditoria offline comprova imports relatius niats i dependències del transport. `write_policy` diferencia evidència del model i restriccions configurades/del coordinador/adaptador amb metadades en memòria cau. Consulta [CONTRIBUTING](../CONTRIBUTING.ca.md) per als entorns de proves i la cobertura de CI.
 
-El model 14 / F136 reutilitza el perfil i els controls Midnight, amb les verificacions aportades a la issue #22 i els camps pendents diferenciats. A la 2.9.2, el model 14 és Beta: el camp 26 té una excepció de lectura U16 LE a `runxin/fields.py` i escala 0,1, confirmada amb la pantalla. El client conserva la identitat validada per a lectures parcials, sense consultes addicionals. A la 2.9.2 els models 1 i 12 continuaven Alpha; a la 2.10.2 tots dos passen a Beta. Les conversions G6/model 12 es mantenen. Consulta la [guia del model 14](model-14-alpha.ca.md).
+El model 14 / F136 reutilitza el perfil i els controls Midnight, amb les verificacions aportades a la issue #22 i els camps pendents diferenciats. A la 2.9.2, el model 14 és Beta: el camp 26 té una excepció de lectura U16 LE a `runxin/fields.py` i escala 0,1, confirmada amb la pantalla. El client conserva la identitat validada per a lectures parcials, sense consultes addicionals. Els models 1 i 12 també tenen suport Beta; els permisos i punts pendents es defineixen per separat. Les conversions G6/model 12 es mantenen. Consulta la [guia del model 14](models/model-14.ca.md).
 
-El model 1 conserva les lectures Alpha, però a la 2.9.3 permet el rellotge i la sincronització manuals (camp 4) sense opció experimental. Les opcions de proves concedeixen els camps 6/10/43/47; una segona opció permet només iniciar regeneració. Coordinador i adaptador apliquen els permisos efectius. Canviar-los substitueix i revoca la sessió anterior sense perdre la memòria cau ni els sensors de referència. El rellotge automàtic, el camp 7 i l’avanç directe de fases continuen bloquejats.
+El model 1 té lectures Beta des de 2.10.2, amb estadístiques normals excepte resina/capacitat per cicle sense unitat confirmada. El rellotge i la sincronització manuals (camp 4) estan validats i no requereixen opció experimental. Les opcions de proves concedeixen els camps 6/10/43/47; una segona opció permet només iniciar regeneració. Coordinador i adaptador apliquen els permisos efectius. Canviar-los substitueix i revoca la sessió anterior sense perdre la memòria cau ni els sensors de referència. El rellotge automàtic, el camp 7 i l’avanç directe de fases continuen bloquejats.
+
+## Cicle de vida asíncron
 
 Les operacions de xarxa són asíncrones des de la 2.10.0; la 2.10.1 utilitza `broadlink-async>=1.1.0` i bloquejos `asyncio.Lock`. L’autodiagnòstic tanca la sessió en cancel·lar-se. Descarregar l’entrada tanca el socket; recarregar crea un client nou conservant la memòria cau del camp 52. L’adaptador per dispositiu valida respostes i evita reenviaments/reautenticació interns en escriptures, sense modificar classes globals. Les API internes queden limitades a la interfície provada i cobertes amb AES real i UDP local simulat. Cal HA 2026.10.0+. [Migració](ha-2026-10.ca.md).

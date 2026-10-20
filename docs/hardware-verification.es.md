@@ -1,4 +1,4 @@
-[English](hardware-verification.md) | [Español](hardware-verification.es.md) | [Català](hardware-verification.ca.md)
+[English](hardware-verification.md) | [Español](hardware-verification.es.md) | [Català](hardware-verification.ca.md) · [Documentación](index.md)
 
 # Verificación de escrituras sobre hardware
 
@@ -88,7 +88,7 @@ Hardware: Euro-Clear Midnight 25 (cabezal ECOPRO+) con módulo BroadLink BL3372 
 
 Una lectura completa de los campos 1–52 se decodifica de forma coherente con el mapa F79D y la pantalla del controlador. Diferencias: el campo 26 informa décimas de litro (250 en una unidad de 25 L), y los campos 24 (valor 2) y 9 (valor 255) quedan fuera de los enums recuperados.
 
-Verificado localmente de extremo a extremo (GET base → un SET → GET nuevo → restauración → GET nuevo, sin efectos secundarios en otros campos): campo 43 `saltAddition` 23 → 24 → 23, campo 10 `regeneratingTriggerTime` 00:00 → 00:01 → 00:00, campo 6 `continuousWaterTime` 0 → 120 → 0 y campo 4 `currentTime` (sincronización 16:31 → 16:32).
+Comprobaciones locales reportadas: los campos 6/10/43 incluyen valor inicial, SET, lectura nueva y restauración, sin cambios reportados en otros campos. El campo 4 registra una sincronización, sin restauración documentada: campo 43 `saltAddition` 23 → 24 → 23, campo 10 `regeneratingTriggerTime` 00:00 → 00:01 → 00:00, campo 6 `continuousWaterTime` 0 → 120 → 0 y campo 4 `currentTime` (sincronización 16:31 → 16:32).
 
 Aún sin verificación física en el modelo 12: campo 7 (`flowRateOff`, lee `00 C8` = 2,00 m³/h en big-endian), campo 47 (`rawWaterHardness`) y la regeneración forzada del campo 34.
 
@@ -127,16 +127,20 @@ La [respuesta del 10-10-2026 en la issue #17](https://github.com/Danirv/runxin-l
 
 El código de idioma 7 es neerlandés en pantalla. El G6 modelo 9 del proyecto devuelve código 3 con menús en español; consulta [las correspondencias limitadas por modelo](f79d-settings.es.md). No valida todo el enum ni el idioma de app/cuenta.
 
-Resina raw 240 y referencia por ciclo 15 son lecturas diferentes sin conversión confirmada. El usuario modificó 24 → 15 bajo la etiqueta Water treatment capacity de la app antigua; faltan unidad y correspondencia exacta con el campo local. Los 24 L nominales hacen plausible una escala 0,1 pero no confirman el parámetro configurado. No hace falta repetir reloj/diagnósticos ni aplicar el códec del modelo 14. [Guía del modelo 1](model-1-alpha.es.md).
+Resina raw 240 y referencia por ciclo 15 son lecturas diferentes sin conversión confirmada. El usuario modificó 24 → 15 bajo la etiqueta Water treatment capacity de la app antigua; faltan unidad y correspondencia exacta con el campo local. Los 24 L nominales hacen plausible una escala 0,1 pero no confirman el parámetro configurado. No hace falta repetir reloj/diagnósticos ni aplicar el códec del modelo 14. [Guía del modelo 1](models/model-1.es.md).
 
 ### Funcionamiento del modelo 1 y observación de una fase con 2.9.3
 
 La [respuesta posterior de la issue #17](https://github.com/Danirv/runxin-local/issues/17#issuecomment-6101162421) confirma consultas periódicas normales, recuperación tras reiniciar HA y coincidencia con la pantalla en aspiración de salmuera / enjuague lento ascendente. No valida todas las fases ni las duraciones configuradas: se excluyen los intentos abortados y la observación aproximada del llenado se hizo con consultas cada 60 segundos. La opción de regeneración de HA estaba desactivada; la escritura del campo 34 sigue pendiente.
 
-HA mostró capacidad restante 3429 L tras el ciclo, manteniendo resina cruda 240 y referencia por ciclo 15. Son lecturas reportadas y una comprobación de coherencia, no una confirmación independiente de la escala de resina o las unidades de capacidad. La etiqueta L del ajuste antiguo se recuerda con incertidumbre. Alpha y escrituras pendientes se mantienen; no se piden más pruebas ni informes al contribuyente. La incidencia original de conexión/alta puede cerrarse independientemente. [Registro detallado](model-1-alpha.es.md#funcionamiento-reportado-después-de-regenerar-con-293).
+HA mostró capacidad restante 3429 L tras el ciclo, manteniendo resina cruda 240 y referencia por ciclo 15. Son lecturas reportadas y una comprobación de coherencia, no una confirmación independiente de la escala de resina o las unidades de capacidad. La etiqueta L del ajuste antiguo se recuerda con incertidumbre. En aquel informe todavía era Alpha; desde 2.10.2 las lecturas son Beta, sin cambiar las escrituras pendientes; no se piden más pruebas ni informes al contribuyente. La incidencia original de conexión/alta puede cerrarse independientemente. [Registro detallado](evidence/model-1.es.md#funcionamiento-reportado-después-de-regenerar-con-293).
+
+### Consumo diario y lecturas Beta
+
+Las [capturas del controlador](https://github.com/Danirv/runxin-local/issues/17#issuecomment-6176732533) confirman el consumo diario, con días completos de 136, 228, 95 y 172 L. La [respuesta posterior](https://github.com/Danirv/runxin-local/issues/17#issuecomment-6248768660) confirma alta, lectura y reloj y pide usar el sensor en Energía. La 2.10.2 habilita `total_increasing` y lecturas Beta; resina y capacidad por ciclo siguen sin unidad ni estadísticas. No se piden pruebas nuevas.
 
 ## Euro-Clear Midnight / controlador modelo 14 (F136)
 
 **Beta en 2.9.2**, contrastada en Euro-Clear Midnight 25 Plug&Play / F136 / ECOPRO+, BL3372 `0x520F`, firmware **62016**. La [issue #22](https://github.com/Danirv/runxin-local/issues/22) confirma funcionamiento con 2.9.1 tras actualizar/reiniciar, sin modificar modelos localmente. Las lecturas **4/6/7/10/43/47** coinciden con la app (campo 7: 3,5 m³/h; campo 47: 260 mg/L). Las escrituras **4/6/10/43** están verificadas por el usuario; **las escrituras 7/47 y las acciones mecánicas de 34 siguen pendientes**.
 
-El campo 26 `[44, 1]` coincide en diagnósticos e informe independiente de lectura. La [foto del controlador](https://github.com/Danirv/runxin-local/issues/22#issuecomment-6084624961) muestra **30,0 L** configurados. U16 little-endian da `0x012C = 300`, con escala 0,1 para obtener 30,0 L. La 2.9.2 aplica la excepción solo al modelo 14 y marca `resin_volume_scale_confirmed=true`; G6/modelo 12 mantienen sus códecs. Los 25 L nominales son distintos del parámetro configurado; no se cambia ningún ajuste. Es una comparación de bytes reportados y pantalla, no una trama completa capturada ni una nueva prueba de escritura del mantenedor. No hace falta otra comparación de resina ni repetir el informe. [Guía del modelo 14](model-14-alpha.es.md).
+El campo 26 `[44, 1]` coincide en diagnósticos e informe independiente de lectura. La [foto del controlador](https://github.com/Danirv/runxin-local/issues/22#issuecomment-6084624961) muestra **30,0 L** configurados. U16 little-endian da `0x012C = 300`, con escala 0,1 para obtener 30,0 L. La 2.9.2 aplica la excepción solo al modelo 14 y marca `resin_volume_scale_confirmed=true`; G6/modelo 12 mantienen sus códecs. Los 25 L nominales son distintos del parámetro configurado; no se cambia ningún ajuste. Es una comparación de bytes reportados y pantalla, no una trama completa capturada ni una nueva prueba de escritura del mantenedor. No hace falta otra comparación de resina ni repetir el informe. [Guía del modelo 14](models/model-14.es.md).

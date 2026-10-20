@@ -1,12 +1,14 @@
 # Contributing
 
+[English](CONTRIBUTING.md) | [Català](CONTRIBUTING.ca.md) | [Español](CONTRIBUTING.es.md)
+
 Contributions are welcome. The project prioritizes reliable local control,
 explicit state reconciliation, conservative mechanical writes, and reusable
 interoperability knowledge.
 
 ## Before opening a pull request
 
-1. Install `requirements-test-offline.txt` in an isolated Python environment and run `python -m pytest -q`. Then run `python scripts/audit.py` and `python scripts/field_surface_audit.py`.
+1. Install `requirements-test-offline.txt` in an isolated Python environment and run `python -m pytest -q`. Then run `python scripts/audit.py` and `python scripts/field_surface_audit.py`. Run `python scripts/docs_check.py` for documentation links and navigation.
 2. Run `python scripts/publication_check.py` in a configured public clone.
 3. Run `python -m compileall -q custom_components/ypsilon_local scripts tests`.
 4. Keep user-facing strings in the translation files (`en`, `ca`, `es`).
@@ -81,3 +83,7 @@ importing an installed `custom_components.ypsilon_local` package.
 
 By contributing, you agree that your contribution is licensed under the
 repository's Apache License 2.0.
+
+## Documentation
+
+Follow [documentation maintenance](docs/documentation.md): current task guides, dated evidence, a single release history and consistent language variants. Documentation-only changes do not require a release.

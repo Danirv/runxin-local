@@ -1,67 +1,39 @@
-# Publishing Runxin Local on GitHub and HACS
+# Publishing Runxin Local
 
-Version **2.9.x** uses a normal stable release tag. Alpha is per-model support metadata (models 1/12/14), not a prerelease requirement for the integration. A normal version updates the stable release channel.
+[English](PUBLISHING.md) | [Català](PUBLISHING.ca.md) | [Español](PUBLISHING.es.md)
 
-The source tree is prepared for the public `Danirv/runxin-local` repository and HACS distribution.
+Runxin Local is included in the HACS default catalog following [hacs/default#10717](https://github.com/hacs/default/pull/10717), merged on 20 October 2026. Normal releases continue in this repository; no new catalog submission is needed for each release. Model support labels and integration release channels are independent.
 
-## 1. Repository metadata
+<a id="1-repository-metadata"></a>
+<a id="2-repository-requirements"></a>
+<a id="3-publish-a-github-release-from-the-web"></a>
+<a id="4-test-through-hacs"></a>
+<a id="5-hacs-default-inclusion"></a>
+<a id="prereleases-and-maintenance-changes"></a>
+<a id="publishing-runxin-local-on-github-and-hacs"></a>
+<a id="release-discipline"></a>
+<a id="repository-rename"></a>
 
-If preparing a fresh clone/template, configure the repository owner once:
+## Prepare a release
 
-```bash
-python scripts/configure_repository.py Danirv --repo runxin-local
-```
+1. Choose a new, unused semantic version. Never reuse or move a published tag to distribute later code.
+2. Update `manifest.json`, `CHANGELOG.md` and the title/current-release summary in `info.md` together. Keep older history in the changelog.
+3. Run the checks below in the offline environment and run the full native HA suites in separate environments from `requirements-test-ha.txt` and `requirements-test-ha-baseline.txt`.
+4. Merge the release changes to `main` after HACS, hassfest and audit/HA regressions pass.
 
-Funding can be configured through GitHub Sponsors and/or Ko-fi. Then verify:
+Documentation-only maintenance can merge without changing the manifest or publishing a release.
 
-```bash
-python scripts/publication_check.py
-python scripts/audit.py
-python scripts/field_surface_audit.py
-python -m pytest -q
-python -m compileall -q custom_components/ypsilon_local scripts tests
-```
+## Publish from GitHub
 
-### Repository rename
+1. Open **Actions → Publish GitHub release → Run workflow**.
+2. Select **main** and run the workflow.
+3. Check the resulting release, `v<manifest version>` tag, manual-install ZIP and validation runs.
 
-Rename `Danirv/ypsilon-local` to `Danirv/runxin-local` in GitHub repository Settings. Keep the old name unused so GitHub's existing redirects remain valid. Update local Git remotes to the new URL. Issues, PRs, stars and release history remain attached to the same repository; do not create a replacement repository or duplicate HACS installation.
+The workflow reads the manifest version, runs offline publication/audit/field-surface/tests/compile checks, rejects an existing GitHub Release, creates or recovers its annotated tag, checks out and validates that exact tagged source, builds the ZIP and publishes the release. It does not replace the native HA checks performed before merge.
 
-The visible manifest/HACS name changes, while `custom_components/ypsilon_local`, domain/service names, unique IDs and the release ZIP's integration folder remain unchanged. Existing HA entries should be retained. Check a normal HACS update and the GitHub redirect after renaming; if an older HACS version still shows the old repository name, refresh its metadata before considering any reinstall.
+A version containing `-` is published as `--prerelease --latest=false`. A model's Alpha/Beta status alone does not make the integration release a prerelease or alter write permissions.
 
-## 2. Repository requirements
-
-Recommended description:
-
-> Local Home Assistant integration for Runxin F79D / BroadLink BL3372 water softeners, including ATH/BWT Ypsilon G6 and Euro-Clear Midnight, with read-only compatibility diagnostics for additional models.
-
-Keep Issues enabled and useful topics such as `home-assistant`, `hacs`, `custom-component`, `water-softener`, `runxin`, `broadlink`, and `ypsilon`.
-
-The repository includes HACS validation, hassfest, the offline protocol/architecture audit, and an automated release workflow. Do not ignore validator failures before publishing or while a HACS default-inclusion request is open.
-
-## 3. Publish a GitHub Release from the web
-
-The preferred release path does not require a local Git clone:
-
-1. Choose a **new, unused** semantic version. Never reuse a version that already has a GitHub Release, even if `main` contains newer code.
-2. Update `manifest.json`, `CHANGELOG.md` and `info.md` to that same version.
-3. Merge those release changes into `main` only after HACS, hassfest and the offline audit are green.
-4. Open GitHub **Actions** → **Publish GitHub release**.
-5. Select **Run workflow** and make sure the branch selector is `main`.
-6. Run the workflow.
-
-The web workflow reads the version directly from `custom_components/ypsilon_local/manifest.json`, runs the full publication/audit/field-surface/unit-test/compile checks, refuses an existing GitHub Release, creates or recovers the matching annotated `v<manifest version>` tag, checks out that exact tag, validates the tagged source again, builds the manual-install ZIP and creates the GitHub Release.
-
-A tag pushed manually is handled by the tag-triggered job, which performs the same validation before creating the release. A tag created by the workflow's own `GITHUB_TOKEN` does not need a second workflow run; the web-release job completes the release itself after validating the tagged source.
-
-### Prereleases and maintenance changes
-
-A version containing `-` (for example `2.9.0-alpha.1`) is published automatically with `--prerelease --latest=false`; the latest stable release remains selected. Verify the prerelease flag and ZIP after publication. Model support/evidence is independent of the release label: an Alpha tag does not itself disable controls.
-
-Unreleased maintenance changes must use a **new version before publishing**. Never rerun publication of an existing tag to distribute newer main code. Run the complete native HA suite using `requirements-test-ha.txt` and `requirements-test-ha-baseline.txt` as separate environments; the release job itself runs the lightweight offline suite.
-
-### Git CLI alternative
-
-If a local clone is available, the same release can still be started by tagging the exact manifest version:
+## Git CLI alternative
 
 ```bash
 VERSION="$(python -c 'import json; print(json.load(open("custom_components/ypsilon_local/manifest.json"))["version"])')"
@@ -69,28 +41,19 @@ git tag -a "v${VERSION}" -m "Runxin Local ${VERSION}"
 git push origin "v${VERSION}"
 ```
 
-Do not manually create a GitHub Release for the same tag; the workflow owns release creation.
+## Checks and repository maintenance
 
-## 4. Test through HACS
+```bash
+python scripts/docs_check.py
+python scripts/publication_check.py
+python scripts/audit.py
+python scripts/field_surface_audit.py
+python -m pytest -q
+python -m compileall -q custom_components/ypsilon_local scripts tests
+```
 
-Before requesting default inclusion, add the repository to HACS as a custom **Integration**, install/update it, restart Home Assistant, configure the device, and verify the real hardware path.
+Do not manually create a duplicate release for the same tag. A manually pushed tag triggers the tag-release job; a tag created by the web job does not require a second run.
 
-## 5. HACS default inclusion
+Maintain Issues, repository topics, brand assets, action pins and HACS/hassfest checks. The completed repository rename is documented in [installation](docs/installation.md); keep the old GitHub name unused for redirects and keep the integration domain `ypsilon_local`.
 
-Current HACS requirements include a public GitHub repository, passing HACS + hassfest actions, brand assets, repository description/topics/issues, and a full GitHub Release created after successful validation actions.
-
-The project currently has an inclusion request open at `hacs/default#10717`. Normal repository maintenance and new releases can continue while it waits in the review queue; do not open duplicate inclusion PRs or comment on the queue PR unless critical information or reviewer feedback requires it.
-
-## Release discipline
-
-For each release:
-
-1. Confirm the intended version does **not** already exist as a GitHub Release.
-2. Update `manifest.json`, `CHANGELOG.md` and `info.md` together.
-3. Run publication check, audit, field-surface audit, pytest and compileall.
-4. Merge only with HACS/hassfest/audit green.
-5. Prefer **Actions → Publish GitHub release → Run workflow** on `main`; alternatively push exactly `v<manifest version>` from Git.
-6. Verify the resulting release tag, asset and main-branch validation runs.
-7. Never move or recreate an already-published release tag to include later code; publish a new patch version instead.
-
-Never commit vendor APKs, firmware, proprietary binary/script dumps, credentials, private/pairing keys, or unredacted packet captures.
+`scripts/configure_repository.py` is for adapting a fresh template/fork, not a routine release step. Never commit vendor APKs, firmware, proprietary dumps, credentials, keys or unredacted captures. See [contributing](CONTRIBUTING.md) and [documentation maintenance](docs/documentation.md).

@@ -1,5 +1,7 @@
 # F79D recovered settings semantics
 
+[Documentation](index.md)
+
 This document records settings recovered from the legacy WaterDevice advanced-settings UI and keeps their Home Assistant representation explicit. It complements `f79d.md`; protocol encodability alone does not imply that a setting is safe to expose as a writable control.
 
 ## Enum fields

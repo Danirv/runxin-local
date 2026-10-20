@@ -1,6 +1,8 @@
 # Legacy WaterDevice / F79D audit
 
-This document records the evidence used by Ypsilon Local to distinguish **wire codec knowledge**, **observed controller state**, and **physically verified writes**. It exists specifically to prevent a recovered application field from being mistaken for a safe current-firmware control.
+[Documentation](index.md)
+
+This document records the evidence used by Runxin Local to distinguish **wire codec knowledge**, **observed controller state**, and **physically verified writes**. It exists specifically to prevent a recovered application field from being mistaken for a safe current-firmware control.
 
 ## Sources and evidence policy
 
@@ -49,7 +51,7 @@ The legacy codec reconstructs `[base_high, continuation_low, continuation_high]`
 - unit codes 0 and 1 use a normal 24-bit little-endian integer;
 - unit code 2 uses base-100 decimal packing and the displayed cubic-metre quantity is divided by 100.
 
-If the unit field or continuation TLV is absent, Ypsilon Local fails closed instead of guessing a value.
+If the unit field or continuation TLV is absent, Runxin Local fails closed instead of guessing a value.
 
 ## Water quantities
 
@@ -59,7 +61,7 @@ This is the controller's cumulative consumption for the current day. Real histor
 
 ### Field 39–40: controller weekly average
 
-The legacy codec names this `averageUsedWater`. It is a current aggregate reported by the controller. It is **not** the same quantity as the vendor application's week-by-week history chart. Ypsilon Local therefore exposes field 39 as **Controller weekly average consumption** with no `state_class`.
+The legacy codec names this `averageUsedWater`. It is a current aggregate reported by the controller. It is **not** the same quantity as the vendor application's week-by-week history chart. Runxin Local therefore exposes field 39 as **Controller weekly average consumption** with no `state_class`.
 
 ### Field 41–42: treatment capacity per cycle
 
@@ -75,7 +77,7 @@ Older integration versions briefly declared `MEASUREMENT` for the weekly-average
 
 The legacy settings UI exposes this value as a 0–100 kg amount of salt added and writes it using the generic control path. The project has physically verified local write/read-back and also observed the value changing through the vendor path.
 
-It is a controller bookkeeping/configuration value, **not a physical remaining-salt sensor**. Ypsilon Local therefore does not decrement it after regeneration and does not use it as an estimate of salt remaining.
+It is a controller bookkeeping/configuration value, **not a physical remaining-salt sensor**. Runxin Local therefore does not decrement it after regeneration and does not use it as an estimate of salt remaining.
 
 Physical salt warnings are separate fields: field 31 for low brine concentration and field 33 low flag for the salt/add-salt reminder.
 
@@ -91,7 +93,7 @@ The newer vendor application also contains dedicated vacation enter/exit operati
 
 ## Regeneration and mechanical state
 
-The legacy UI uses field 34 `systemMode` for regeneration/phase control. Ypsilon Local keeps mechanical commands separated from ordinary reversible settings and always reconciles them using fresh device state. An ACK is never considered proof of valve movement.
+The legacy UI uses field 34 `systemMode` for regeneration/phase control. Runxin Local keeps mechanical commands separated from ordinary reversible settings and always reconciles them using fresh device state. An ACK is never considered proof of valve movement.
 
 ## Alarm semantics confirmed from legacy UI
 

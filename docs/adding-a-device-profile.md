@@ -1,5 +1,7 @@
 # Adding another Runxin device profile
 
+[Documentation](index.md)
+
 Do not copy the F79D table and rename it. Treat another controller as unverified until read-only evidence establishes what is shared. A compatible controller may reuse the existing wire profile with model-specific policy; shared framing does not establish identical physical semantics.
 
 ## Controller policy versus wire profile
@@ -8,7 +10,7 @@ First check whether the new controller shares a demonstrated existing map. If it
 
 If bytes/enums/scales differ, add proven model-specific overrides and fixtures without changing G6/Midnight defaults. If the frame/map is different, add a separate profile and explicit selector; `protocol_profile` currently documents the shared path and is not a general codec factory. Tests must cover missing fields, unmapped values, permission bypasses, restarts and legacy identities.
 
-See [support policy](model-support.md) and [model 1](model-1-alpha.md).
+See [support policy](model-support.md) and [model 1](models/model-1.md).
 
 
 ## Suggested workflow

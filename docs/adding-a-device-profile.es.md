@@ -1,4 +1,4 @@
-[English](adding-a-device-profile.md) | [Español](adding-a-device-profile.es.md) | [Català](adding-a-device-profile.ca.md)
+[English](adding-a-device-profile.md) | [Español](adding-a-device-profile.es.md) | [Català](adding-a-device-profile.ca.md) · [Documentación](index.md)
 
 # Añadir otro perfil de dispositivo Runxin
 
@@ -6,11 +6,11 @@ No copies la tabla F79D cambiándole el nombre. Trata otro controlador como no v
 
 ## Política de controlador y perfil de protocolo
 
-Si el mapa compartido está demostrado, reutiliza el códec y añade un `ControllerModel` con evidencia, permisos explícitos, incertidumbre y entidades aplicables. `allowed_write_fields` está vacío por defecto. Una Alpha de lectura puede mostrar referencias provisionales, pero debe bloquear reloj, servicios y escrituras directas y desactivar estadísticas provisionales.
+Si el mapa compartido está demostrado, reutiliza el códec y añade un `ControllerModel` con evidencia, permisos explícitos, incertidumbre y entidades aplicables. `allowed_write_fields` está vacío por defecto. Una Alpha de lectura puede mostrar referencias provisionales, pero debe bloquear reloj, servicios y escrituras directas y desactivar estadísticas provisionales. Cuando el modelo ya tiene evidencia operativa, limita la incertidumbre de unidades a `unconfirmed_unit_fields`; no desactives las estadísticas de todas las lecturas por dos campos pendientes.
 
 Las diferencias demostradas necesitan overrides/fixtures por modelo sin alterar G6/Midnight. Otro mapa requiere perfil/selector explícitos; `protocol_profile` todavía no es una fábrica genérica. Prueba campos ausentes, códigos desconocidos, intentos de eludir permisos, reinicios e identidades existentes.
 
-Consulta la [política de soporte](model-support.md) y el [modelo 1](model-1-alpha.es.md).
+Consulta la [política de soporte](model-support.md) y el [modelo 1](models/model-1.es.md).
 
 
 ## Flujo de trabajo recomendado

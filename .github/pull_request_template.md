@@ -5,6 +5,7 @@ Describe the change and why it is needed.
 ## Validation
 
 - [ ] `python scripts/audit.py` passes.
+- [ ] `python scripts/docs_check.py` passes; affected EN/CA/ES guides are consistent.
 - [ ] `python scripts/publication_check.py` passes.
 - [ ] No vendor APK, firmware, proprietary binary, pairing key, credential, MAC address, or unredacted capture is included.
 - [ ] User-facing strings are translated in `en.json`, `ca.json`, and `es.json` when applicable.

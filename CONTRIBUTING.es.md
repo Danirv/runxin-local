@@ -6,7 +6,7 @@ Las contribuciones son bienvenidas. El proyecto prioriza control local fiable, r
 
 ## Antes de abrir un pull request
 
-1. Instala `requirements-test-offline.txt` en un entorno Python aislado y ejecuta `python -m pytest -q`, `python scripts/audit.py` y `python scripts/field_surface_audit.py`.
+1. Instala `requirements-test-offline.txt` en un entorno Python aislado y ejecuta `python -m pytest -q`, `python scripts/audit.py` y `python scripts/field_surface_audit.py`. Ejecuta también `python scripts/docs_check.py` para comprobar enlaces y navegación.
 2. Ejecuta `python scripts/publication_check.py` en un clon público configurado.
 3. Ejecuta `python -m compileall -q custom_components/ypsilon_local scripts tests`.
 4. Mantén los textos visibles para el usuario en los archivos de traducción (`en`, `es`, `ca`).
@@ -24,13 +24,13 @@ Estas pruebas simulan la E/S del dispositivo y no establecen evidencia física.
 Lee [`docs/architecture.es.md`](docs/architecture.es.md) antes de trabajar con el protocolo.
 
 - `runxin/` debe seguir siendo independiente de Home Assistant y BroadLink.
-- Los transports transportan tramas Runxin en bruto y no deben decodificar campos F79D.
+- Los transportes llevan tramas Runxin en bruto y no deben decodificar campos F79D.
 - Paquetes, cifrado y sesión pertenecen a la implementación del transport.
 - IDs de campo, codecs y evidencia pertenecen al perfil de dispositivo.
 - Home Assistant decide qué escrituras conocidas son seguras de exponer.
 - `protocol.py` es una fachada de compatibilidad, no el lugar para lógica nueva.
 
-El trabajo nativo ejecuta toda la suite con HA 2026.9.4; otro usa `requirements-test-ha-baseline.txt` con HA 2026.9.3. Son versiones probadas con E/S simulada, no una versión mínima declarada.
+El trabajo nativo ejecuta toda la suite con HA 2026.10.2; otro usa `requirements-test-ha-baseline.txt` con HA 2026.10.0. Los entornos deben ser separados. Las pruebas combinan E/S simulada, AES/biblioteca reales y UDP local; también comprueban convivencia con BroadLink antiguo. No sustituyen la verificación física. La versión mínima HA 2026.10.0 se declara en `hacs.json`.
 
 Las revisiones del código de las acciones están fijadas, pero HACS/hassfest aún utilizan etiquetas de contenedores que pueden cambiar. Esto no fija toda la cadena de herramientas. Las comprobaciones de imports son estáticas; no aíslan el código durante la ejecución.
 
@@ -44,9 +44,9 @@ Los fixtures pequeños y saneados necesarios para probar código escrito de form
 
 Al documentar un hecho de ingeniería inversa, diferencia evidencia recuperada de la app antigua, comportamiento observado en un dispositivo real, una escritura físicamente verificada y una inferencia. Es preferible marcar algo como `inferred` que presentarlo como certeza falsa.
 
-## Nuevos transports
+## Nuevos transportes
 
-Consulta [`docs/adding-a-transport.es.md`](docs/adding-a-transport.es.md). Un transport debe implementar el contrato `transact(frame: bytes) -> bytes` y retirar únicamente su propia envolvente antes de devolver la respuesta.
+Consulta [`docs/adding-a-transport.es.md`](docs/adding-a-transport.es.md). Un transport debe implementar el contrato asíncrono `await transact(frame: bytes) -> bytes` y retirar únicamente su propia envolvente antes de devolver la respuesta.
 
 ## Nuevos dispositivos Runxin
 
@@ -59,3 +59,7 @@ La capa pura de protocolo está preparada para poder extraerse más adelante a u
 ## Licencia
 
 Al contribuir aceptas que tu contribución se publica bajo la licencia Apache 2.0 del repositorio.
+
+## Documentación
+
+Consulta las [reglas de mantenimiento](docs/documentation.md): guías actuales separadas del historial, evidencia fechada y traducciones coherentes. Un cambio solo documental no necesita una release.
