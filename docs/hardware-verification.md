@@ -136,8 +136,10 @@ The Midnight manual, printed page 16, instructs users to multiply measured Germa
 
 ### Follow-up validation
 
+These are optional future evidence contributions, not conditions for the current Beta label or a request to repeat completed comparisons.
+
 - Fields 7 and 47: baseline GET → one suitable SET → fresh GET → controller/app comparison → restore → fresh GET. Include both wire bytes, requested values and any write-confirmation errors.
-- Field 26: report both raw bytes and the resin volume shown by the controller/app. No second unit is required; larger-volume compatibility remains unverified until evidence becomes available.
+- Field 26: `FA 00` → 25 L is already confirmed on the reported unit; no repeated comparison is required. A future independent capture using the high byte could establish larger-volume decoding, which remains unverified.
 - During a normally planned regeneration, verify that the HA button starts the physical cycle and the read phases match. Phase advancement is a separate pending action; do not skip phases merely to complete this checklist.
 - Confirm 25 L in HA, decimal `2`/`255` plus `raw_code` for unmapped enums, and whether normal use produces recurring errors.
 

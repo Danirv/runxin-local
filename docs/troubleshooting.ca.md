@@ -35,8 +35,10 @@ Per a entrades configurades, descarrega els diagnòstics al menú de la integrac
 o del dispositiu. `connection.transport` conté l'última etapa, el tipus descobert,
 el bloqueig anunciat i les metadades de l'última fallada. `last_error` es conserva
 encara que després hi hagi una transacció correcta; `available` indica l'estat
-actual del coordinador. Si la configuració inicial falla, encara no hi ha entrada
-per descarregar: utilitza l'avís del log o el script independent.
+actual del coordinador. Si falla l’alta normal, encara no hi ha una entrada operativa. Pots acceptar
+l’[informe de lectura integrat](compatibility-report.md), desar l’entrada només
+de diagnòstic i descarregar-ne l’informe. Alternativament, recull l’avís del log
+o utilitza el script independent.
 
 ## Informe independent
 

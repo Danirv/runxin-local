@@ -104,8 +104,10 @@ El manual Midnight, pàgina impresa 16, indica multiplicar la duresa alemanya me
 
 ### Validacions pendents
 
+Són aportacions d’evidència futures i opcionals, no condicions per al suport Beta ni una petició de repetir comparacions completades.
+
 - Camps 7 i 47: GET inicial → un SET adequat → GET nou → comparació amb pantalla/app → restauració → GET nou. Incloure els dos bytes, el valor demanat i qualsevol error de confirmació.
-- Camp 26: informar dels dos bytes i del volum de resina mostrat a pantalla/app. No cal una altra unitat; els volums més grans queden pendents fins obtenir evidència.
+- Camp 26: `FA 00` → 25 L ja està confirmat a l’equip reportat; no cal repetir el contrast. Una captura independent futura que utilitzi el byte alt podria demostrar el còdec de volums més grans, encara pendent.
 - Durant una regeneració prevista, comprovar que el botó HA inicia el cicle físic i que les fases llegides concorden. L'avanç de fase és una acció pendent separada; no cal saltar fases per completar aquestes proves.
 - Confirmar 25 L a HA, els codis decimals `2`/`255` amb `raw_code` per als enums sense correspondència i possibles errors recurrents durant l'ús normal.
 

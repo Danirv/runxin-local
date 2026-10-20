@@ -35,8 +35,10 @@ Para entradas configuradas, descarga los diagnósticos desde el menú de la
 integración o dispositivo. `connection.transport` contiene la última etapa,
 el tipo descubierto, el bloqueo anunciado y los metadatos del último fallo.
 `last_error` se conserva aunque después haya una transacción correcta; `available`
-indica el estado actual del coordinador. Si falla la configuración inicial,
-todavía no hay entrada para descargar: utiliza el aviso o el script independiente.
+indica el estado actual del coordinador. Si falla el alta normal, todavía no hay una entrada operativa. Puedes aceptar
+el [informe de lectura integrado](compatibility-report.md), guardar la entrada solo
+de diagnóstico y descargar su informe. Alternativamente, recoge el aviso del
+registro o utiliza el script independiente.
 
 ## Informe independiente
 

@@ -104,8 +104,10 @@ El manual Midnight, página impresa 16, indica multiplicar la dureza alemana med
 
 ### Validaciones pendientes
 
+Son aportaciones de evidencia futuras y opcionales, no condiciones para el soporte Beta ni una petición de repetir comparaciones completadas.
+
 - Campos 7 y 47: GET inicial → un SET adecuado → GET nuevo → comparación con pantalla/app → restauración → GET nuevo. Incluir ambos bytes, el valor solicitado y cualquier error de confirmación.
-- Campo 26: informar de ambos bytes y del volumen de resina mostrado en pantalla/app. No se necesita otra unidad; los volúmenes mayores quedan pendientes hasta obtener evidencia.
+- Campo 26: `FA 00` → 25 L ya está confirmado en el equipo reportado; no hace falta repetir el contraste. Una captura independiente futura que utilice el byte alto podría demostrar el códec de volúmenes mayores, todavía pendiente.
 - Durante una regeneración prevista, comprobar que el botón HA inicia el ciclo físico y que las fases leídas coinciden. El avance de fase es una acción pendiente separada; no hace falta saltar fases para completar estas pruebas.
 - Confirmar 25 L en HA, los códigos decimales `2`/`255` con `raw_code` para los enums sin correspondencia y posibles errores recurrentes durante el uso normal.
 

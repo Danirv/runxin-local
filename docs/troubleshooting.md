@@ -35,8 +35,10 @@ For configured entries, download diagnostics from the integration/device menu.
 `connection.transport` includes the last transport stage, discovered type,
 advertised lock and most recent failure metadata. `last_error` retains the last
 failure even after a later successful transaction; `available` indicates the
-coordinator's current status. Failed initial setup has no entry to download, so
-use the setup warning or standalone probe instead.
+coordinator's current status. A failed normal setup has no operational entry to download. You can still accept
+the [built-in read-only report](compatibility-report.md), save its diagnostic-only
+entry and download that report. Alternatively, collect the setup warning or use
+the standalone probe below.
 
 ## Standalone report
 
